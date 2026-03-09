@@ -298,3 +298,9 @@ tr:hover td{background:rgba(201,168,76,.025)}
 .access-denied .ei{font-size:64px;margin-bottom:16px}
 .access-denied h3{font-size:18px;color:var(--re);margin-bottom:8px}
 .access-denied p{font-size:13px;color:var(--mu)}
+
+/* ═══ FAVORITES BUTTON ═══ */
+.fav-btn{position:absolute;top:8px;font-size:18px;z-index:3;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;transition:.2s;border:none;cursor:pointer;line-height:1}
+[dir=rtl] .fav-btn{left:8px}[dir=ltr] .fav-btn{right:8px}
+.fav-btn:hover{background:rgba(0,0,0,.8);transform:scale(1.12)}
+.fav-btn.fav-on{background:rgba(217,79,79,.25)}

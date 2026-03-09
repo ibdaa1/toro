@@ -2,7 +2,7 @@
 // CONFIG
 // ══════════════════════════════════════════
 const BASE   = 'https://qooqz.infinityfreeapp.com/api';
-const WA_NUM = '971559740334';
+const WA_NUM = '971505931141';
 
 // ══════════════════════════════════════════
 // STATE
@@ -11,6 +11,7 @@ const LS = { USER:'toro_user', TOKEN:'toro_token', CART:'toro_cart', LANG:'toro_
 
 let lang   = localStorage.getItem(LS.LANG) || 'ar';
 let prods  = [];
+let favIds = new Set(); // favorites product IDs for current user
 let curFlt = 'all';
 let curPg  = 'home';
 let modalProdId = null;
@@ -105,12 +106,13 @@ function nav(pg) {
   window.scrollTo(0,0);
 }
 function renderPage() {
-  if (curPg==='home')     renderProds();
-  if (curPg==='cart')     renderCart();
-  if (curPg==='orders')   renderOrders();
-  if (curPg==='profile')  renderProfile();
-  if (curPg==='checkout') renderChkSumm();
-  if (curPg==='admin')    initAdmin();
+  if (curPg==='home')      renderProds();
+  if (curPg==='cart')      renderCart();
+  if (curPg==='orders')    renderOrders();
+  if (curPg==='favorites') renderFavorites();
+  if (curPg==='profile')   renderProfile();
+  if (curPg==='checkout')  renderChkSumm();
+  if (curPg==='admin')     initAdmin();
 }
 
 // ══════════════════════════════════════════
@@ -174,6 +176,45 @@ function setFlt(f, btn) {
 }
 function doSearch() { renderProds(); }
 
+function renderProdCard(p, i=0) {
+  const nm   = lang==='ar' ? p.name_ar : p.name_en;
+  const disc = p.price_before ? Math.round((1-p.price/p.price_before)*100) : 0;
+  const isFav = favIds.has(p.id);
+      const favTitle = isFav
+        ? (lang==='ar' ? 'إزالة من المفضلة' : 'Remove from favorites')
+        : (lang==='ar' ? 'إضافة للمفضلة'    : 'Add to favorites');
+  return `
+  <div class="pc" style="animation-delay:${i*0.055}s">
+    <div class="pim" onclick="showProd(${p.id})">
+      ${p.image ? `<img src="${p.image}" alt="${escHtml(nm)}" loading="lazy" onerror="this.style.display='none'">` : '<div class="pfb">🫙</div>'}
+      ${disc ? `<div class="dbd">-${disc}%</div>` : ''}
+      ${p.stock>0&&p.stock<=3 ? `<div class="sbd">${p.stock} ${t('stk')}</div>` : ''}
+      <button class="fav-btn${isFav?' fav-on':''}" onclick="event.stopPropagation();toggleFav(${p.id})" title="${escHtml(favTitle)}">${isFav?'❤️':'🤍'}</button>
+      <div class="prb">
+        <div class="prb-row">
+          ${p.price_before ? `<span class="prb-was">${p.price_before} ${t('aed')}</span>` : ''}
+          <span class="prb-now">${p.price} ${t('aed')}</span>
+          ${disc ? `<span class="prb-d">-${disc}%</span>` : ''}
+        </div>
+      </div>
+    </div>
+    <div class="pinf">
+      <div class="pbr">${escHtml(p.brand)}</div>
+      <div class="pnm" onclick="showProd(${p.id})">${escHtml(nm)}</div>
+      <div class="prc">
+        ${p.price_before ? `<span class="pwas">${p.price_before}</span>` : ''}
+        <span class="pnow">${p.price}</span>
+        <span class="pcur">${t('aed')}</span>
+        ${disc ? `<span class="pdsc">-${disc}%</span>` : ''}
+      </div>
+      <div class="cbts">
+        <button class="cadd" onclick="addCart(${p.id},1)"><span>${t('ac')}</span></button>
+        <button class="cwa" onclick="waProduct(${p.id})" title="اطلب عبر واتساب">📱</button>
+      </div>
+    </div>
+  </div>`;
+}
+
 function renderProds() {
   const grid = document.getElementById('pGrid');
   if (!grid) return;
@@ -188,39 +229,7 @@ function renderProds() {
     grid.innerHTML = `<div style="grid-column:1/-1"><div class="empty"><div class="ei">🔍</div><p>${lang==='ar'?'لا نتائج':'No results'}</p></div></div>`;
     return;
   }
-  grid.innerHTML = list.map((p,i) => {
-    const nm   = lang==='ar' ? p.name_ar : p.name_en;
-    const disc = p.price_before ? Math.round((1-p.price/p.price_before)*100) : 0;
-    return `
-    <div class="pc" style="animation-delay:${i*0.055}s">
-      <div class="pim" onclick="showProd(${p.id})">
-        ${p.image ? `<img src="${p.image}" alt="${escHtml(nm)}" loading="lazy" onerror="this.style.display='none'">` : '<div class="pfb">🫙</div>'}
-        ${disc ? `<div class="dbd">-${disc}%</div>` : ''}
-        ${p.stock>0&&p.stock<=3 ? `<div class="sbd">${p.stock} ${t('stk')}</div>` : ''}
-        <div class="prb">
-          <div class="prb-row">
-            ${p.price_before ? `<span class="prb-was">${p.price_before} ${t('aed')}</span>` : ''}
-            <span class="prb-now">${p.price} ${t('aed')}</span>
-            ${disc ? `<span class="prb-d">-${disc}%</span>` : ''}
-          </div>
-        </div>
-      </div>
-      <div class="pinf">
-        <div class="pbr">${escHtml(p.brand)}</div>
-        <div class="pnm" onclick="showProd(${p.id})">${escHtml(nm)}</div>
-        <div class="prc">
-          ${p.price_before ? `<span class="pwas">${p.price_before}</span>` : ''}
-          <span class="pnow">${p.price}</span>
-          <span class="pcur">${t('aed')}</span>
-          ${disc ? `<span class="pdsc">-${disc}%</span>` : ''}
-        </div>
-        <div class="cbts">
-          <button class="cadd" onclick="addCart(${p.id},1)"><span>${t('ac')}</span></button>
-          <button class="cwa" onclick="waProduct(${p.id})" title="اطلب عبر واتساب">📱</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+  grid.innerHTML = list.map((p,i) => renderProdCard(p, i)).join('');
 }
 
 function showProd(id) {
@@ -266,10 +275,31 @@ function waFromModal()  { waProduct(modalProdId, modalQty); cm('pdMod'); }
 // ══════════════════════════════════════════
 function waProduct(id, qty=1) {
   const p = prods.find(x=>x.id==id); if(!p) return;
-  const nm = lang==='ar' ? p.name_ar : p.name_en;
+  const nm   = lang==='ar' ? p.name_ar : p.name_en;
+  const disc = p.price_before ? ` (كان ${p.price_before} ${t('aed')})` : '';
   const msg = lang==='ar'
-    ? `مرحباً 👋\nأريد طلب:\n\n🫙 *${nm}*\n🏷️ الماركة: ${p.brand}\n💰 السعر: ${p.price} ${t('aed')}\n📦 الكمية: ${qty}\n\nالمجموع: ${(p.price*qty).toFixed(2)} ${t('aed')}`
-    : `Hello 👋\nI'd like to order:\n\n🫙 *${nm}*\n🏷️ Brand: ${p.brand}\n💰 Price: ${p.price} ${t('aed')}\n📦 Qty: ${qty}\n\nTotal: ${(p.price*qty).toFixed(2)} ${t('aed')}`;
+    ? `✨ *متجر TORO للعطور*\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `مرحباً 👋\nأرغب في طلب المنتج التالي:\n\n` +
+      `🫙 *${nm}*\n` +
+      `🏷️ الماركة: ${p.brand}\n` +
+      `🌍 المنشأ: ${p.origin || '—'}\n` +
+      `💰 السعر: *${p.price} ${t('aed')}*${disc}\n` +
+      `📦 الكمية: ${qty}\n\n` +
+      `💵 *الإجمالي: ${(p.price*qty).toFixed(2)} ${t('aed')}*\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `💳 الدفع عند الاستلام`
+    : `✨ *TORO Perfume Store*\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `Hello 👋\nI'd like to order:\n\n` +
+      `🫙 *${nm}*\n` +
+      `🏷️ Brand: ${p.brand}\n` +
+      `🌍 Origin: ${p.origin || '—'}\n` +
+      `💰 Price: *${p.price} ${t('aed')}*\n` +
+      `📦 Qty: ${qty}\n\n` +
+      `💵 *Total: ${(p.price*qty).toFixed(2)} ${t('aed')}*\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `💳 Cash on Delivery`;
   window.open(`https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
@@ -279,14 +309,28 @@ function sendWhatsApp() {
   const lines = cart.map(c => {
     const p = prods.find(x=>x.id==c.product_id); if(!p) return null;
     const nm = lang==='ar' ? p.name_ar : p.name_en;
-    return `🫙 *${nm}* × ${c.qty} = ${(p.price*c.qty).toFixed(0)} ${t('aed')}`;
+    return `🫙 *${nm}* × ${c.qty} — ${(p.price*c.qty).toFixed(0)} ${t('aed')}`;
   }).filter(Boolean);
   const total = calcTotal(cart);
   const addr  = document.getElementById('chkAddr')?.value?.trim() || '';
   const notes = document.getElementById('chkNotes')?.value?.trim() || '';
   let msg = lang==='ar'
-    ? `مرحباً TORO 🌟\n\n*طلب جديد:*\n\n${lines.join('\n')}\n\n💰 *الإجمالي: ${total.toFixed(2)} ${t('aed')}*\n🚚 الشحن: مجاني`
-    : `Hello TORO 🌟\n\n*New Order:*\n\n${lines.join('\n')}\n\n💰 *Total: ${total.toFixed(2)} ${t('aed')}*\n🚚 Shipping: Free`;
+    ? `✨ *متجر TORO للعطور*\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `مرحباً 👋 لدي طلب جديد:\n\n` +
+      `${lines.join('\n')}\n\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `💰 *الإجمالي: ${total.toFixed(2)} ${t('aed')}*\n` +
+      `🚚 الشحن: مجاني\n` +
+      `💳 الدفع عند الاستلام`
+    : `✨ *TORO Perfume Store*\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `Hello 👋 New Order:\n\n` +
+      `${lines.join('\n')}\n\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `💰 *Total: ${total.toFixed(2)} ${t('aed')}*\n` +
+      `🚚 Shipping: Free\n` +
+      `💳 Cash on Delivery`;
   if (addr)  msg += `\n📍 ${lang==='ar'?'العنوان':'Address'}: ${addr}`;
   if (notes) msg += `\n📝 ${lang==='ar'?'ملاحظات':'Notes'}: ${notes}`;
   window.open(`https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
@@ -476,10 +520,7 @@ function showLogin() {
       <input class="fi" id="lEm" type="email" placeholder="example@email.com" autocomplete="email" maxlength="150"></div>
     <div class="fg"><label class="fl">كلمة المرور / Password</label>
       <input class="fi" id="lPw" type="password" placeholder="••••••••" autocomplete="current-password"></div>
-    <button class="btn-g" style="width:100%" onclick="doLogin()">${lang==='ar'?'دخول':'Login'}</button>
-    <p style="text-align:center;margin-top:10px;font-size:11px;color:var(--mu)">
-      ${lang==='ar'?'أدمن:':'Admin:'} admin@toro.ae / admin123
-    </p>`;
+    <button class="btn-g" style="width:100%" onclick="doLogin()">${lang==='ar'?'دخول':'Login'}</button>`;
 }
 function showReg() {
   document.getElementById('aForm').innerHTML = `
@@ -856,8 +897,10 @@ async function updOrdSt(id, status) {
 }
 
 function waOrderAdmin(o) {
-  const items = (o.items||[]).map(i=>`🫙 ${lang==='ar'?i.name_ar:i.name_en} × ${i.qty} = ${(i.price*i.qty).toFixed(0)} ${t('aed')}`).join('\n');
-  const msg = `*${lang==='ar'?'طلب':'Order'} #${o.id}*\n\n${items}\n\n💰 ${lang==='ar'?'الإجمالي':'Total'}: ${Number(o.total).toFixed(0)} ${t('aed')}\n👤 ${o.user_name||''}\n📍 ${o.address||''}`;
+  const items = (o.items||[]).map(i=>`🫙 *${lang==='ar'?i.name_ar:i.name_en}* × ${i.qty} — ${(i.price*i.qty).toFixed(0)} ${t('aed')}`).join('\n');
+  const msg = lang==='ar'
+    ? `✨ *متجر TORO للعطور*\n━━━━━━━━━━━━━━━━━━\n📋 *طلب رقم #${o.id}*\n\n${items}\n\n━━━━━━━━━━━━━━━━━━\n💰 *الإجمالي: ${Number(o.total).toFixed(2)} ${t('aed')}*\n👤 العميل: ${o.user_name||'—'}\n📍 العنوان: ${o.address||'—'}\n💳 الدفع عند الاستلام`
+    : `✨ *TORO Perfume Store*\n━━━━━━━━━━━━━━━━━━\n📋 *Order #${o.id}*\n\n${items}\n\n━━━━━━━━━━━━━━━━━━\n💰 *Total: ${Number(o.total).toFixed(2)} ${t('aed')}*\n👤 Customer: ${o.user_name||'—'}\n📍 Address: ${o.address||'—'}\n💳 Cash on Delivery`;
   window.open(`https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
@@ -932,6 +975,66 @@ async function delProd(id) {
 }
 
 // ══════════════════════════════════════════
+// FAVORITES / WISHLIST
+// ══════════════════════════════════════════
+async function loadFavIds() {
+  const tk = localStorage.getItem(LS.TOKEN);
+  if (!tk) return;
+  const r = await api('GET', `${BASE}/favorites.php`);
+  if (r.ok && Array.isArray(r.data)) {
+    favIds = new Set(r.data.map(f => f.id));
+    // Re-render home if visible to update heart icons
+    if (curPg === 'home') renderProds();
+  }
+}
+
+async function toggleFav(productId) {
+  const tk = localStorage.getItem(LS.TOKEN);
+  if (!tk) { toast(lang==='ar'?'سجّل دخولك لإضافة للمفضلة':'Login to add to favorites', 'er'); return; }
+  const r = await api('POST', `${BASE}/favorites.php`, { product_id: productId });
+  if (r.ok) {
+    if (r.data.action === 'added') {
+      favIds.add(productId);
+      toast(lang==='ar'?'❤️ أضيف للمفضلة':'❤️ Added to favorites', 'ok');
+    } else {
+      favIds.delete(productId);
+      toast(lang==='ar'?'🤍 حُذف من المفضلة':'🤍 Removed from favorites');
+    }
+    renderProds();
+    if (curPg === 'favorites') renderFavorites();
+  } else {
+    toast(r.msg || (lang==='ar'?'خطأ':'Error'), 'er');
+  }
+}
+
+async function renderFavorites() {
+  const el = document.getElementById('favBody');
+  if (!el) return;
+  const tk = localStorage.getItem(LS.TOKEN);
+  if (!tk) {
+    el.innerHTML = `<div class="empty" style="padding:60px 20px">
+      <div class="ei">🔒</div>
+      <p style="margin-bottom:14px">${lang==='ar'?'سجّل دخولك لعرض المفضلة':'Login to view your favorites'}</p>
+      <button class="btn-g" onclick="nav('profile')">${lang==='ar'?'تسجيل الدخول':'Login'}</button>
+    </div>`;
+    return;
+  }
+  el.innerHTML = '<div class="ldw"><div class="ld"></div></div>';
+  const r = await api('GET', `${BASE}/favorites.php`);
+  if (!r.ok || !Array.isArray(r.data)) {
+    el.innerHTML = `<div class="empty"><div class="ei">💔</div><p>${r.msg||'Error'}</p></div>`;
+    return;
+  }
+  if (!r.data.length) {
+    el.innerHTML = `<div class="empty"><div class="ei">🤍</div><p>${lang==='ar'?'لا توجد منتجات في المفضلة':'No favorites yet'}</p></div>`;
+    return;
+  }
+  // Update favIds from response
+  favIds = new Set(r.data.map(f => f.id));
+  el.innerHTML = `<div class="pgrd">${r.data.map(p => renderProdCard(p)).join('')}</div>`;
+}
+
+// ══════════════════════════════════════════
 // SECURITY: HTML Escape
 // ══════════════════════════════════════════
 function escHtml(str) {
@@ -957,4 +1060,5 @@ document.querySelectorAll('.ov').forEach(m => {
 // ══════════════════════════════════════════
 updBdg();
 loadProds();
+loadFavIds();
 document.querySelectorAll('[data-ar]').forEach(el => el.textContent = el.getAttribute('data-'+lang));

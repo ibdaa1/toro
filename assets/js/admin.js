@@ -4,7 +4,7 @@
 
 // ── CONFIG ──────────────────────────────────────────────
 const BASE   = 'https://qooqz.infinityfreeapp.com/api';
-const WA_NUM = '971559740334';
+const WA_NUM = '971505931141';
 
 // ── STATE ───────────────────────────────────────────────
 const LS = { USER: 'toro_user', TOKEN: 'toro_token', LANG: 'toro_lang' };
@@ -36,7 +36,7 @@ const i18n = {
     loginFirst: 'يرجى تسجيل الدخول بحساب المدير', goToStore: '← العودة للمتجر',
     recentOrders: 'آخر الطلبات', logout: 'تسجيل الخروج',
     paymentMethod: 'طريقة الدفع', paymentStatus: 'حالة الدفع', scheduledDate: 'تاريخ مجدول',
-    cod: 'الدفع عند الاستلام', scheduledPayment: 'دفع مجدول', paid: 'مدفوع',
+    cod: 'الدفع عند الاستلام', scheduledPayment: 'دفع مجدول', paid: 'مدفوع', failed: 'فشل', refunded: 'مُسترد',
     pending: 'معلق', confirmed: 'مؤكد', shipped: 'قيد الشحن', delivered: 'تم التوصيل', cancelled: 'ملغي',
     viewDetails: 'عرض', update: 'تحديث', filter: 'تصفية', all: 'الكل',
     name: 'الاسم', email: 'البريد', role: 'الدور', joined: 'تاريخ التسجيل',
@@ -69,7 +69,7 @@ const i18n = {
     loginFirst: 'Please login with an admin account', goToStore: '→ Back to Store',
     recentOrders: 'Recent Orders', logout: 'Logout',
     paymentMethod: 'Payment Method', paymentStatus: 'Payment Status', scheduledDate: 'Scheduled Date',
-    cod: 'Cash on Delivery', scheduledPayment: 'Scheduled Payment', paid: 'Paid',
+    cod: 'Cash on Delivery', scheduledPayment: 'Scheduled Payment', paid: 'Paid', failed: 'Failed', refunded: 'Refunded',
     pending: 'Pending', confirmed: 'Confirmed', shipped: 'Shipped', delivered: 'Delivered', cancelled: 'Cancelled',
     viewDetails: 'View', update: 'Update', filter: 'Filter', all: 'All',
     name: 'Name', email: 'Email', role: 'Role', joined: 'Joined',
@@ -533,9 +533,27 @@ function showOrderDetail(o) {
 
 function waOrder(o) {
   const items = (o.items || []).map(i =>
-    `🫙 ${lang === 'ar' ? i.name_ar : i.name_en} × ${i.qty} = ${(i.price * i.qty).toFixed(0)} ${t('aed')}`
+    `🫙 *${lang === 'ar' ? i.name_ar : i.name_en}* × ${i.qty} — ${(i.price * i.qty).toFixed(0)} ${t('aed')}`
   ).join('\n');
-  const msg = `*${lang === 'ar' ? 'طلب رقم' : 'Order'} #${o.id}*\n\n${items}\n\n💰 ${t('total')}: ${Number(o.total).toFixed(0)} ${t('aed')}\n👤 ${o.user_name || ''}\n📍 ${o.address || ''}`;
+  const msg = lang === 'ar'
+    ? `✨ *متجر TORO للعطور*\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `📋 *طلب رقم #${o.id}*\n\n` +
+      `${items}\n\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `💰 *الإجمالي: ${Number(o.total).toFixed(2)} ${t('aed')}*\n` +
+      `👤 العميل: ${o.user_name || '—'}\n` +
+      `📍 العنوان: ${o.address || '—'}\n` +
+      `💳 الدفع عند الاستلام`
+    : `✨ *TORO Perfume Store*\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `📋 *Order #${o.id}*\n\n` +
+      `${items}\n\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `💰 *Total: ${Number(o.total).toFixed(2)} ${t('aed')}*\n` +
+      `👤 Customer: ${o.user_name || '—'}\n` +
+      `📍 Address: ${o.address || '—'}\n` +
+      `💳 Cash on Delivery`;
   window.open(`https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
@@ -596,24 +614,14 @@ function filterUsers(q) {
 async function loadPayments() {
   const el = document.getElementById('payments-body');
   if (!el) return;
+  el.innerHTML = '<div class="ldw"><div class="ld"></div></div>';
 
-  // Ensure orders are loaded
-  if (!allOrders.length) {
-    const r = await api('GET', `${BASE}/orders.php`);
-    allOrders = (r.ok && Array.isArray(r.data)) ? r.data : [];
-  }
+  const r = await api('GET', `${BASE}/payments.php`);
+  const payments = (r.ok && Array.isArray(r.data)) ? r.data : [];
 
-  // For now, all orders are COD. Future: some may be scheduled.
-  const scls = { pending:'sp', confirmed:'sc2', shipped:'ss', delivered:'sd', cancelled:'sx' };
-
-  const rows = allOrders.map(o => {
-    // Determine payment method — currently all COD
-    const payMethod = o.payment_method || 'cod';
-    const payStatus = o.status === 'delivered' ? 'paid'
-                    : o.status === 'cancelled'  ? 'cancelled'
-                    : 'pending';
-    return { ...o, payMethod, payStatus };
-  });
+  const methodLabel = { cod:'💵 '+t('cod'), card:'💳 Card', bank_transfer:'🏦 Bank', scheduled:'📅 '+t('scheduledPayment') };
+  const payScls     = { pending:'pay-badge-cod', paid:'pay-badge-paid', failed:'badge-off', refunded:'badge-off' };
+  const orderScls   = { pending:'sp', confirmed:'sc2', shipped:'ss', delivered:'sd', cancelled:'sx' };
 
   el.innerHTML = `
     <div style="background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--mu)">
@@ -629,23 +637,43 @@ async function loadPayments() {
         <th>${t('scheduledDate')}</th>
         <th>${t('status')}</th>
         <th>${t('date')}</th>
+        <th>${t('action')}</th>
       </tr></thead>
-      <tbody>${rows.map(o => `<tr>
-        <td style="color:var(--g);font-weight:700">#${o.id}</td>
-        <td style="font-weight:500">${escHtml(o.user_name || '—')}</td>
-        <td style="color:var(--g);font-weight:700">${Number(o.total).toFixed(0)} <small style="color:var(--mu)">${t('aed')}</small></td>
-        <td><span class="pay-badge-cod">${t('cod')}</span></td>
-        <td><span class="${o.payStatus==='paid'?'pay-badge-paid':o.payStatus==='cancelled'?'badge-off':'pay-badge-cod'}">
-          ${o.payStatus==='paid'?t('paid'):o.payStatus==='cancelled'?t('cancelled'):t('pending')}
-        </span></td>
-        <td style="color:var(--mu);font-size:11px">${lang==='ar'?'—  (قريباً)':'— (soon)'}</td>
-        <td><span class="ost ${scls[o.status]||'sp'}">${t(o.status)}</span></td>
-        <td style="white-space:nowrap">${fmtDate(o.created_at)}</td>
-      </tr>`).join('')}
-      ${!rows.length ? `<tr><td colspan="8"><div class="empty-state"><div class="ei">💳</div><p>${t('noOrders')}</p></div></td></tr>` : ''}
+      <tbody>${payments.length ? payments.map(p => `<tr>
+        <td style="color:var(--g);font-weight:700">#${p.order_id}</td>
+        <td style="font-weight:500">${escHtml(p.user_name || '—')}</td>
+        <td style="color:var(--g);font-weight:700">${Number(p.amount).toFixed(0)} <small style="color:var(--mu)">${t('aed')}</small></td>
+        <td><span class="pay-badge-cod">${methodLabel[p.method] || p.method}</span></td>
+        <td>
+          <select class="st-sel" onchange="updatePaymentStatus(${p.id}, this.value)">
+            ${['pending','paid','failed','refunded'].map(s=>`<option value="${s}"${p.status===s?' selected':''}>${t(s)||s}</option>`).join('')}
+          </select>
+        </td>
+        <td style="color:var(--mu);font-size:11px">${p.scheduled_date || (lang==='ar'?'—':'—')}</td>
+        <td><span class="ost ${orderScls[p.order_status]||'sp'}">${t(p.order_status)||p.order_status}</span></td>
+        <td style="white-space:nowrap">${fmtDate(p.created_at)}</td>
+        <td><button class="btn-sm btn-view" onclick="showPaymentDetail(${p.id})">${t('viewDetails')}</button></td>
+      </tr>`).join('') : `<tr><td colspan="9"><div class="empty-state"><div class="ei">💳</div><p>${t('noOrders')}</p></div></td></tr>`}
       </tbody>
     </table></div>`;
+
+  // Store payments data for detail view
+  window._payments = payments;
 }
+
+async function updatePaymentStatus(payId, status) {
+  const r = await api('PUT', `${BASE}/payments.php?id=${payId}`, { status });
+  if (r.ok) toast(t('statusUpdated'), 'ok');
+  else toast(r.msg || t('error'), 'er');
+}
+
+function showPaymentDetail(payId) {
+  const p = (window._payments || []).find(x => x.id == payId);
+  if (!p) return;
+  const payScls = { pending:'pay-badge-cod', paid:'pay-badge-paid', failed:'badge-off', refunded:'badge-off' };
+  alert(`#${p.order_id} | ${p.user_name} | ${Number(p.amount).toFixed(2)} ${t('aed')} | ${p.status}`);
+}
+
 
 // ── INIT ─────────────────────────────────────────────────
 function initAdmin() {

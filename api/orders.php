@@ -93,6 +93,15 @@ if ($method === 'POST') {
         $s3->execute(); $s3->close();
     }
 
+    // Auto-create a COD payment record for this order
+    $uid = (int)$user['id'];
+    $sp = $db->prepare("INSERT IGNORE INTO payments (order_id, user_id, amount, method, status) VALUES (?, ?, ?, 'cod', 'pending')");
+    if ($sp) {
+        $sp->bind_param('iid', $oid, $uid, $total);
+        $sp->execute();
+        $sp->close();
+    }
+
     $db->close();
     ok(['order_id' => $oid, 'total' => round($total, 2)]);
 }

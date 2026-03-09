@@ -67,20 +67,21 @@ if (!file_exists($htaccess)) {
     file_put_contents($htaccess, "Options -ExecCGI\nAddHandler cgi-script .php .pl .py .rb\nRemoveHandler .php\nOptions -Indexes\n");
 }
 
-// Generate a unique filename
-$filename = bin2hex(random_bytes(16)) . '.' . $ext;
+// Generate a human-friendly unique filename with extra randomness to prevent collisions
+$filename = 'toro_' . time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
 $dest     = $uploadDir . $filename;
 
 if (!move_uploaded_file($file['tmp_name'], $dest)) {
     err('Failed to save file', 500);
 }
 
-// Return a relative URL suitable for serving
-// Adjust BASE_URL to match your actual deployment path
-$baseUrl = rtrim($_SERVER['REQUEST_SCHEME'] ?? 'https', '/') . '://' . $_SERVER['HTTP_HOST'];
-// Detect the root path (one directory above /api/)
-$scriptDir = dirname($_SERVER['SCRIPT_NAME']); // e.g. /api
-$rootPath  = dirname($scriptDir);              // e.g. /
-$imageUrl  = rtrim($baseUrl . $rootPath, '/') . '/uploads/' . $filename;
+// Build the full URL to the uploaded image
+$scheme   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host     = $_SERVER['HTTP_HOST'];
+$baseUrl  = $scheme . '://' . $host;
+// Detect root path: SCRIPT_NAME is e.g. /api/upload.php → root is two levels up
+$scriptDir = dirname(dirname($_SERVER['SCRIPT_NAME'])); // e.g. '/' or '/myapp'
+$rootPath  = rtrim($scriptDir, '/');                    // strip trailing slash
+$imageUrl  = $baseUrl . $rootPath . '/uploads/' . $filename;
 
 ok(['url' => $imageUrl, 'filename' => $filename]);

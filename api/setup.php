@@ -53,6 +53,32 @@ CREATE TABLE IF NOT EXISTS `order_items` (
   FOREIGN KEY (`order_id`)   REFERENCES `orders`(`id`)   ON DELETE CASCADE,
   FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `payments` (
+  `id`             INT AUTO_INCREMENT PRIMARY KEY,
+  `order_id`       INT NOT NULL,
+  `user_id`        INT NOT NULL,
+  `amount`         DECIMAL(10,2) NOT NULL,
+  `method`         ENUM('cod','card','bank_transfer','scheduled') DEFAULT 'cod',
+  `status`         ENUM('pending','paid','failed','refunded') DEFAULT 'pending',
+  `scheduled_date` DATE DEFAULT NULL,
+  `reference`      VARCHAR(100) DEFAULT NULL COMMENT 'رقم مرجعي للدفع',
+  `notes`          TEXT,
+  `created_at`     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`     TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`user_id`)  REFERENCES `users`(`id`)  ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `favorites` (
+  `id`         INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id`    INT NOT NULL,
+  `product_id` INT NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY `uq_fav` (`user_id`, `product_id`),
+  FOREIGN KEY (`user_id`)    REFERENCES `users`(`id`)    ON DELETE CASCADE,
+  FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ";
 
 // Run each statement
