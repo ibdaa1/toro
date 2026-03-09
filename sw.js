@@ -1,23 +1,38 @@
 // TORO Service Worker — cache-first for static, network-first for API
-const CACHE = 'toro-v2';
+// Bump CACHE version whenever static files change to force a fresh install.
+const CACHE = 'toro-v3';
 const STATIC = [
-  '/',
-  '/index.html',
-  '/assets/css/main.css',
-  '/assets/js/i18n.js',
-  '/assets/js/main.js',
-  '/manifest.json',
-  '/assets/img/icon.svg'
+  './',
+  './index.html',
+  './assets/css/main.css',
+  './assets/js/i18n.js',
+  './assets/js/main.js',
+  './manifest.json',
+  './assets/img/icon.svg',
+  './assets/img/icon-192.png',
+  './assets/img/icon-512.png',
+  './assets/img/apple-touch-icon.png'
 ];
 
+// ── INSTALL ────────────────────────────────────────────────────────────────
+// Cache each file individually so a single network failure does not abort the
+// entire install and leave users with a broken cached shell.
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE)
-      .then(c => c.addAll(STATIC))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE).then(cache =>
+      Promise.allSettled(
+        STATIC.map(url =>
+          cache.add(url).catch(err =>
+            console.warn('[SW] Could not cache:', url, err.message)
+          )
+        )
+      )
+    ).then(() => self.skipWaiting())
   );
 });
 
+// ── ACTIVATE ────────────────────────────────────────────────────────────────
+// Delete every old cache (any key that is not the current CACHE name).
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
@@ -28,27 +43,46 @@ self.addEventListener('activate', e => {
   );
 });
 
+// ── FETCH ───────────────────────────────────────────────────────────────────
 self.addEventListener('fetch', e => {
-  const url = e.request.url;
+  const req = e.request;
+  const url = new URL(req.url);
 
-  // Always network-first for API calls (never cache API responses)
-  // Match the specific API path pattern rather than the entire domain
-  if (url.includes('/api/')) {
-    return; // browser default
-  }
+  // 1. Skip non-GET requests (POST/PUT/DELETE always go to network)
+  if (req.method !== 'GET') return;
 
-  // Cache-first for static assets
+  // 2. Skip cross-origin requests (Google Fonts, Unsplash, API host, etc.)
+  //    These are opaque responses that waste cache quota and can cause bugs.
+  if (url.origin !== self.location.origin) return;
+
+  // 3. Always network-first for API calls — never serve stale data
+  if (url.pathname.includes('/api/')) return;
+
+  // 4. Cache-first strategy for same-origin static assets
   e.respondWith(
-    caches.match(e.request).then(cached => {
+    caches.match(req).then(cached => {
       if (cached) return cached;
-      return fetch(e.request)
+
+      return fetch(req)
         .then(res => {
+          // Only cache valid same-origin responses
           if (!res || res.status !== 200 || res.type !== 'basic') return res;
           const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
+          caches.open(CACHE).then(c => c.put(req, clone));
           return res;
         })
-        .catch(() => new Response('Offline', { status: 503 }));
+        .catch(() => {
+          // Offline fallback: serve cached index.html for navigation requests
+          if (req.destination === 'document') {
+            return caches.match('./index.html').then(cached =>
+              cached || new Response('<h1>TORO — You are offline</h1>', {
+                headers: { 'Content-Type': 'text/html; charset=utf-8' }
+              })
+            );
+          }
+          // For other assets return an empty 503
+          return new Response('', { status: 503 });
+        });
     })
   );
 });
