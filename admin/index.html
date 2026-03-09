@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TORO — لوحة التحكم</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body data-lang="ar">
+
+<!-- TOP HEADER -->
+<header class="adm-hdr">
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="adm-menu-btn" id="menuBtn">☰</button>
+    <div class="adm-logo">TORO <small>لوحة التحكم</small></div>
+  </div>
+  <div class="adm-hdr-r">
+    <div class="adm-user-info">
+      <strong id="adm-user-name">—</strong>
+      <span id="adm-user-email"></span>
+    </div>
+    <a href="../index.html" class="adm-store-link">🛍 المتجر</a>
+    <button class="adm-logout" onclick="logout()">خروج</button>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="adm-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="adm-sidebar" id="adm-sidebar">
+    <nav class="adm-nav">
+      <div class="adm-nav-section">الرئيسية</div>
+      <button class="adm-nav-item active" data-section="dashboard">
+        <span class="nav-icon">📊</span> لوحة التحكم
+      </button>
+
+      <div class="adm-nav-section">إدارة المتجر</div>
+      <button class="adm-nav-item" data-section="products">
+        <span class="nav-icon">📦</span> المنتجات
+      </button>
+      <button class="adm-nav-item" data-section="orders">
+        <span class="nav-icon">🧾</span> الطلبات
+      </button>
+      <button class="adm-nav-item" data-section="payments">
+        <span class="nav-icon">💳</span> جدول الدفع
+      </button>
+
+      <div class="adm-nav-section">إدارة المستخدمين</div>
+      <button class="adm-nav-item" data-section="users">
+        <span class="nav-icon">👥</span> العملاء
+      </button>
+    </nav>
+    <div class="adm-sidebar-footer">
+      TORO Admin v2.0<br>
+      <span style="font-size:9px;opacity:.5">© 2025</span>
+    </div>
+  </aside>
+
+  <!-- OVERLAY (mobile) -->
+  <div class="adm-overlay" id="adm-overlay"></div>
+
+  <!-- MAIN CONTENT -->
+  <main class="adm-main" id="adm-content">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <section class="adm-section" id="sec-dashboard">
+      <div class="adm-page-hdr">
+        <div>
+          <div class="adm-page-title">📊 لوحة التحكم</div>
+          <div class="adm-page-sub">نظرة عامة على المتجر</div>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📦</div>
+          <div class="stat-val" id="stat-products">—</div>
+          <div class="stat-lbl">المنتجات النشطة</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon">🧾</div>
+          <div class="stat-val" id="stat-orders">—</div>
+          <div class="stat-lbl">إجمالي الطلبات</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon">👥</div>
+          <div class="stat-val" id="stat-users">—</div>
+          <div class="stat-lbl">إجمالي العملاء</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-icon">💰</div>
+          <div class="stat-val" id="stat-revenue">—</div>
+          <div class="stat-lbl">الإيراد (د.إ)</div>
+        </div>
+      </div>
+
+      <!-- Revenue bar + pending -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+        <div class="sec-card">
+          <div class="sec-hdr"><span class="sec-title">💰 الإيراد الإجمالي</span></div>
+          <div class="sec-body">
+            <div style="font-size:28px;font-weight:800;color:var(--g)" id="stat-revenue-big">—</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px">درهم إماراتي</div>
+            <div class="rev-bar" style="margin-top:12px">
+              <div class="rev-fill" id="rev-bar-fill" style="width:0%"></div>
+            </div>
+            <div style="font-size:10px;color:var(--mu);margin-top:4px">من هدف 100,000 د.إ</div>
+          </div>
+        </div>
+        <div class="sec-card">
+          <div class="sec-hdr"><span class="sec-title">⏳ الطلبات المعلقة</span></div>
+          <div class="sec-body">
+            <div style="font-size:42px;font-weight:800;color:var(--or)" id="stat-pending">—</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px">طلب بانتظار المعالجة</div>
+            <div style="margin-top:12px">
+              <button class="btn-secondary" onclick="switchSection('orders')">عرض الطلبات ←</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent orders -->
+      <div class="sec-card">
+        <div class="sec-hdr">
+          <span class="sec-title">🕒 آخر الطلبات</span>
+          <button class="btn-secondary" onclick="switchSection('orders')">عرض الكل</button>
+        </div>
+        <div class="sec-body" id="recent-orders-list">
+          <div class="ldw"><div class="ld"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ PRODUCTS ═══ -->
+    <section class="adm-section" id="sec-products" style="display:none">
+      <div class="adm-page-hdr">
+        <div>
+          <div class="adm-page-title">📦 المنتجات</div>
+          <div class="adm-page-sub">إضافة وتعديل وحذف المنتجات</div>
+        </div>
+        <button class="btn-primary" onclick="openProductForm()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          إضافة منتج
+        </button>
+      </div>
+      <div class="sec-card">
+        <div class="sec-hdr">
+          <span class="sec-title">قائمة المنتجات</span>
+          <div class="adm-search" style="width:240px;margin:0">
+            <span class="srch-ic">🔍</span>
+            <input placeholder="بحث..." oninput="filterProducts(this.value)">
+          </div>
+        </div>
+        <div style="padding:0" id="prod-table-wrap">
+          <div class="ldw"><div class="ld"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ ORDERS ═══ -->
+    <section class="adm-section" id="sec-orders" style="display:none">
+      <div class="adm-page-hdr">
+        <div>
+          <div class="adm-page-title">🧾 الطلبات</div>
+          <div class="adm-page-sub">متابعة وتحديث حالة الطلبات</div>
+        </div>
+      </div>
+      <div class="sec-card">
+        <div class="sec-hdr">
+          <span class="sec-title">قائمة الطلبات</span>
+          <div class="adm-search" style="width:240px;margin:0">
+            <span class="srch-ic">🔍</span>
+            <input placeholder="بحث بالرقم أو العميل..." oninput="filterOrders(this.value)">
+          </div>
+        </div>
+        <div style="padding:0" id="orders-table-wrap">
+          <div class="ldw"><div class="ld"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ PAYMENTS ═══ -->
+    <section class="adm-section" id="sec-payments" style="display:none">
+      <div class="adm-page-hdr">
+        <div>
+          <div class="adm-page-title">💳 جدول الدفع</div>
+          <div class="adm-page-sub">متابعة مدفوعات الطلبات</div>
+        </div>
+      </div>
+      <div class="sec-card">
+        <div class="sec-hdr"><span class="sec-title">سجل المدفوعات</span></div>
+        <div class="sec-body" id="payments-body">
+          <div class="ldw"><div class="ld"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ USERS ═══ -->
+    <section class="adm-section" id="sec-users" style="display:none">
+      <div class="adm-page-hdr">
+        <div>
+          <div class="adm-page-title">👥 العملاء</div>
+          <div class="adm-page-sub">قائمة المستخدمين المسجلين</div>
+        </div>
+      </div>
+      <div class="sec-card">
+        <div class="sec-hdr">
+          <span class="sec-title">قائمة العملاء</span>
+          <div class="adm-search" style="width:240px;margin:0">
+            <span class="srch-ic">🔍</span>
+            <input placeholder="بحث بالاسم أو البريد..." oninput="filterUsers(this.value)">
+          </div>
+        </div>
+        <div style="padding:0" id="users-table-wrap">
+          <div class="ldw"><div class="ld"></div></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Product Form Modal -->
+<div class="ov" id="pf-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="mt" id="pf-title">إضافة منتج جديد</div>
+    <input type="hidden" id="f_id">
+
+    <div class="fr2">
+      <div class="fg">
+        <label class="fl">الاسم بالعربي *</label>
+        <input class="fi" id="f_nar" placeholder="عود الملكي" maxlength="200">
+      </div>
+      <div class="fg">
+        <label class="fl">Name English *</label>
+        <input class="fi" id="f_nen" placeholder="Royal Oud" maxlength="200">
+      </div>
+    </div>
+
+    <div class="fr2">
+      <div class="fg">
+        <label class="fl">الماركة / Brand *</label>
+        <input class="fi" id="f_br" placeholder="TORO, Chanel..." maxlength="100">
+      </div>
+      <div class="fg">
+        <label class="fl">الأصل / Origin</label>
+        <input class="fi" id="f_or" placeholder="UAE, France..." maxlength="100">
+      </div>
+    </div>
+
+    <div class="fg">
+      <label class="fl">التصنيف / Category</label>
+      <select class="fsel" id="f_cat">
+        <option value="men">رجالي / Men</option>
+        <option value="women">نسائي / Women</option>
+        <option value="unisex">للجنسين / Unisex</option>
+      </select>
+    </div>
+
+    <div class="fr2">
+      <div class="fg">
+        <label class="fl">السعر الحالي (درهم) *</label>
+        <input class="fi" id="f_pr" type="number" placeholder="299" min="0" max="99999" step="0.01">
+      </div>
+      <div class="fg">
+        <label class="fl">السعر قبل الخصم</label>
+        <input class="fi" id="f_pb" type="number" placeholder="399" min="0" max="99999" step="0.01">
+      </div>
+    </div>
+
+    <div class="fr2">
+      <div class="fg">
+        <label class="fl">المخزون / Stock</label>
+        <input class="fi" id="f_st" type="number" placeholder="10" min="0" max="9999">
+      </div>
+      <div class="fg">
+        <label class="fl">الحالة / Status</label>
+        <select class="fsel" id="f_ac">
+          <option value="1">نشط / Active</option>
+          <option value="0">مخفي / Hidden</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Image section with tabs -->
+    <div class="fg">
+      <label class="fl">الصورة / Image</label>
+      <div class="img-tabs">
+        <button class="img-tab active" data-tab="url"    onclick="setImgTab('url')">🔗 رابط URL</button>
+        <button class="img-tab"        data-tab="upload" onclick="setImgTab('upload')">📤 رفع صورة</button>
+      </div>
+
+      <!-- URL tab -->
+      <div id="img-url-section">
+        <input class="fi" id="f_im" placeholder="https://example.com/photo.jpg" oninput="updateImgPreview()" maxlength="500">
+        <div class="ipr" id="imgPrev"><span>معاينة / Preview</span></div>
+      </div>
+
+      <!-- Upload tab -->
+      <div id="img-file-section" style="display:none">
+        <div class="img-drop-zone" id="img-drop-zone">
+          <div class="drop-icon">🖼️</div>
+          <div class="drop-text">اضغط أو اسحب الصورة هنا</div>
+          <div class="drop-sub">JPG, PNG, WebP — حتى 5MB</div>
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif"
+                 onchange="handleFileUpload(this)">
+        </div>
+        <div id="upload-status" style="font-size:12px;color:var(--mu);margin-top:6px;text-align:center"></div>
+      </div>
+    </div>
+
+    <div class="fg">
+      <label class="fl">الوصف (عربي)</label>
+      <textarea class="fta" id="f_dar" placeholder="وصف العطر..." maxlength="1000"></textarea>
+    </div>
+    <div class="fg">
+      <label class="fl">Description (English)</label>
+      <textarea class="fta" id="f_den" placeholder="Description..." maxlength="1000"></textarea>
+    </div>
+
+    <div class="mac">
+      <button class="btn-primary" onclick="saveProduct()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="t-save">حفظ المنتج</span>
+      </button>
+      <button class="bcl" onclick="cm('pf-modal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Order Detail Modal -->
+<div class="ov" id="ord-detail-modal">
+  <div class="modal">
+    <div class="mt" id="ord-detail-title">تفاصيل الطلب</div>
+    <div id="ord-detail-body"></div>
+    <div style="margin-top:14px">
+      <button class="bcl" style="width:100%" onclick="cm('ord-detail-modal')">إغلاق / Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="../assets/js/admin.js"></script>
+</body>
+</html>

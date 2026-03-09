@@ -1,0 +1,5 @@
+Options -Indexes
+Options -ExecCGI
+RemoveHandler .php .pl .py .rb .cgi
+RemoveType application/x-httpd-php
+AddType text/plain .php .pl .py .rb .cgi

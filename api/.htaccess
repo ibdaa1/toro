@@ -1,0 +1,14 @@
+RewriteEngine On
+
+# Pass Authorization header to PHP (needed for some servers)
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Pass X-Token header through
+RewriteCond %{HTTP:X-Token} .
+RewriteRule .* - [E=HTTP_X_TOKEN:%{HTTP:X-Token}]
+
+# Allow all origins for API requests
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, X-Token"

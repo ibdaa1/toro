@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TORO — عطور فاخرة</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body data-lang="ar">
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="logo">TORO</div>
+  <div class="hdr-r">
+    <button class="lbtn" onclick="swLang()" id="lbtn">EN</button>
+    <button class="ico" onclick="nav('cart')">🛒<span class="bdg" id="cBdg">0</span></button>
+    <button class="ico" onclick="nav('profile')">👤</button>
+  </div>
+</header>
+
+<!-- ══════════ PAGES ══════════ -->
+
+<!-- HOME -->
+<div class="pg on" id="pg-home">
+  <div class="hero">
+    <div class="h-eye" id="t-eye">عطور فاخرة أصيلة</div>
+    <div class="h-tit">TORO</div>
+    <div class="h-sub" id="t-sub">الإمارات العربية المتحدة</div>
+  </div>
+  <div class="sw">
+    <span class="sic">🔍</span>
+    <input id="srchIn" placeholder="ابحث عن عطر أو ماركة..." oninput="doSearch()">
+  </div>
+  <div class="flts" id="fltBar">
+    <button class="flt on" onclick="setFlt('all',this)" data-ar="الكل" data-en="All">الكل</button>
+    <button class="flt" onclick="setFlt('men',this)" data-ar="رجالي" data-en="Men">رجالي</button>
+    <button class="flt" onclick="setFlt('women',this)" data-ar="نسائي" data-en="Women">نسائي</button>
+    <button class="flt" onclick="setFlt('unisex',this)" data-ar="للجنسين" data-en="Unisex">للجنسين</button>
+  </div>
+  <div class="pgrd" id="pGrid"><div class="ldw"><div class="ld"></div></div></div>
+</div>
+
+<!-- CART -->
+<div class="pg" id="pg-cart">
+  <div class="ptit" id="t-cart">🛒 السلة</div>
+  <div id="cartBody"></div>
+</div>
+
+<!-- CHECKOUT -->
+<div class="pg" id="pg-checkout">
+  <div class="ptit" id="t-chk">💳 إتمام الطلب</div>
+  <div class="chkf">
+    <div class="notice">💡 <span id="t-chk-note">يمكنك إتمام الطلب عبر الموقع أو إرساله مباشرة على واتساب</span></div>
+    <div class="fg"><label class="fl" id="t-addr">العنوان التفصيلي</label>
+      <textarea class="fta" id="chkAddr" placeholder="الإمارة / المدينة / الحي / الشارع" maxlength="500"></textarea></div>
+    <div class="fg"><label class="fl" id="t-notes">ملاحظات</label>
+      <textarea class="fta" id="chkNotes" rows="2" maxlength="300"></textarea></div>
+    <div id="chkSumm"></div>
+    <div class="chk-acts">
+      <button class="btn-g" id="placeBtn" onclick="placeOrder()"><span id="t-place">تأكيد الطلب</span></button>
+      <button class="chk-wa" onclick="sendWhatsApp()">📱 <span id="t-wa-send">واتساب</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ORDERS -->
+<div class="pg" id="pg-orders">
+  <div class="ptit" id="t-ord">📦 طلباتي</div>
+  <div id="ordBody"></div>
+</div>
+
+<!-- PROFILE -->
+<div class="pg" id="pg-profile"><div id="profBody"></div></div>
+
+<!-- ADMIN -->
+<div class="pg" id="pg-admin">
+  <div class="ptit">⚙️ <span id="t-dash">لوحة التحكم</span></div>
+  <div id="admContent"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <button class="bni on" onclick="nav('home')" id="bn-home">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    <span data-ar="الرئيسية" data-en="Home">الرئيسية</span>
+  </button>
+  <button class="bni" onclick="nav('cart')" id="bn-cart">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+    <span data-ar="السلة" data-en="Cart">السلة</span>
+  </button>
+  <button class="bni" onclick="nav('orders')" id="bn-orders">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span data-ar="طلباتي" data-en="Orders">طلباتي</span>
+  </button>
+  <button class="bni" onclick="nav('profile')" id="bn-profile">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span data-ar="حسابي" data-en="Profile">حسابي</span>
+  </button>
+</nav>
+
+<!-- ══════════ MODALS ══════════ -->
+
+<!-- Product Detail -->
+<div class="ov" id="pdMod">
+  <div class="modal">
+    <div id="pdBody"></div>
+    <div class="qty-sel">
+      <span class="qty-lbl" id="t-qty">الكمية</span>
+      <div class="qty-ctrl">
+        <button class="qcb" onclick="chgMQty(-1)">−</button>
+        <span class="qcv" id="mQty">1</span>
+        <button class="qcb" onclick="chgMQty(1)">+</button>
+      </div>
+    </div>
+    <div class="mac">
+      <button class="btn-g" id="pdAddBtn" onclick="addFromModal()">أضف للسلة</button>
+      <button class="btn-wa-mod" onclick="waFromModal()">📱</button>
+      <button class="bcl" onclick="cm('pdMod')">✕</button>
+    </div>
+  </div>
+</div>
+
+<!-- Product Form (Admin) -->
+<div class="ov" id="pfMod">
+  <div class="modal">
+    <div class="mt" id="pfTit">إضافة منتج جديد</div>
+    <input type="hidden" id="f_id">
+    <div class="fr2">
+      <div class="fg"><label class="fl">الاسم بالعربي *</label><input class="fi" id="f_nar" placeholder="عود الملكي" maxlength="200"></div>
+      <div class="fg"><label class="fl">Name English *</label><input class="fi" id="f_nen" placeholder="Royal Oud" maxlength="200"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">الماركة / Brand *</label><input class="fi" id="f_br" placeholder="TORO, Chanel..." maxlength="100"></div>
+      <div class="fg"><label class="fl">الأصل / Origin</label><input class="fi" id="f_or" placeholder="UAE, France..." maxlength="100"></div>
+    </div>
+    <div class="fg"><label class="fl">التصنيف / Category</label>
+      <select class="fsel" id="f_cat">
+        <option value="men">رجالي / Men</option>
+        <option value="women">نسائي / Women</option>
+        <option value="unisex">للجنسين / Unisex</option>
+      </select>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">السعر الحالي (درهم) *</label><input class="fi" id="f_pr" type="number" placeholder="299" min="0" max="99999"></div>
+      <div class="fg"><label class="fl">السعر قبل الخصم</label><input class="fi" id="f_pb" type="number" placeholder="399" min="0" max="99999"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">المخزون / Stock</label><input class="fi" id="f_st" type="number" placeholder="10" min="0" max="9999"></div>
+      <div class="fg"><label class="fl">الحالة / Status</label>
+        <select class="fsel" id="f_ac">
+          <option value="1">نشط / Active</option>
+          <option value="0">مخفي / Hidden</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">رابط الصورة / Image URL</label>
+      <input class="fi" id="f_im" placeholder="https://example.com/photo.jpg" oninput="prevImg()" maxlength="500">
+      <div class="ipr" id="imgPrev"><span>معاينة / Preview</span></div>
+    </div>
+    <div class="fg"><label class="fl">الوصف (عربي)</label><textarea class="fta" id="f_dar" placeholder="وصف العطر..." maxlength="1000"></textarea></div>
+    <div class="fg"><label class="fl">Description (English)</label><textarea class="fta" id="f_den" placeholder="Description..." maxlength="1000"></textarea></div>
+    <div class="mac">
+      <button class="btn-g" onclick="saveProd()"><span id="t-save">حفظ المنتج</span></button>
+      <button class="bcl" onclick="cm('pfMod')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Order Detail Modal (Admin) -->
+<div class="ov" id="ordDetailMod">
+  <div class="modal">
+    <div class="mt" id="ordDetailTitle">تفاصيل الطلب</div>
+    <div id="ordDetailBody"></div>
+    <div style="margin-top:14px">
+      <button class="bcl" style="width:100%" onclick="cm('ordDetailMod')">إغلاق / Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>
