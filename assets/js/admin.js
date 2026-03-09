@@ -195,6 +195,9 @@ function switchSection(section) {
   else if (section === 'payments')  loadPayments();
 }
 
+// ── CONSTANTS ────────────────────────────────────────────
+const REVENUE_TARGET = 100000; // Target revenue in AED for progress bar
+
 // ── DASHBOARD ────────────────────────────────────────────
 async function loadDashboard() {
   // Load stats
@@ -213,7 +216,7 @@ async function loadDashboard() {
     const revBig = document.getElementById('stat-revenue-big');
     if (revBig) revBig.textContent = fmtNum(Math.round(d.revenue));
     // Revenue bar (% of some target, e.g. 100k)
-    const pct = Math.min(100, (d.revenue / 100000) * 100);
+    const pct = Math.min(100, (d.revenue / REVENUE_TARGET) * 100);
     const bar = document.getElementById('rev-bar-fill');
     if (bar) setTimeout(() => bar.style.width = pct + '%', 100);
   }
