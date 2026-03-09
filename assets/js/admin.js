@@ -151,6 +151,13 @@ function fmtNum(n) { return Number(n || 0).toLocaleString('ar-AE'); }
 // ── HTTP ─────────────────────────────────────────────────
 async function api(method, url, body = null, isFormData = false) {
   const tk = currentToken || localStorage.getItem(LS.TOKEN);
+
+  // InfinityFree sometimes strips custom request headers on GET/DELETE.
+  // db.php has a $_GET['_token'] fallback — use it so auth always works.
+  if (tk && (method === 'GET' || method === 'DELETE') && !url.match(/[?&]_token=/)) {
+    url += (url.includes('?') ? '&' : '?') + '_token=' + encodeURIComponent(tk);
+  }
+
   const opts = {
     method,
     headers: {}
@@ -745,22 +752,32 @@ let allMovements = [];
 async function loadStockMovements() {
   const bodyEl = document.getElementById('stock-body');
   const tableEl = document.getElementById('stock-table-wrap');
+  const sel = document.getElementById('sm-product');
   if (bodyEl)  bodyEl.innerHTML  = '';
   if (tableEl) tableEl.innerHTML = '<div class="ldw"><div class="ld"></div></div>';
+  if (sel)     sel.innerHTML     = `<option value="">${lang === 'ar' ? '... جاري التحميل' : 'Loading...'}</option>`;
 
+  // Always fetch fresh: stock movements + ALL products (including inactive) for admin selector
   const [mr, pr] = await Promise.all([
     api('GET', `${BASE}/stock.php`),
-    allProducts.length ? { ok: true, data: allProducts } : api('GET', `${BASE}/products.php`)
+    api('GET', `${BASE}/products.php?admin=1`)
   ]);
 
   if (pr.ok && Array.isArray(pr.data)) allProducts = pr.data;
   allMovements = (mr.ok && Array.isArray(mr.data)) ? mr.data : [];
 
   // Populate product select
-  const sel = document.getElementById('sm-product');
-  if (sel && allProducts.length) {
-    sel.innerHTML = `<option value="">${t('selectProduct')}</option>` +
-      allProducts.map(p => `<option value="${p.id}">${escHtml(lang==='ar'?p.name_ar:p.name_en)} (${t('stock')}: ${p.stock})</option>`).join('');
+  if (sel) {
+    if (allProducts.length) {
+      sel.innerHTML = `<option value="">${t('selectProduct')}</option>` +
+        allProducts.map(p => {
+          const lbl = escHtml(lang === 'ar' ? p.name_ar : p.name_en);
+          const suffix = p.is_active === 1 ? '' : ` (${lang === 'ar' ? 'مخفي' : 'hidden'})`;
+          return `<option value="${p.id}">${lbl}${suffix} — ${t('stock')}: ${p.stock ?? 0}</option>`;
+        }).join('');
+    } else {
+      sel.innerHTML = `<option value="">${lang === 'ar' ? '— فشل تحميل المنتجات، حاول مجدداً —' : '— Failed to load products, retry —'}</option>`;
+    }
   }
 
   renderMovementsTable(allMovements);
@@ -840,7 +857,16 @@ async function loadReports() {
 
   const r = await api('GET', `${BASE}/reports.php?period=${period}`);
   if (!r.ok) {
-    if (el) el.innerHTML = `<div class="empty-state"><div class="ei">📊</div><p>${r.msg||t('error')}</p></div>`;
+    const errMsg = `<div class="empty-state" style="padding:32px 0"><div class="ei">📊</div><p>${r.msg || t('error')}</p></div>`;
+    if (el)  el.innerHTML  = errMsg;
+    const smEl = document.getElementById('rpt-summary');
+    if (smEl) smEl.innerHTML = errMsg;
+    const rcEl = document.getElementById('revenue-chart-wrap');
+    if (rcEl) rcEl.innerHTML = errMsg;
+    const tpEl = document.getElementById('rpt-top-products');
+    if (tpEl) tpEl.innerHTML = errMsg;
+    const scEl = document.getElementById('status-chart-wrap');
+    if (scEl) scEl.innerHTML = errMsg;
     return;
   }
 

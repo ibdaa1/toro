@@ -22,8 +22,16 @@ if ($method === 'GET') {
         ok($p);
     }
 
+    // Admin mode: return ALL products (including inactive) for inventory management
+    // Triggered by ?admin=1 with a valid admin token
+    $adminMode = false;
+    if (!empty($_GET['admin'])) {
+        authUser(true);  // throws 401/403 if not admin; if execution continues, user is admin
+        $adminMode = true;
+    }
+
     // بناء الاستعلام بشكل آمن
-    $conditions = ["is_active = 1"];
+    $conditions = $adminMode ? [] : ["is_active = 1"];
     $params     = [];
     $types      = '';
 
@@ -42,7 +50,7 @@ if ($method === 'GET') {
         $types       .= 'sss';
     }
 
-    $where = 'WHERE ' . implode(' AND ', $conditions);
+    $where = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
     $sql   = "SELECT * FROM products $where ORDER BY created_at DESC";
     $stmt  = $db->prepare($sql);
     if ($types && count($params)) {

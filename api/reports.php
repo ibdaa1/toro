@@ -17,6 +17,11 @@ switch ($period) {
     default:        $sinceDate = date('Y-m-d', strtotime('-30 days'));  $groupFmt = '%Y-%m-%d'; break;
 }
 
+$revenueData = [];
+$topProducts = [];
+$statusData  = [];
+$summary     = ['total_orders' => 0, 'total_revenue' => 0, 'avg_order_value' => 0];
+
 // ── 1. Daily / monthly revenue ────────────────────────────
 $stmt = $db->prepare(
     "SELECT DATE_FORMAT(created_at, ?) AS period,
@@ -27,10 +32,12 @@ $stmt = $db->prepare(
      GROUP BY period
      ORDER BY period ASC"
 );
-$stmt->bind_param('ss', $groupFmt, $sinceDate);
-$stmt->execute();
-$revenueData = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
+if ($stmt) {
+    $stmt->bind_param('ss', $groupFmt, $sinceDate);
+    $stmt->execute();
+    $revenueData = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+}
 
 // ── 2. Top selling products ────────────────────────────────
 $stmt2 = $db->prepare(
@@ -45,15 +52,20 @@ $stmt2 = $db->prepare(
      ORDER BY total_sold DESC
      LIMIT 10"
 );
-$stmt2->bind_param('s', $sinceDate);
-$stmt2->execute();
-$topProducts = $stmt2->get_result()->fetch_all(MYSQLI_ASSOC);
-$stmt2->close();
+if ($stmt2) {
+    $stmt2->bind_param('s', $sinceDate);
+    $stmt2->execute();
+    $topProducts = $stmt2->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt2->close();
+}
 
 // ── 3. Orders by status ────────────────────────────────────
-$statusData = $db->query(
+$statusRes = $db->query(
     "SELECT status, COUNT(*) AS count FROM orders GROUP BY status ORDER BY count DESC"
-)->fetch_all(MYSQLI_ASSOC);
+);
+if ($statusRes) {
+    $statusData = $statusRes->fetch_all(MYSQLI_ASSOC);
+}
 
 // ── 4. Summary totals ──────────────────────────────────────
 $stmt3 = $db->prepare(
@@ -62,10 +74,13 @@ $stmt3 = $db->prepare(
             IFNULL(AVG(total), 0) AS avg_order_value
      FROM orders WHERE created_at >= ? AND status NOT IN ('cancelled')"
 );
-$stmt3->bind_param('s', $sinceDate);
-$stmt3->execute();
-$summary = $stmt3->get_result()->fetch_assoc();
-$stmt3->close();
+if ($stmt3) {
+    $stmt3->bind_param('s', $sinceDate);
+    $stmt3->execute();
+    $row = $stmt3->get_result()->fetch_assoc();
+    if ($row) $summary = $row;
+    $stmt3->close();
+}
 
 $db->close();
 
