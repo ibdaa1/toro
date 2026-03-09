@@ -1,6 +1,6 @@
 // TORO Service Worker — cache-first for static, network-first for API
 // Bump CACHE version whenever static files change to force a fresh install.
-const CACHE = 'toro-v3';
+const CACHE = 'toro-v4';
 const STATIC = [
   './',
   './index.html',
@@ -8,6 +8,7 @@ const STATIC = [
   './assets/js/i18n.js',
   './assets/js/main.js',
   './manifest.json',
+  './favicon.ico',
   './assets/img/icon.svg',
   './assets/img/icon-192.png',
   './assets/img/icon-512.png',
