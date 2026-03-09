@@ -69,7 +69,8 @@ if ($method === 'POST') {
     $price   = round((float)($body['price'] ?? 0), 2);
     $pBefore = !empty($body['price_before']) ? round((float)$body['price_before'], 2) : null;
     $stock   = max(0, (int)($body['stock'] ?? 0));
-    $image   = filter_var(trim($body['image'] ?? ''), FILTER_VALIDATE_URL) ?: '';
+    $rawImg  = trim($body['image'] ?? '');
+    $image   = (preg_match('#^https?://#i', $rawImg) && strlen($rawImg) <= 500) ? $rawImg : '';
     $active  = isset($body['is_active']) ? (int)(bool)$body['is_active'] : 1;
 
     $allowedCats = ['men', 'women', 'unisex'];
@@ -109,7 +110,8 @@ if ($method === 'PUT' && $id) {
     $price   = round((float)($body['price'] ?? 0), 2);
     $pBefore = !empty($body['price_before']) ? round((float)$body['price_before'], 2) : null;
     $stock   = max(0, (int)($body['stock']  ?? 0));
-    $image   = filter_var(trim($body['image'] ?? ''), FILTER_VALIDATE_URL) ?: '';
+    $rawImg  = trim($body['image'] ?? '');
+    $image   = (preg_match('#^https?://#i', $rawImg) && strlen($rawImg) <= 500) ? $rawImg : '';
     $active  = isset($body['is_active']) ? (int)(bool)$body['is_active'] : 1;
 
     $allowedCats = ['men', 'women', 'unisex'];

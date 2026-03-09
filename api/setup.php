@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `email`      VARCHAR(150) NOT NULL UNIQUE,
   `password`   VARCHAR(255) NOT NULL,
   `role`       ENUM('admin','customer') DEFAULT 'customer',
+  `is_active`  TINYINT(1) NOT NULL DEFAULT 1,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -79,6 +80,19 @@ CREATE TABLE IF NOT EXISTS `favorites` (
   FOREIGN KEY (`user_id`)    REFERENCES `users`(`id`)    ON DELETE CASCADE,
   FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `stock_movements` (
+  `id`          INT AUTO_INCREMENT PRIMARY KEY,
+  `product_id`  INT NOT NULL,
+  `type`        ENUM('in','out','adjustment') DEFAULT 'in',
+  `quantity`    INT NOT NULL,
+  `balance`     INT NOT NULL COMMENT 'stock level after movement',
+  `reason`      VARCHAR(255) DEFAULT '',
+  `user_id`     INT DEFAULT NULL,
+  `created_at`  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`user_id`)    REFERENCES `users`(`id`)    ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ";
 
 // Run each statement
@@ -90,6 +104,16 @@ foreach ($stmts as $sql) {
         $results[] = ['sql' => substr($sql, 0, 50).'...', 'status' => 'OK'];
     } else {
         $results[] = ['sql' => substr($sql, 0, 50).'...', 'status' => 'Error: '.$db->error];
+    }
+}
+
+// Migration: add is_active to users if it doesn't exist
+$colCheck = $db->query("SHOW COLUMNS FROM `users` LIKE 'is_active'");
+if ($colCheck && $colCheck->num_rows === 0) {
+    if ($db->query("ALTER TABLE `users` ADD COLUMN `is_active` TINYINT(1) NOT NULL DEFAULT 1 AFTER `role`")) {
+        $results[] = ['migration' => 'Added is_active column to users'];
+    } else {
+        $results[] = ['migration' => 'Failed to add is_active: ' . $db->error];
     }
 }
 

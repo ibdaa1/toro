@@ -53,7 +53,7 @@ if ($method === 'POST' && $action === 'login') {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) err('بيانات خاطئة / Invalid credentials', 401);
 
     $db   = getDB();
-    $stmt = $db->prepare("SELECT id, name, email, password, role FROM users WHERE email = ? LIMIT 1");
+    $stmt = $db->prepare("SELECT id, name, email, password, role, is_active FROM users WHERE email = ? LIMIT 1");
     $stmt->bind_param('s', $email);
     $stmt->execute();
     $user = $stmt->get_result()->fetch_assoc();
@@ -63,6 +63,10 @@ if ($method === 'POST' && $action === 'login') {
     // timing-safe: تحقق حتى لو المستخدم غير موجود لمنع timing attacks
     if (!$user || !password_verify($pass, $user['password'])) {
         err('بيانات خاطئة / Invalid credentials', 401);
+    }
+
+    if (isset($user['is_active']) && (int)$user['is_active'] === 0) {
+        err('تم تعطيل هذا الحساب / Account deactivated', 403);
     }
 
     unset($user['password']);

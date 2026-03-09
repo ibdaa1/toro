@@ -51,6 +51,24 @@ const i18n = {
     priceNow: 'السعر الحالي', priceBefore: 'السعر قبل الخصم', statusLabel: 'الحالة',
     men: 'رجالي', women: 'نسائي', unisex: 'للجنسين',
     payNotes: 'ملاحظة: الدفع حالياً عند الاستلام. الدفع المسبق والمجدول قيد التطوير.',
+    // Stock movements
+    stockMovements: 'حركة المخزون', addStock: 'إضافة حركة مخزون',
+    stockHistory: 'سجل حركات المخزون', movementType: 'نوع الحركة',
+    stockIn: 'إضافة مخزون', stockOut: 'سحب مخزون', adjustment: 'تسوية مخزون',
+    balanceAfter: 'الرصيد بعد', reason: 'السبب', quantity: 'الكمية',
+    selectProduct: 'اختر المنتج', noMovements: 'لا توجد حركات مخزون',
+    stockUpdated: '✓ تم تحديث المخزون',
+    // Sales reports
+    salesReports: 'تقارير المبيعات', selectPeriod: 'الفترة الزمنية',
+    last7days: 'آخر 7 أيام', last30days: 'آخر 30 يوم',
+    last3months: 'آخر 3 أشهر', lastYear: 'السنة الكاملة',
+    revenueChart: 'مخطط الإيرادات', topProducts: 'أكثر المنتجات مبيعاً',
+    ordersByStatus: 'الطلبات حسب الحالة', avgOrderValue: 'متوسط قيمة الطلب',
+    totalSold: 'وحدة مباعة',
+    // User activation
+    activateUser: 'تفعيل', deactivateUser: 'تعطيل',
+    userActivated: '✓ تم تفعيل الحساب', userDeactivated: '✓ تم تعطيل الحساب',
+    inactive: 'غير نشط', confirmDeactivate: 'تعطيل هذا الحساب؟',
   },
   en: {
     dashboard: 'Dashboard', products: 'Products', orders: 'Orders',
@@ -84,6 +102,24 @@ const i18n = {
     priceNow: 'Current Price', priceBefore: 'Price Before Discount', statusLabel: 'Status',
     men: 'Men', women: 'Women', unisex: 'Unisex',
     payNotes: 'Note: Payment is currently Cash on Delivery. Pre-payment and scheduled payment are under development.',
+    // Stock movements
+    stockMovements: 'Stock Movements', addStock: 'Add Stock Movement',
+    stockHistory: 'Stock Movement History', movementType: 'Movement Type',
+    stockIn: 'Stock In', stockOut: 'Stock Out', adjustment: 'Adjustment',
+    balanceAfter: 'Balance After', reason: 'Reason', quantity: 'Quantity',
+    selectProduct: 'Select Product', noMovements: 'No stock movements',
+    stockUpdated: '✓ Stock updated',
+    // Sales reports
+    salesReports: 'Sales Reports', selectPeriod: 'Time Period',
+    last7days: 'Last 7 Days', last30days: 'Last 30 Days',
+    last3months: 'Last 3 Months', lastYear: 'Full Year',
+    revenueChart: 'Revenue Chart', topProducts: 'Top Selling Products',
+    ordersByStatus: 'Orders by Status', avgOrderValue: 'Avg Order Value',
+    totalSold: 'units sold',
+    // User activation
+    activateUser: 'Activate', deactivateUser: 'Deactivate',
+    userActivated: '✓ User activated', userDeactivated: '✓ User deactivated',
+    inactive: 'Inactive', confirmDeactivate: 'Deactivate this account?',
   }
 };
 
@@ -193,6 +229,8 @@ function switchSection(section) {
   else if (section === 'orders')    loadOrders();
   else if (section === 'users')     loadUsers();
   else if (section === 'payments')  loadPayments();
+  else if (section === 'stock')     loadStockMovements();
+  else if (section === 'reports')   loadReports();
 }
 
 // ── CONSTANTS ────────────────────────────────────────────
@@ -580,25 +618,52 @@ function renderUsersTable(list) {
       <th>${t('name')}</th>
       <th>${t('email')}</th>
       <th>${t('role')}</th>
+      <th>${t('status')}</th>
       <th>${t('joined')}</th>
+      <th>${t('action')}</th>
     </tr></thead>
-    <tbody>${list.map(u => `<tr>
-      <td style="color:var(--mu)">${u.id}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:9px">
-          <div style="width:32px;height:32px;border-radius:50%;background:${u.role==='admin'?'var(--g)':'var(--d3)'};color:${u.role==='admin'?'var(--d)':'var(--mu)'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">
-            ${escHtml((u.name || '?')[0].toUpperCase())}
+    <tbody>${list.map(u => {
+      const isActive = u.is_active == null ? null : (u.is_active == 1);
+      // null means column missing from DB response — treat as active but don't show toggle
+      const activeKnown = u.is_active != null;
+      const displayActive = isActive !== false; // true or unknown → show as active
+      return `<tr>
+        <td style="color:var(--mu)">${u.id}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:32px;height:32px;border-radius:50%;background:${u.role==='admin'?'var(--g)':'var(--d3)'};color:${u.role==='admin'?'var(--d)':'var(--mu)'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;opacity:${displayActive?1:.5}">
+              ${escHtml((u.name || '?')[0].toUpperCase())}
+            </div>
+            <span style="font-weight:${u.role==='admin'?'700':'400'};opacity:${displayActive?1:.6}">${escHtml(u.name)}</span>
           </div>
-          <span style="font-weight:${u.role==='admin'?'700':'400'}">${escHtml(u.name)}</span>
-        </div>
-      </td>
-      <td style="color:var(--mu)">${escHtml(u.email)}</td>
-      <td><span class="${u.role==='admin'?'badge-on':''}">
-        ${u.role==='admin'?'⚙️ '+t('admin'):'👤 '+t('customer')}
-      </span></td>
-      <td>${fmtDate(u.created_at)}</td>
-    </tr>`).join('')}</tbody>
+        </td>
+        <td style="color:var(--mu)">${escHtml(u.email)}</td>
+        <td><span class="${u.role==='admin'?'badge-on':''}">
+          ${u.role==='admin'?'⚙️ '+t('admin'):'👤 '+t('customer')}
+        </span></td>
+        <td><span class="${displayActive?'badge-on':'badge-off'}">${displayActive?t('active'):t('inactive')}</span></td>
+        <td>${fmtDate(u.created_at)}</td>
+        <td>
+          ${(u.role !== 'admin' && activeKnown)
+            ? `<button class="btn-sm ${displayActive?'btn-del':'btn-edit'}" onclick="toggleUserActive(${u.id}, ${displayActive?0:1})">
+                ${displayActive ? t('deactivateUser') : t('activateUser')}
+               </button>`
+            : `<span style="color:var(--mu);font-size:11px">${u.role==='admin'?t('admin'):'—'}</span>`}
+        </td>
+      </tr>`;
+    }).join('')}</tbody>
   </table></div>`;
+}
+
+async function toggleUserActive(userId, newActive) {
+  if (newActive === 0 && !confirm(t('confirmDeactivate'))) return;
+  const r = await api('PUT', `${BASE}/users.php?id=${userId}`, { is_active: newActive });
+  if (r.ok) {
+    toast(newActive ? t('userActivated') : t('userDeactivated'), 'ok');
+    await loadUsers();
+  } else {
+    toast(r.msg || t('error'), 'er');
+  }
 }
 
 function filterUsers(q) {
@@ -674,6 +739,242 @@ function showPaymentDetail(payId) {
   alert(`#${p.order_id} | ${p.user_name} | ${Number(p.amount).toFixed(2)} ${t('aed')} | ${p.status}`);
 }
 
+
+// ── STOCK MOVEMENTS ──────────────────────────────────────
+let allMovements = [];
+
+async function loadStockMovements() {
+  const bodyEl = document.getElementById('stock-body');
+  const tableEl = document.getElementById('stock-table-wrap');
+  if (bodyEl)  bodyEl.innerHTML  = '';
+  if (tableEl) tableEl.innerHTML = '<div class="ldw"><div class="ld"></div></div>';
+
+  const [mr, pr] = await Promise.all([
+    api('GET', `${BASE}/stock.php`),
+    allProducts.length ? { ok: true, data: allProducts } : api('GET', `${BASE}/products.php`)
+  ]);
+
+  if (pr.ok && Array.isArray(pr.data)) allProducts = pr.data;
+  allMovements = (mr.ok && Array.isArray(mr.data)) ? mr.data : [];
+
+  // Populate product select
+  const sel = document.getElementById('sm-product');
+  if (sel && allProducts.length) {
+    sel.innerHTML = `<option value="">${t('selectProduct')}</option>` +
+      allProducts.map(p => `<option value="${p.id}">${escHtml(lang==='ar'?p.name_ar:p.name_en)} (${t('stock')}: ${p.stock})</option>`).join('');
+  }
+
+  renderMovementsTable(allMovements);
+}
+
+function renderMovementsTable(list) {
+  const el = document.getElementById('stock-table-wrap');
+  if (!el) return;
+  if (!list.length) {
+    el.innerHTML = `<div class="empty-state"><div class="ei">📦</div><p>${t('noMovements')}</p></div>`;
+    return;
+  }
+  const typeLabel = { in: `<span class="badge-on">⬆ ${t('stockIn')}</span>`, out: `<span class="badge-off">⬇ ${t('stockOut')}</span>`, adjustment: `<span style="color:var(--or)">⚙ ${t('adjustment')}</span>` };
+  el.innerHTML = `<div class="tw"><table>
+    <thead><tr>
+      <th>#</th>
+      <th>${t('product')}</th>
+      <th>${t('movementType')}</th>
+      <th>${t('quantity')}</th>
+      <th>${t('balanceAfter')}</th>
+      <th>${t('reason')}</th>
+      <th>${t('name')}</th>
+      <th>${t('date')}</th>
+    </tr></thead>
+    <tbody>${list.map(m => `<tr>
+      <td style="color:var(--mu)">${m.id}</td>
+      <td>
+        <div style="font-weight:500">${escHtml(lang==='ar'?m.name_ar:m.name_en)}</div>
+        <div style="font-size:10px;color:var(--mu)">${escHtml(m.brand)}</div>
+      </td>
+      <td>${typeLabel[m.type] || m.type}</td>
+      <td style="font-weight:700;color:${m.type==='in'?'var(--gr)':m.type==='out'?'var(--re)':'var(--or)'}">${m.type==='in'?'+':m.type==='out'?'-':''}${m.quantity}</td>
+      <td style="font-weight:700;color:var(--g)">${m.balance}</td>
+      <td style="color:var(--mu);font-size:12px">${escHtml(m.reason||'—')}</td>
+      <td style="color:var(--mu)">${escHtml(m.admin_name||'—')}</td>
+      <td style="white-space:nowrap">${fmtDate(m.created_at)}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+async function addStockMovement() {
+  const productId = document.getElementById('sm-product')?.value;
+  const type      = document.getElementById('sm-type')?.value;
+  const qty       = parseInt(document.getElementById('sm-qty')?.value);
+  const reason    = document.getElementById('sm-reason')?.value?.trim();
+
+  if (!productId) { toast(t('selectProduct'), 'er'); return; }
+  if (!qty || qty <= 0) { toast(lang==='ar'?'أدخل كمية أكبر من صفر':'Enter a quantity greater than 0', 'er'); return; }
+
+  const r = await api('POST', `${BASE}/stock.php`, { product_id: parseInt(productId), type, quantity: qty, reason });
+  if (r.ok) {
+    toast(t('stockUpdated'), 'ok');
+    // Update product stock in allProducts; reload full list if not found
+    const idx = allProducts.findIndex(p => p.id == productId);
+    if (idx >= 0) {
+      allProducts[idx].stock = r.data.new_stock;
+    } else {
+      // Product not in cache — force a full reload
+      const pr = await api('GET', `${BASE}/products.php`);
+      if (pr.ok && Array.isArray(pr.data)) allProducts = pr.data;
+    }
+    // Reset form
+    document.getElementById('sm-qty').value = '';
+    document.getElementById('sm-reason').value = '';
+    await loadStockMovements();
+  } else {
+    toast(r.msg || t('error'), 'er');
+  }
+}
+
+// ── SALES REPORTS ────────────────────────────────────────
+let revenueChart = null;
+let statusChart  = null;
+
+async function loadReports() {
+  const period = document.getElementById('rpt-period')?.value || '30days';
+  const el = document.getElementById('rpt-body');
+  if (el) el.innerHTML = '<div class="ldw"><div class="ld"></div></div>';
+
+  const r = await api('GET', `${BASE}/reports.php?period=${period}`);
+  if (!r.ok) {
+    if (el) el.innerHTML = `<div class="empty-state"><div class="ei">📊</div><p>${r.msg||t('error')}</p></div>`;
+    return;
+  }
+
+  if (el) el.innerHTML = '';
+
+  const d = r.data;
+
+  // Summary cards
+  const smEl = document.getElementById('rpt-summary');
+  if (smEl) {
+    smEl.innerHTML = `
+      <div class="stat-card" style="flex:1;min-width:120px">
+        <div class="stat-icon">🧾</div>
+        <div class="stat-val">${fmtNum(d.summary?.total_orders||0)}</div>
+        <div class="stat-lbl">${t('totalOrders')}</div>
+      </div>
+      <div class="stat-card green" style="flex:1;min-width:120px">
+        <div class="stat-icon">💰</div>
+        <div class="stat-val">${fmtNum(Math.round(d.summary?.total_revenue||0))}</div>
+        <div class="stat-lbl">${t('totalRevenue')} (${t('aed')})</div>
+      </div>
+      <div class="stat-card blue" style="flex:1;min-width:120px">
+        <div class="stat-icon">📊</div>
+        <div class="stat-val">${fmtNum(Math.round(d.summary?.avg_order_value||0))}</div>
+        <div class="stat-lbl">${t('avgOrderValue')} (${t('aed')})</div>
+      </div>`;
+  }
+
+  // Revenue chart
+  renderRevenueChart(d.revenue || []);
+
+  // Top products
+  renderTopProducts(d.top_products || []);
+
+  // Status chart
+  renderStatusChart(d.by_status || []);
+}
+
+function renderRevenueChart(data) {
+  const canvas = document.getElementById('revenue-chart');
+  if (!canvas) return;
+  if (revenueChart) { revenueChart.destroy(); revenueChart = null; }
+
+  const labels  = data.map(d => d.period);
+  const values  = data.map(d => parseFloat(d.revenue));
+  const counts  = data.map(d => parseInt(d.orders_count));
+
+  revenueChart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: lang==='ar'?'الإيراد (د.إ)':'Revenue (AED)',
+          data: values,
+          backgroundColor: 'rgba(201,168,76,0.7)',
+          borderColor: '#c9a84c',
+          borderWidth: 1,
+          yAxisID: 'y',
+        },
+        {
+          label: lang==='ar'?'عدد الطلبات':'Orders',
+          data: counts,
+          type: 'line',
+          borderColor: '#4ca3c9',
+          backgroundColor: 'rgba(76,163,201,.15)',
+          tension: 0.3,
+          yAxisID: 'y1',
+          pointRadius: 3,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { labels: { color: '#c9a84c' } } },
+      scales: {
+        x:  { ticks: { color: '#888', maxRotation: 45 }, grid: { color: 'rgba(255,255,255,.05)' } },
+        y:  { ticks: { color: '#c9a84c' }, grid: { color: 'rgba(201,168,76,.1)' }, position: 'left' },
+        y1: { ticks: { color: '#4ca3c9' }, grid: { display: false }, position: 'right' }
+      }
+    }
+  });
+}
+
+function renderTopProducts(data) {
+  const el = document.getElementById('rpt-top-products');
+  if (!el) return;
+  if (!data.length) { el.innerHTML = `<div class="empty-state"><p>${t('noProducts')}</p></div>`; return; }
+  el.innerHTML = `<div class="tw"><table>
+    <thead><tr>
+      <th>#</th><th>${t('product')}</th><th>${t('brand')}</th>
+      <th>${t('qty')}</th><th>${t('total')} (${t('aed')})</th>
+    </tr></thead>
+    <tbody>${data.map((p,i) => `<tr>
+      <td style="color:var(--g);font-weight:700">${i+1}</td>
+      <td style="font-weight:500">${escHtml(lang==='ar'?p.name_ar:p.name_en)}</td>
+      <td style="color:var(--mu)">${escHtml(p.brand)}</td>
+      <td style="color:var(--gr);font-weight:700">${fmtNum(p.total_sold)} ${t('totalSold')}</td>
+      <td style="color:var(--g);font-weight:700">${fmtNum(Math.round(p.revenue))}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+function renderStatusChart(data) {
+  const canvas = document.getElementById('status-chart');
+  if (!canvas) return;
+  if (statusChart) { statusChart.destroy(); statusChart = null; }
+  if (!data.length) return;
+
+  const colorMap = { pending:'#f0a500', confirmed:'#4ca3c9', shipped:'#7a6de8',
+                     delivered:'#4caf72', cancelled:'#c94c4c' };
+  statusChart = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: data.map(d => t(d.status) || d.status),
+      datasets: [{
+        data: data.map(d => d.count),
+        backgroundColor: data.map(d => colorMap[d.status] || '#888'),
+        borderWidth: 2,
+        borderColor: '#1a1a1a',
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#ccc', padding: 12, font: { size: 11 } } }
+      }
+    }
+  });
+}
 
 // ── INIT ─────────────────────────────────────────────────
 function initAdmin() {

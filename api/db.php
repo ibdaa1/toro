@@ -102,7 +102,7 @@ function authUser($requireAdmin = false) {
     if ($userId <= 0) err('Invalid user id in token', 401);
 
     $db   = getDB();
-    $stmt = $db->prepare("SELECT id, name, email, role FROM users WHERE id = ? LIMIT 1");
+    $stmt = $db->prepare("SELECT id, name, email, role, is_active FROM users WHERE id = ? LIMIT 1");
     if (!$stmt) { $db->close(); err('DB prepare error: '.$db->error, 500); }
     $stmt->bind_param('i', $userId);
     $stmt->execute();
@@ -111,6 +111,7 @@ function authUser($requireAdmin = false) {
     $db->close();
 
     if (!$user) err('User not found', 401);
+    if (isset($user['is_active']) && (int)$user['is_active'] === 0) err('Account deactivated', 403);
     if ($requireAdmin && $user['role'] !== 'admin') err('Admin only - requires admin role', 403);
 
     return $user;

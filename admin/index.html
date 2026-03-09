@@ -47,6 +47,14 @@
       <button class="adm-nav-item" data-section="payments">
         <span class="nav-icon">💳</span> جدول الدفع
       </button>
+      <button class="adm-nav-item" data-section="stock">
+        <span class="nav-icon">📊</span> حركة المخزون
+      </button>
+
+      <div class="adm-nav-section">التقارير</div>
+      <button class="adm-nav-item" data-section="reports">
+        <span class="nav-icon">📈</span> تقارير المبيعات
+      </button>
 
       <div class="adm-nav-section">إدارة المستخدمين</div>
       <button class="adm-nav-item" data-section="users">
@@ -204,7 +212,7 @@
       <div class="adm-page-hdr">
         <div>
           <div class="adm-page-title">👥 العملاء</div>
-          <div class="adm-page-sub">قائمة المستخدمين المسجلين</div>
+          <div class="adm-page-sub">قائمة المستخدمين المسجلين وإدارة الحسابات</div>
         </div>
       </div>
       <div class="sec-card">
@@ -219,6 +227,112 @@
           <div class="ldw"><div class="ld"></div></div>
         </div>
       </div>
+    </section>
+
+    <!-- ═══ STOCK MOVEMENTS ═══ -->
+    <section class="adm-section" id="sec-stock" style="display:none">
+      <div class="adm-page-hdr">
+        <div>
+          <div class="adm-page-title">📦 حركة المخزون</div>
+          <div class="adm-page-sub">إضافة وسحب المخزون ومتابعة الحركات</div>
+        </div>
+      </div>
+
+      <!-- Add movement form -->
+      <div class="sec-card" style="margin-bottom:16px">
+        <div class="sec-hdr"><span class="sec-title">➕ إضافة حركة مخزون</span></div>
+        <div class="sec-body">
+          <div class="fr2">
+            <div class="fg">
+              <label class="fl">المنتج / Product *</label>
+              <select class="fsel" id="sm-product">
+                <option value="">— اختر المنتج —</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label class="fl">نوع الحركة / Type *</label>
+              <select class="fsel" id="sm-type">
+                <option value="in">⬆ إضافة مخزون (Stock In)</option>
+                <option value="out">⬇ سحب مخزون (Stock Out)</option>
+                <option value="adjustment">⚙ تسوية (Adjustment)</option>
+              </select>
+            </div>
+          </div>
+          <div class="fr2">
+            <div class="fg">
+              <label class="fl">الكمية / Quantity *</label>
+              <input class="fi" id="sm-qty" type="number" min="1" max="99999" placeholder="10">
+            </div>
+            <div class="fg">
+              <label class="fl">السبب / Reason</label>
+              <input class="fi" id="sm-reason" placeholder="مثال: شحنة جديدة، طلب رقم 25..." maxlength="255">
+            </div>
+          </div>
+          <button class="btn-primary" onclick="addStockMovement()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            تسجيل الحركة
+          </button>
+        </div>
+      </div>
+
+      <!-- Movement history -->
+      <div class="sec-card">
+        <div class="sec-hdr">
+          <span class="sec-title">📋 سجل حركات المخزون</span>
+        </div>
+        <div id="stock-body" style="padding:0">
+          <div class="ldw"><div class="ld"></div></div>
+        </div>
+        <div style="padding:0" id="stock-table-wrap"></div>
+      </div>
+    </section>
+
+    <!-- ═══ SALES REPORTS ═══ -->
+    <section class="adm-section" id="sec-reports" style="display:none">
+      <div class="adm-page-hdr">
+        <div>
+          <div class="adm-page-title">📈 تقارير المبيعات</div>
+          <div class="adm-page-sub">إحصائيات ومخططات بيانية لمبيعات المتجر</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <select class="fsel" id="rpt-period" style="width:160px" onchange="loadReports()">
+            <option value="7days">آخر 7 أيام</option>
+            <option value="30days" selected>آخر 30 يوم</option>
+            <option value="3months">آخر 3 أشهر</option>
+            <option value="year">السنة الكاملة</option>
+          </select>
+          <button class="btn-secondary" onclick="loadReports()">🔄 تحديث</button>
+        </div>
+      </div>
+
+      <!-- Summary cards -->
+      <div class="stat-grid" id="rpt-summary" style="margin-bottom:16px">
+        <div class="ldw"><div class="ld"></div></div>
+      </div>
+
+      <!-- Revenue chart -->
+      <div class="sec-card" style="margin-bottom:16px">
+        <div class="sec-hdr"><span class="sec-title">💰 مخطط الإيرادات</span></div>
+        <div class="sec-body" style="position:relative;height:280px">
+          <canvas id="revenue-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Two column: top products + status chart -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div class="sec-card">
+          <div class="sec-hdr"><span class="sec-title">🏆 أكثر المنتجات مبيعاً</span></div>
+          <div style="padding:0" id="rpt-top-products"></div>
+        </div>
+        <div class="sec-card">
+          <div class="sec-hdr"><span class="sec-title">📊 الطلبات حسب الحالة</span></div>
+          <div class="sec-body" style="position:relative;height:260px;display:flex;align-items:center;justify-content:center">
+            <canvas id="status-chart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div id="rpt-body"></div>
     </section>
 
   </main>
@@ -347,6 +461,7 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="../assets/js/admin.js"></script>
 </body>
 </html>
