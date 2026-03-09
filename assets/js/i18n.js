@@ -147,6 +147,7 @@ const TR = {
   th_stock:    { ar: 'المخزون',             en: 'Stock' },
   th_status:   { ar: 'الحالة',             en: 'Status' },
   th_action:   { ar: 'إجراء',              en: 'Action' },
+  th_id:       { ar: '#',                  en: '#' },
   th_customer: { ar: 'العميل',             en: 'Customer' },
   th_ttl:      { ar: 'الإجمالي',           en: 'Total' },
   th_date:     { ar: 'التاريخ',            en: 'Date' },

@@ -425,7 +425,7 @@ async function placeOrder() {
     document.getElementById('chkNotes').value='';
     nav('orders');
   } else {
-    toast(r.msg||'Error','er');
+    toast(r.msg||t('error_lbl'),'er');
     // If token invalid, redirect to login
     if (r.msg && r.msg.includes('nauthorized')) { toast(t('login_first'),'er'); nav('profile'); }
   }
@@ -540,7 +540,7 @@ async function doReg() {
     toast(t('acc_created'),'ok');
     renderProfile();
   } else {
-    toast(r.msg||'Error','er');
+    toast(r.msg||t('error_lbl'),'er');
   }
 }
 function doLogout() {
@@ -668,7 +668,7 @@ function admProdSearch(q) {
 function renderProdTable(list) {
   if (!list.length) return `<div class="adm-empty"><div class="ei">📦</div><p>${t('adm_no_prods')}</p></div>`;
   const scls = {men:'cat-m',women:'cat-w',unisex:'cat-u'};
-  const catLbls = {men:{ar:'رجالي',en:'Men'},women:{ar:'نسائي',en:'Women'},unisex:{ar:'للجنسين',en:'Unisex'}};
+  const catMap = {men:'cat_men',women:'cat_women',unisex:'cat_unisex'};
   return `<table>
     <thead><tr>
       <th>📷</th>
@@ -686,24 +686,24 @@ function renderProdTable(list) {
       const disc = p.price_before?Math.round((1-p.price/p.price_before)*100):0;
       const nm = lang==='ar'?p.name_ar:p.name_en;
       const catCls = scls[p.category]||'cat-u';
-      const catLbl = catLbls[p.category]?.[lang]||p.category;
+      const catLbl = t(catMap[p.category]||'cat_unisex');
       const active = p.is_active==1||p.is_active===undefined;
       return `<tr>
         <td><div class="prod-thumb">
           ${p.image?`<img src="${p.image}" onerror="this.style.display='none'">` : '🫙'}
         </div></td>
-        <td style="color:var(--tx);max-width:140px">
+        <td data-label="${escHtml(t('th_product'))}" style="color:var(--tx);max-width:140px">
           <div style="font-weight:500">${escHtml(nm)}</div>
           ${p.origin?`<div style="font-size:10px;color:var(--mu);margin-top:2px">🌍 ${escHtml(p.origin)}</div>`:''}
         </td>
-        <td style="color:var(--tx);font-weight:500">${escHtml(p.brand)}</td>
-        <td><span class="${catCls}">${catLbl}</span></td>
-        <td>${p.price_before?`<span style="text-decoration:line-through;color:var(--mu)">${p.price_before}</span>`:'-'}</td>
-        <td style="color:var(--g);font-weight:700">${p.price} <small style="font-weight:400;color:var(--mu)">${t('currency')}</small></td>
-        <td>${disc?`<span style="color:var(--re);font-weight:700">-${disc}%</span>`:'-'}</td>
-        <td style="${p.stock<=3?'color:var(--re)':''}">${p.stock}</td>
-        <td><span class="${active?'badge-on':'badge-off'}">${active?t('status_on'):t('status_off')}</span></td>
-        <td><div class="act-row">
+        <td data-label="${escHtml(t('th_brand'))}" style="color:var(--tx);font-weight:500">${escHtml(p.brand)}</td>
+        <td data-label="${escHtml(t('th_category'))}"><span class="${catCls}">${catLbl}</span></td>
+        <td data-label="${escHtml(t('th_before'))}">${p.price_before?`<span style="text-decoration:line-through;color:var(--mu)">${p.price_before}</span>`:'-'}</td>
+        <td data-label="${escHtml(t('th_after'))}" style="color:var(--g);font-weight:700">${p.price} <small style="font-weight:400;color:var(--mu)">${t('currency')}</small></td>
+        <td data-label="${escHtml(t('th_disc'))}">${disc?`<span style="color:var(--re);font-weight:700">-${disc}%</span>`:'-'}</td>
+        <td data-label="${escHtml(t('th_stock'))}" style="${p.stock<=3?'color:var(--re)':''}">${p.stock}</td>
+        <td data-label="${escHtml(t('th_status'))}"><span class="${active?'badge-on':'badge-off'}">${active?t('status_on'):t('status_off')}</span></td>
+        <td data-label="${escHtml(t('th_action'))}"><div class="act-row">
           <button class="btn-sm btn-edit" onclick="openPF(${p.id})">✏️</button>
           <button class="btn-sm btn-del" onclick="delProd(${p.id})">🗑</button>
           <button class="btn-sm btn-wa-sm" onclick="waProduct(${p.id})" title="${escHtml(t('wa_order'))}">📱</button>
@@ -717,7 +717,7 @@ async function loadAdmOrds() {
   const r = await api('GET', `${BASE}/orders.php`);
   const el = document.getElementById('admBody'); if(!el) return;
   if (!r.ok||!Array.isArray(r.data)) {
-    el.innerHTML = `<div style="padding:20px;color:var(--mu)">${r.msg||'Error'}</div>`;
+    el.innerHTML = `<div style="padding:20px;color:var(--mu)">${r.msg||t('error_lbl')}</div>`;
     return;
   }
   const sts=['pending','confirmed','shipped','delivered','cancelled'];
@@ -757,20 +757,20 @@ function renderOrdsTable(data, sts, scls) {
       <th>${t('th_action')}</th>
     </tr></thead>
     <tbody>${data.map(o=>`<tr>
-      <td style="color:var(--g);font-weight:700">#${o.id}</td>
-      <td>
+      <td data-label="${escHtml(t('th_id'))}" style="color:var(--g);font-weight:700">#${o.id}</td>
+      <td data-label="${escHtml(t('th_customer'))}">
         <div style="color:var(--tx);font-weight:500">${escHtml(o.user_name||'-')}</div>
         ${o.email?`<div style="font-size:10px;color:var(--mu)">${escHtml(o.email)}</div>`:''}
       </td>
-      <td style="color:var(--g);font-weight:700">${Number(o.total).toFixed(0)} <small style="color:var(--mu);font-weight:400">${t('currency')}</small></td>
-      <td><span class="ost ${scls[o.status]||'sp'}">${ts(o.status)}</span></td>
-      <td style="white-space:nowrap">${o.created_at?.slice(0,10)||''}</td>
-      <td>
+      <td data-label="${escHtml(t('th_ttl'))}" style="color:var(--g);font-weight:700">${Number(o.total).toFixed(0)} <small style="color:var(--mu);font-weight:400">${t('currency')}</small></td>
+      <td data-label="${escHtml(t('th_status'))}"><span class="ost ${scls[o.status]||'sp'}">${ts(o.status)}</span></td>
+      <td data-label="${escHtml(t('th_date'))}" style="white-space:nowrap">${o.created_at?.slice(0,10)||''}</td>
+      <td data-label="${escHtml(t('th_update'))}">
         <select class="st-sel" onchange="updOrdSt(${o.id},this.value)">
           ${sts.map(s=>`<option value="${s}"${o.status===s?' selected':''}>${ts(s)}</option>`).join('')}
         </select>
       </td>
-      <td><div class="act-row">
+      <td data-label="${escHtml(t('th_action'))}"><div class="act-row">
         <button class="btn-sm btn-view" onclick='showOrdDetail(${JSON.stringify(o).replace(/'/g,"&#39;")})'>${t('view_lbl')}</button>
         <button class="btn-sm btn-wa-sm" onclick='waOrderAdmin(${JSON.stringify(o).replace(/'/g,"&#39;")})'>📱</button>
       </div></td>
@@ -822,7 +822,7 @@ function showOrdDetail(o) {
 async function loadAdmUsers() {
   const r = await api('GET', `${BASE}/users.php`);
   const el = document.getElementById('admBody'); if(!el) return;
-  if (!r.ok||!Array.isArray(r.data)) { el.innerHTML=`<div style="padding:20px;color:var(--mu)">${r.msg||'Error'}</div>`; return; }
+  if (!r.ok||!Array.isArray(r.data)) { el.innerHTML=`<div style="padding:20px;color:var(--mu)">${r.msg||t('error_lbl')}</div>`; return; }
   el.innerHTML = `
     <div class="adm-search">
       <span class="sic">🔍</span>
@@ -853,8 +853,8 @@ function renderUsersTable(data) {
       <th>${t('th_joined')}</th>
     </tr></thead>
     <tbody>${data.map(u=>`<tr>
-      <td style="color:var(--mu)">${u.id}</td>
-      <td>
+      <td data-label="${escHtml(t('th_id'))}" style="color:var(--mu)">${u.id}</td>
+      <td data-label="${escHtml(t('th_name'))}">
         <div style="display:flex;align-items:center;gap:9px">
           <div style="width:32px;height:32px;border-radius:50%;background:${u.role==='admin'?'var(--g)':'var(--d3)'};color:${u.role==='admin'?'var(--d)':'var(--mu)'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">
             ${escHtml(u.name[0].toUpperCase())}
@@ -862,11 +862,11 @@ function renderUsersTable(data) {
           <span style="color:var(--tx);font-weight:${u.role==='admin'?'700':'400'}">${escHtml(u.name)}</span>
         </div>
       </td>
-      <td style="color:var(--mu)">${escHtml(u.email)}</td>
-      <td><span class="${u.role==='admin'?'badge-on':''}">
+      <td data-label="${escHtml(t('th_email'))}" style="color:var(--mu)">${escHtml(u.email)}</td>
+      <td data-label="${escHtml(t('th_role'))}"><span class="${u.role==='admin'?'badge-on':''}">
         ${u.role==='admin'?(t('role_admin')):(t('role_cust'))}
       </span></td>
-      <td>${u.created_at?.slice(0,10)||''}</td>
+      <td data-label="${escHtml(t('th_joined'))}">${u.created_at?.slice(0,10)||''}</td>
     </tr>`).join('')}</tbody>
   </table>`;
 }
@@ -874,7 +874,7 @@ function renderUsersTable(data) {
 async function updOrdSt(id, status) {
   const r = await api('PUT', `${BASE}/orders.php?id=${id}`, {status});
   if (r.ok) toast(t('adm_st_upd'),'ok');
-  else toast(r.msg||'Error','er');
+  else toast(r.msg||t('error_lbl'),'er');
 }
 
 function waOrderAdmin(o) {
@@ -937,7 +937,7 @@ async function saveProd() {
     await loadProds();
     if (admCurrentTab==='products') await loadAdmProds();
   } else {
-    toast(r.msg||'Error','er');
+    toast(r.msg||t('error_lbl'),'er');
   }
 }
 async function delProd(id) {
@@ -947,7 +947,7 @@ async function delProd(id) {
     toast(t('adm_deleted'));
     await loadProds();
     if (admCurrentTab==='products') await loadAdmProds();
-  } else toast(r.msg||'Error','er');
+  } else toast(r.msg||t('error_lbl'),'er');
 }
 
 // ══════════════════════════════════════════
@@ -998,7 +998,7 @@ async function renderFavorites() {
   el.innerHTML = '<div class="ldw"><div class="ld"></div></div>';
   const r = await api('GET', `${BASE}/favorites.php`);
   if (!r.ok || !Array.isArray(r.data)) {
-    el.innerHTML = `<div class="empty"><div class="ei">💔</div><p>${r.msg||'Error'}</p></div>`;
+    el.innerHTML = `<div class="empty"><div class="ei">💔</div><p>${r.msg||t('error_lbl')}</p></div>`;
     return;
   }
   if (!r.data.length) {

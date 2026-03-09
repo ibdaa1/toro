@@ -270,6 +270,24 @@ tr:hover td{background:rgba(201,168,76,.025)}
 .adm-empty{text-align:center;padding:50px 20px;color:var(--mu)}
 .adm-empty .ei{font-size:48px;margin-bottom:12px;opacity:.5}
 
+/* ── Admin Tables: responsive card layout on mobile ──── */
+@media(max-width:559px){
+  .adm-wrap{padding:0 10px}
+  .tw{border:none;background:transparent}
+  .tw table,.tw thead,.tw tbody,.tw th,.tw td,.tw tr{display:block}
+  .tw thead tr{display:none}
+  .tw tbody tr{background:var(--d2);border:1px solid rgba(201,168,76,.1);border-radius:var(--r);margin-bottom:10px;padding:4px 0}
+  .tw tbody tr:hover td{background:transparent}
+  .tw tbody td{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px}
+  .tw tbody td:last-child{border-bottom:none}
+  .tw tbody td:first-child{justify-content:center;border-bottom:1px solid rgba(201,168,76,.08);padding:10px 14px}
+  .tw tbody td[data-label]::before{content:attr(data-label);color:var(--mu);font-size:11px;font-weight:600;flex-shrink:0}
+  [dir=rtl] .tw tbody td[data-label]::before{margin-left:12px}
+  [dir=ltr] .tw tbody td[data-label]::before{margin-right:12px}
+  .prod-thumb{width:52px;height:52px}
+  .act-row{flex-wrap:wrap;gap:6px}
+}
+
 /* Revenue chart */
 .rev-bar{height:6px;background:rgba(201,168,76,.15);border-radius:3px;overflow:hidden;margin-top:6px}
 .rev-fill{height:100%;background:var(--g);border-radius:3px;transition:width .8s ease}
