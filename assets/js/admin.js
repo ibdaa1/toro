@@ -69,6 +69,20 @@ const i18n = {
     activateUser: 'تفعيل', deactivateUser: 'تعطيل',
     userActivated: '✓ تم تفعيل الحساب', userDeactivated: '✓ تم تعطيل الحساب',
     inactive: 'غير نشط', confirmDeactivate: 'تعطيل هذا الحساب؟',
+    // HTML page labels
+    navHome: 'الرئيسية', navStore: 'إدارة المتجر', navReports: 'التقارير', navUsers: 'إدارة المستخدمين',
+    dashboardSub: 'نظرة عامة على المتجر', revenueStat: 'الإيراد (د.إ)',
+    aedFull: 'درهم إماراتي', revenueTarget: 'من هدف 100,000 د.إ',
+    pendingWaiting: 'طلب بانتظار المعالجة', viewOrders: 'عرض الطلبات ←',
+    viewAll: 'عرض الكل', productsList: 'قائمة المنتجات',
+    productsSub: 'إضافة وتعديل وحذف المنتجات', ordersSub: 'متابعة وتحديث حالة الطلبات',
+    ordersList: 'قائمة الطلبات', paymentsSub: 'متابعة مدفوعات الطلبات',
+    paymentsHistory: 'سجل المدفوعات', usersSub: 'قائمة المستخدمين المسجلين وإدارة الحسابات',
+    customersList: 'قائمة العملاء', stockSub: 'إضافة وسحب المخزون ومتابعة الحركات',
+    recordMovement: 'تسجيل الحركة', stockReasonPh: 'مثال: شحنة جديدة، طلب رقم 25...',
+    reportsSub: 'إحصائيات ومخططات بيانية لمبيعات المتجر',
+    refresh: '🔄 تحديث', cancel: 'إلغاء', preview: 'معاينة',
+    urlTab: '🔗 رابط URL', storeLink: 'المتجر',
   },
   en: {
     dashboard: 'Dashboard', products: 'Products', orders: 'Orders',
@@ -120,10 +134,62 @@ const i18n = {
     activateUser: 'Activate', deactivateUser: 'Deactivate',
     userActivated: '✓ User activated', userDeactivated: '✓ User deactivated',
     inactive: 'Inactive', confirmDeactivate: 'Deactivate this account?',
+    // HTML page labels
+    navHome: 'Home', navStore: 'Store Management', navReports: 'Reports', navUsers: 'User Management',
+    dashboardSub: 'Store overview', revenueStat: 'Revenue (AED)',
+    aedFull: 'UAE Dirham', revenueTarget: 'of 100,000 AED target',
+    pendingWaiting: 'order(s) awaiting processing', viewOrders: 'View Orders →',
+    viewAll: 'View All', productsList: 'Products List',
+    productsSub: 'Add, edit and delete products', ordersSub: 'Track and update order status',
+    ordersList: 'Orders List', paymentsSub: 'Track order payments',
+    paymentsHistory: 'Payment Records', usersSub: 'Registered users and account management',
+    customersList: 'Customers List', stockSub: 'Add, withdraw and track inventory',
+    recordMovement: 'Record Movement', stockReasonPh: 'e.g. New shipment, Order #25...',
+    reportsSub: 'Store sales statistics and charts',
+    refresh: '🔄 Refresh', cancel: 'Cancel', preview: 'Preview',
+    urlTab: '🔗 URL Link', storeLink: 'Store',
   }
 };
 
 function t(k) { return (i18n[lang] || i18n.ar)[k] || k; }
+
+// ── LANGUAGE SWITCH ──────────────────────────────────────
+function applyTranslations() {
+  const d = document.documentElement;
+  d.lang = lang;
+  d.dir  = lang === 'ar' ? 'rtl' : 'ltr';
+  document.body.dataset.lang = lang;
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.dataset.i18nPlaceholder);
+  });
+
+  const btn = document.getElementById('lang-btn');
+  if (btn) btn.textContent = lang === 'ar' ? 'EN' : 'AR';
+}
+
+function setLang(l) {
+  lang = l;
+  localStorage.setItem(LS.LANG, l);
+  applyTranslations();
+  if (!isAdmin()) {
+    const el = document.getElementById('adm-content');
+    if (el) el.innerHTML = `
+      <div class="access-denied">
+        <div class="ei">🔒</div>
+        <h3>${t('adminOnly')}</h3>
+        <p>${t('loginFirst')}</p>
+        <a href="../index.html" class="btn-primary" style="margin-top:16px;display:inline-flex">${t('goToStore')}</a>
+      </div>`;
+  } else {
+    switchSection(currentSection);
+  }
+}
+
+function toggleLang() { setLang(lang === 'ar' ? 'en' : 'ar'); }
 
 // ── HELPERS ─────────────────────────────────────────────
 function escHtml(str) {
@@ -1034,6 +1100,9 @@ function renderStatusChart(data) {
 // ── INIT ─────────────────────────────────────────────────
 function initAdmin() {
   loadAuth();
+
+  // Apply translations first (sets dir/lang, fills data-i18n elements)
+  applyTranslations();
 
   // Show user info
   if (currentUser) {

@@ -14,15 +14,16 @@
 <header class="adm-hdr">
   <div style="display:flex;align-items:center;gap:12px">
     <button class="adm-menu-btn" id="menuBtn">☰</button>
-    <div class="adm-logo">TORO <small>لوحة التحكم</small></div>
+    <div class="adm-logo">TORO <small data-i18n="dashboard">لوحة التحكم</small></div>
   </div>
   <div class="adm-hdr-r">
     <div class="adm-user-info">
       <strong id="adm-user-name">—</strong>
       <span id="adm-user-email"></span>
     </div>
-    <a href="../index.html" class="adm-store-link">🛍 المتجر</a>
-    <button class="adm-logout" onclick="logout()">خروج</button>
+    <a href="../index.html" class="adm-store-link">🛍 <span data-i18n="storeLink">المتجر</span></a>
+    <button class="adm-lang-btn" id="lang-btn" onclick="toggleLang()">EN</button>
+    <button class="adm-logout" onclick="logout()" data-i18n="logout">خروج</button>
   </div>
 </header>
 
@@ -32,33 +33,33 @@
   <!-- SIDEBAR -->
   <aside class="adm-sidebar" id="adm-sidebar">
     <nav class="adm-nav">
-      <div class="adm-nav-section">الرئيسية</div>
+      <div class="adm-nav-section" data-i18n="navHome">الرئيسية</div>
       <button class="adm-nav-item active" data-section="dashboard">
-        <span class="nav-icon">📊</span> لوحة التحكم
+        <span class="nav-icon">📊</span> <span data-i18n="dashboard">لوحة التحكم</span>
       </button>
 
-      <div class="adm-nav-section">إدارة المتجر</div>
+      <div class="adm-nav-section" data-i18n="navStore">إدارة المتجر</div>
       <button class="adm-nav-item" data-section="products">
-        <span class="nav-icon">📦</span> المنتجات
+        <span class="nav-icon">📦</span> <span data-i18n="products">المنتجات</span>
       </button>
       <button class="adm-nav-item" data-section="orders">
-        <span class="nav-icon">🧾</span> الطلبات
+        <span class="nav-icon">🧾</span> <span data-i18n="orders">الطلبات</span>
       </button>
       <button class="adm-nav-item" data-section="payments">
-        <span class="nav-icon">💳</span> جدول الدفع
+        <span class="nav-icon">💳</span> <span data-i18n="payments">جدول الدفع</span>
       </button>
       <button class="adm-nav-item" data-section="stock">
-        <span class="nav-icon">📊</span> حركة المخزون
+        <span class="nav-icon">📦</span> <span data-i18n="stockMovements">حركة المخزون</span>
       </button>
 
-      <div class="adm-nav-section">التقارير</div>
+      <div class="adm-nav-section" data-i18n="navReports">التقارير</div>
       <button class="adm-nav-item" data-section="reports">
-        <span class="nav-icon">📈</span> تقارير المبيعات
+        <span class="nav-icon">📈</span> <span data-i18n="salesReports">تقارير المبيعات</span>
       </button>
 
-      <div class="adm-nav-section">إدارة المستخدمين</div>
+      <div class="adm-nav-section" data-i18n="navUsers">إدارة المستخدمين</div>
       <button class="adm-nav-item" data-section="users">
-        <span class="nav-icon">👥</span> العملاء
+        <span class="nav-icon">👥</span> <span data-i18n="users">العملاء</span>
       </button>
     </nav>
     <div class="adm-sidebar-footer">
@@ -77,8 +78,8 @@
     <section class="adm-section" id="sec-dashboard">
       <div class="adm-page-hdr">
         <div>
-          <div class="adm-page-title">📊 لوحة التحكم</div>
-          <div class="adm-page-sub">نظرة عامة على المتجر</div>
+          <div class="adm-page-title">📊 <span data-i18n="dashboard">لوحة التحكم</span></div>
+          <div class="adm-page-sub" data-i18n="dashboardSub">نظرة عامة على المتجر</div>
         </div>
       </div>
 
@@ -87,45 +88,45 @@
         <div class="stat-card">
           <div class="stat-icon">📦</div>
           <div class="stat-val" id="stat-products">—</div>
-          <div class="stat-lbl">المنتجات النشطة</div>
+          <div class="stat-lbl" data-i18n="totalProducts">المنتجات النشطة</div>
         </div>
         <div class="stat-card blue">
           <div class="stat-icon">🧾</div>
           <div class="stat-val" id="stat-orders">—</div>
-          <div class="stat-lbl">إجمالي الطلبات</div>
+          <div class="stat-lbl" data-i18n="totalOrders">إجمالي الطلبات</div>
         </div>
         <div class="stat-card green">
           <div class="stat-icon">👥</div>
           <div class="stat-val" id="stat-users">—</div>
-          <div class="stat-lbl">إجمالي العملاء</div>
+          <div class="stat-lbl" data-i18n="totalCustomers">إجمالي العملاء</div>
         </div>
         <div class="stat-card orange">
           <div class="stat-icon">💰</div>
           <div class="stat-val" id="stat-revenue">—</div>
-          <div class="stat-lbl">الإيراد (د.إ)</div>
+          <div class="stat-lbl" data-i18n="revenueStat">الإيراد (د.إ)</div>
         </div>
       </div>
 
       <!-- Revenue bar + pending -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
         <div class="sec-card">
-          <div class="sec-hdr"><span class="sec-title">💰 الإيراد الإجمالي</span></div>
+          <div class="sec-hdr"><span class="sec-title">💰 <span data-i18n="totalRevenue">الإيراد الإجمالي</span></span></div>
           <div class="sec-body">
             <div style="font-size:28px;font-weight:800;color:var(--g)" id="stat-revenue-big">—</div>
-            <div style="font-size:11px;color:var(--mu);margin-top:3px">درهم إماراتي</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px" data-i18n="aedFull">درهم إماراتي</div>
             <div class="rev-bar" style="margin-top:12px">
               <div class="rev-fill" id="rev-bar-fill" style="width:0%"></div>
             </div>
-            <div style="font-size:10px;color:var(--mu);margin-top:4px">من هدف 100,000 د.إ</div>
+            <div style="font-size:10px;color:var(--mu);margin-top:4px" data-i18n="revenueTarget">من هدف 100,000 د.إ</div>
           </div>
         </div>
         <div class="sec-card">
-          <div class="sec-hdr"><span class="sec-title">⏳ الطلبات المعلقة</span></div>
+          <div class="sec-hdr"><span class="sec-title">⏳ <span data-i18n="pendingOrders">الطلبات المعلقة</span></span></div>
           <div class="sec-body">
             <div style="font-size:42px;font-weight:800;color:var(--or)" id="stat-pending">—</div>
-            <div style="font-size:11px;color:var(--mu);margin-top:3px">طلب بانتظار المعالجة</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px" data-i18n="pendingWaiting">طلب بانتظار المعالجة</div>
             <div style="margin-top:12px">
-              <button class="btn-secondary" onclick="switchSection('orders')">عرض الطلبات ←</button>
+              <button class="btn-secondary" onclick="switchSection('orders')" data-i18n="viewOrders">عرض الطلبات ←</button>
             </div>
           </div>
         </div>
@@ -134,8 +135,8 @@
       <!-- Recent orders -->
       <div class="sec-card">
         <div class="sec-hdr">
-          <span class="sec-title">🕒 آخر الطلبات</span>
-          <button class="btn-secondary" onclick="switchSection('orders')">عرض الكل</button>
+          <span class="sec-title">🕒 <span data-i18n="recentOrders">آخر الطلبات</span></span>
+          <button class="btn-secondary" onclick="switchSection('orders')" data-i18n="viewAll">عرض الكل</button>
         </div>
         <div class="sec-body" id="recent-orders-list">
           <div class="ldw"><div class="ld"></div></div>
@@ -147,20 +148,20 @@
     <section class="adm-section" id="sec-products" style="display:none">
       <div class="adm-page-hdr">
         <div>
-          <div class="adm-page-title">📦 المنتجات</div>
-          <div class="adm-page-sub">إضافة وتعديل وحذف المنتجات</div>
+          <div class="adm-page-title">📦 <span data-i18n="products">المنتجات</span></div>
+          <div class="adm-page-sub" data-i18n="productsSub">إضافة وتعديل وحذف المنتجات</div>
         </div>
         <button class="btn-primary" onclick="openProductForm()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          إضافة منتج
+          <span data-i18n="addProduct">إضافة منتج</span>
         </button>
       </div>
       <div class="sec-card">
         <div class="sec-hdr">
-          <span class="sec-title">قائمة المنتجات</span>
+          <span class="sec-title" data-i18n="productsList">قائمة المنتجات</span>
           <div class="adm-search" style="width:240px;margin:0">
             <span class="srch-ic">🔍</span>
-            <input placeholder="بحث..." oninput="filterProducts(this.value)">
+            <input data-i18n-placeholder="searchProducts" placeholder="بحث..." oninput="filterProducts(this.value)">
           </div>
         </div>
         <div style="padding:0" id="prod-table-wrap">
@@ -173,16 +174,16 @@
     <section class="adm-section" id="sec-orders" style="display:none">
       <div class="adm-page-hdr">
         <div>
-          <div class="adm-page-title">🧾 الطلبات</div>
-          <div class="adm-page-sub">متابعة وتحديث حالة الطلبات</div>
+          <div class="adm-page-title">🧾 <span data-i18n="orders">الطلبات</span></div>
+          <div class="adm-page-sub" data-i18n="ordersSub">متابعة وتحديث حالة الطلبات</div>
         </div>
       </div>
       <div class="sec-card">
         <div class="sec-hdr">
-          <span class="sec-title">قائمة الطلبات</span>
+          <span class="sec-title" data-i18n="ordersList">قائمة الطلبات</span>
           <div class="adm-search" style="width:240px;margin:0">
             <span class="srch-ic">🔍</span>
-            <input placeholder="بحث بالرقم أو العميل..." oninput="filterOrders(this.value)">
+            <input data-i18n-placeholder="searchOrders" placeholder="بحث بالرقم أو العميل..." oninput="filterOrders(this.value)">
           </div>
         </div>
         <div style="padding:0" id="orders-table-wrap">
@@ -195,12 +196,12 @@
     <section class="adm-section" id="sec-payments" style="display:none">
       <div class="adm-page-hdr">
         <div>
-          <div class="adm-page-title">💳 جدول الدفع</div>
-          <div class="adm-page-sub">متابعة مدفوعات الطلبات</div>
+          <div class="adm-page-title">💳 <span data-i18n="payments">جدول الدفع</span></div>
+          <div class="adm-page-sub" data-i18n="paymentsSub">متابعة مدفوعات الطلبات</div>
         </div>
       </div>
       <div class="sec-card">
-        <div class="sec-hdr"><span class="sec-title">سجل المدفوعات</span></div>
+        <div class="sec-hdr"><span class="sec-title" data-i18n="paymentsHistory">سجل المدفوعات</span></div>
         <div class="sec-body" id="payments-body">
           <div class="ldw"><div class="ld"></div></div>
         </div>
@@ -211,16 +212,16 @@
     <section class="adm-section" id="sec-users" style="display:none">
       <div class="adm-page-hdr">
         <div>
-          <div class="adm-page-title">👥 العملاء</div>
-          <div class="adm-page-sub">قائمة المستخدمين المسجلين وإدارة الحسابات</div>
+          <div class="adm-page-title">👥 <span data-i18n="users">العملاء</span></div>
+          <div class="adm-page-sub" data-i18n="usersSub">قائمة المستخدمين المسجلين وإدارة الحسابات</div>
         </div>
       </div>
       <div class="sec-card">
         <div class="sec-hdr">
-          <span class="sec-title">قائمة العملاء</span>
+          <span class="sec-title" data-i18n="customersList">قائمة العملاء</span>
           <div class="adm-search" style="width:240px;margin:0">
             <span class="srch-ic">🔍</span>
-            <input placeholder="بحث بالاسم أو البريد..." oninput="filterUsers(this.value)">
+            <input data-i18n-placeholder="searchUsers" placeholder="بحث بالاسم أو البريد..." oninput="filterUsers(this.value)">
           </div>
         </div>
         <div style="padding:0" id="users-table-wrap">
@@ -233,44 +234,44 @@
     <section class="adm-section" id="sec-stock" style="display:none">
       <div class="adm-page-hdr">
         <div>
-          <div class="adm-page-title">📦 حركة المخزون</div>
-          <div class="adm-page-sub">إضافة وسحب المخزون ومتابعة الحركات</div>
+          <div class="adm-page-title">📦 <span data-i18n="stockMovements">حركة المخزون</span></div>
+          <div class="adm-page-sub" data-i18n="stockSub">إضافة وسحب المخزون ومتابعة الحركات</div>
         </div>
       </div>
 
       <!-- Add movement form -->
       <div class="sec-card" style="margin-bottom:16px">
-        <div class="sec-hdr"><span class="sec-title">➕ إضافة حركة مخزون</span></div>
+        <div class="sec-hdr"><span class="sec-title">➕ <span data-i18n="addStock">إضافة حركة مخزون</span></span></div>
         <div class="sec-body">
           <div class="fr2">
             <div class="fg">
-              <label class="fl">المنتج / Product *</label>
+              <label class="fl"><span data-i18n="product">المنتج</span> *</label>
               <select class="fsel" id="sm-product">
-                <option value="">— اختر المنتج —</option>
+                <option value="" data-i18n="selectProduct">— اختر المنتج —</option>
               </select>
             </div>
             <div class="fg">
-              <label class="fl">نوع الحركة / Type *</label>
+              <label class="fl"><span data-i18n="movementType">نوع الحركة</span> *</label>
               <select class="fsel" id="sm-type">
-                <option value="in">⬆ إضافة مخزون (Stock In)</option>
-                <option value="out">⬇ سحب مخزون (Stock Out)</option>
-                <option value="adjustment">⚙ تسوية (Adjustment)</option>
+                <option value="in" data-i18n="stockIn">⬆ إضافة مخزون</option>
+                <option value="out" data-i18n="stockOut">⬇ سحب مخزون</option>
+                <option value="adjustment" data-i18n="adjustment">⚙ تسوية</option>
               </select>
             </div>
           </div>
           <div class="fr2">
             <div class="fg">
-              <label class="fl">الكمية / Quantity *</label>
+              <label class="fl"><span data-i18n="quantity">الكمية</span> *</label>
               <input class="fi" id="sm-qty" type="number" min="1" max="99999" placeholder="10">
             </div>
             <div class="fg">
-              <label class="fl">السبب / Reason</label>
-              <input class="fi" id="sm-reason" placeholder="مثال: شحنة جديدة، طلب رقم 25..." maxlength="255">
+              <label class="fl" data-i18n="reason">السبب</label>
+              <input class="fi" id="sm-reason" data-i18n-placeholder="stockReasonPh" placeholder="مثال: شحنة جديدة، طلب رقم 25..." maxlength="255">
             </div>
           </div>
           <button class="btn-primary" onclick="addStockMovement()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            تسجيل الحركة
+            <span data-i18n="recordMovement">تسجيل الحركة</span>
           </button>
         </div>
       </div>
@@ -278,7 +279,7 @@
       <!-- Movement history -->
       <div class="sec-card">
         <div class="sec-hdr">
-          <span class="sec-title">📋 سجل حركات المخزون</span>
+          <span class="sec-title">📋 <span data-i18n="stockHistory">سجل حركات المخزون</span></span>
         </div>
         <div id="stock-body" style="padding:0">
           <div class="ldw"><div class="ld"></div></div>
@@ -291,17 +292,17 @@
     <section class="adm-section" id="sec-reports" style="display:none">
       <div class="adm-page-hdr">
         <div>
-          <div class="adm-page-title">📈 تقارير المبيعات</div>
-          <div class="adm-page-sub">إحصائيات ومخططات بيانية لمبيعات المتجر</div>
+          <div class="adm-page-title">📈 <span data-i18n="salesReports">تقارير المبيعات</span></div>
+          <div class="adm-page-sub" data-i18n="reportsSub">إحصائيات ومخططات بيانية لمبيعات المتجر</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <select class="fsel" id="rpt-period" style="width:160px" onchange="loadReports()">
-            <option value="7days">آخر 7 أيام</option>
-            <option value="30days" selected>آخر 30 يوم</option>
-            <option value="3months">آخر 3 أشهر</option>
-            <option value="year">السنة الكاملة</option>
+            <option value="7days" data-i18n="last7days">آخر 7 أيام</option>
+            <option value="30days" selected data-i18n="last30days">آخر 30 يوم</option>
+            <option value="3months" data-i18n="last3months">آخر 3 أشهر</option>
+            <option value="year" data-i18n="lastYear">السنة الكاملة</option>
           </select>
-          <button class="btn-secondary" onclick="loadReports()">🔄 تحديث</button>
+          <button class="btn-secondary" onclick="loadReports()" data-i18n="refresh">🔄 تحديث</button>
         </div>
       </div>
 
@@ -312,7 +313,7 @@
 
       <!-- Revenue chart — SVG rendered by renderRevenueChart() -->
       <div class="sec-card" style="margin-bottom:16px">
-        <div class="sec-hdr"><span class="sec-title">💰 مخطط الإيرادات</span></div>
+        <div class="sec-hdr"><span class="sec-title">💰 <span data-i18n="revenueChart">مخطط الإيرادات</span></span></div>
         <div class="sec-body" style="padding:8px 0">
           <div id="revenue-chart-wrap"></div>
         </div>
@@ -321,11 +322,11 @@
       <!-- Two column: top products + status breakdown -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
         <div class="sec-card">
-          <div class="sec-hdr"><span class="sec-title">🏆 أكثر المنتجات مبيعاً</span></div>
+          <div class="sec-hdr"><span class="sec-title">🏆 <span data-i18n="topProducts">أكثر المنتجات مبيعاً</span></span></div>
           <div style="padding:0" id="rpt-top-products"></div>
         </div>
         <div class="sec-card">
-          <div class="sec-hdr"><span class="sec-title">📊 الطلبات حسب الحالة</span></div>
+          <div class="sec-hdr"><span class="sec-title">📊 <span data-i18n="ordersByStatus">الطلبات حسب الحالة</span></span></div>
           <div id="status-chart-wrap"></div>
         </div>
       </div>
@@ -341,85 +342,85 @@
 <!-- Product Form Modal -->
 <div class="ov" id="pf-modal">
   <div class="modal" style="max-width:560px">
-    <div class="mt" id="pf-title">إضافة منتج جديد</div>
+    <div class="mt" id="pf-title" data-i18n="addProduct">إضافة منتج جديد</div>
     <input type="hidden" id="f_id">
 
     <div class="fr2">
       <div class="fg">
-        <label class="fl">الاسم بالعربي *</label>
+        <label class="fl"><span data-i18n="nameAr">الاسم بالعربي</span> *</label>
         <input class="fi" id="f_nar" placeholder="عود الملكي" maxlength="200">
       </div>
       <div class="fg">
-        <label class="fl">Name English *</label>
+        <label class="fl"><span data-i18n="nameEn">Name English</span> *</label>
         <input class="fi" id="f_nen" placeholder="Royal Oud" maxlength="200">
       </div>
     </div>
 
     <div class="fr2">
       <div class="fg">
-        <label class="fl">الماركة / Brand *</label>
+        <label class="fl"><span data-i18n="brand">الماركة</span> *</label>
         <input class="fi" id="f_br" placeholder="TORO, Chanel..." maxlength="100">
       </div>
       <div class="fg">
-        <label class="fl">الأصل / Origin</label>
+        <label class="fl" data-i18n="origin">الأصل</label>
         <input class="fi" id="f_or" placeholder="UAE, France..." maxlength="100">
       </div>
     </div>
 
     <div class="fg">
-      <label class="fl">التصنيف / Category</label>
+      <label class="fl" data-i18n="category">التصنيف</label>
       <select class="fsel" id="f_cat">
-        <option value="men">رجالي / Men</option>
-        <option value="women">نسائي / Women</option>
-        <option value="unisex">للجنسين / Unisex</option>
+        <option value="men" data-i18n="men">رجالي</option>
+        <option value="women" data-i18n="women">نسائي</option>
+        <option value="unisex" data-i18n="unisex">للجنسين</option>
       </select>
     </div>
 
     <div class="fr2">
       <div class="fg">
-        <label class="fl">السعر الحالي (درهم) *</label>
+        <label class="fl"><span data-i18n="priceNow">السعر الحالي</span> *</label>
         <input class="fi" id="f_pr" type="number" placeholder="299" min="0" max="99999" step="0.01">
       </div>
       <div class="fg">
-        <label class="fl">السعر قبل الخصم</label>
+        <label class="fl" data-i18n="priceBefore">السعر قبل الخصم</label>
         <input class="fi" id="f_pb" type="number" placeholder="399" min="0" max="99999" step="0.01">
       </div>
     </div>
 
     <div class="fr2">
       <div class="fg">
-        <label class="fl">المخزون / Stock</label>
+        <label class="fl" data-i18n="stock">المخزون</label>
         <input class="fi" id="f_st" type="number" placeholder="10" min="0" max="9999">
       </div>
       <div class="fg">
-        <label class="fl">الحالة / Status</label>
+        <label class="fl" data-i18n="statusLabel">الحالة</label>
         <select class="fsel" id="f_ac">
-          <option value="1">نشط / Active</option>
-          <option value="0">مخفي / Hidden</option>
+          <option value="1" data-i18n="active">نشط</option>
+          <option value="0" data-i18n="hidden">مخفي</option>
         </select>
       </div>
     </div>
 
     <!-- Image section with tabs -->
     <div class="fg">
-      <label class="fl">الصورة / Image</label>
+      <label class="fl" data-i18n="image">الصورة</label>
       <div class="img-tabs">
-        <button class="img-tab active" data-tab="url"    onclick="setImgTab('url')">🔗 رابط URL</button>
-        <button class="img-tab"        data-tab="upload" onclick="setImgTab('upload')">📤 رفع صورة</button>
+        <button class="img-tab active" data-tab="url"    onclick="setImgTab('url')" data-i18n="urlTab">🔗 رابط URL</button>
+        <button class="img-tab"        data-tab="upload" onclick="setImgTab('upload')" data-i18n="uploadImage">📤 رفع صورة</button>
       </div>
 
       <!-- URL tab -->
       <div id="img-url-section">
         <input class="fi" id="f_im" placeholder="https://example.com/photo.jpg" oninput="updateImgPreview()" maxlength="500">
-        <div class="ipr" id="imgPrev"><span>معاينة / Preview</span></div>
+        <div class="ipr" id="imgPrev"><span data-i18n="preview">معاينة</span></div>
       </div>
 
       <!-- Upload tab -->
       <div id="img-file-section" style="display:none">
         <div class="img-drop-zone" id="img-drop-zone">
           <div class="drop-icon">🖼️</div>
-          <div class="drop-text">اضغط أو اسحب الصورة هنا</div>
-          <div class="drop-sub">JPG, PNG, WebP — حتى 5MB</div>
+          <div class="drop-text" data-i18n="clickOrDrop">اضغط أو اسحب الصورة هنا</div>
+          <div class="drop-sub" data-i18n="imageFormats">JPG, PNG, WebP — حتى 5MB</div>
           <input type="file" accept="image/jpeg,image/png,image/webp,image/gif"
                  onchange="handleFileUpload(this)">
         </div>
@@ -428,20 +429,20 @@
     </div>
 
     <div class="fg">
-      <label class="fl">الوصف (عربي)</label>
+      <label class="fl" data-i18n="descAr">الوصف (عربي)</label>
       <textarea class="fta" id="f_dar" placeholder="وصف العطر..." maxlength="1000"></textarea>
     </div>
     <div class="fg">
-      <label class="fl">Description (English)</label>
+      <label class="fl" data-i18n="descEn">Description (English)</label>
       <textarea class="fta" id="f_den" placeholder="Description..." maxlength="1000"></textarea>
     </div>
 
     <div class="mac">
       <button class="btn-primary" onclick="saveProduct()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        <span id="t-save">حفظ المنتج</span>
+        <span id="t-save" data-i18n="saveProduct">حفظ المنتج</span>
       </button>
-      <button class="bcl" onclick="cm('pf-modal')">إلغاء</button>
+      <button class="bcl" onclick="cm('pf-modal')" data-i18n="cancel">إلغاء</button>
     </div>
   </div>
 </div>
@@ -449,10 +450,10 @@
 <!-- Order Detail Modal -->
 <div class="ov" id="ord-detail-modal">
   <div class="modal">
-    <div class="mt" id="ord-detail-title">تفاصيل الطلب</div>
+    <div class="mt" id="ord-detail-title" data-i18n="orderDetail">تفاصيل الطلب</div>
     <div id="ord-detail-body"></div>
     <div style="margin-top:14px">
-      <button class="bcl" style="width:100%" onclick="cm('ord-detail-modal')">إغلاق / Close</button>
+      <button class="bcl" style="width:100%" onclick="cm('ord-detail-modal')" data-i18n="close">إغلاق</button>
     </div>
   </div>
 </div>
