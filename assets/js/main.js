@@ -28,6 +28,7 @@ applyLang();
 const TR = {
   eye:   {ar:'عطور فاخرة أصيلة',       en:'Authentic Luxury Fragrances'},
   sub:   {ar:'الإمارات العربية المتحدة', en:'United Arab Emirates'},
+  tag:   {ar:'الفاخر لا يحتاج مناسبة', en:'Luxury Needs No Occasion'},
   sph:   {ar:'ابحث عن عطر أو ماركة...', en:'Search perfumes or brands...'},
   ct:    {ar:'🛒 السلة',en:'🛒 Cart'},
   cht:   {ar:'💳 إتمام الطلب',en:'💳 Checkout'},
@@ -82,7 +83,7 @@ function swLang() {
   applyLang();
   document.querySelectorAll('[data-ar]').forEach(el => el.textContent = el.getAttribute('data-'+lang));
   const ids = {
-    't-eye':t('eye'),'t-sub':t('sub'),'t-cart':t('ct'),'t-chk':t('cht'),
+    't-eye':t('eye'),'t-sub':t('sub'),'t-tag':t('tag'),'t-cart':t('ct'),'t-chk':t('cht'),
     't-ord':t('ot'),'t-addr':t('al'),'t-notes':t('nl'),'t-place':t('pl'),
     't-save':t('sw'),'t-dash':t('dsh'),'t-qty':t('qty'),
     't-chk-note':t('chknote'),'t-wa-send':t('wabtn')
@@ -90,6 +91,7 @@ function swLang() {
   Object.entries(ids).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.textContent=val;});
   const si = document.getElementById('srchIn');
   if (si) si.placeholder = t('sph');
+  renderMarquee();
   renderPage();
 }
 
@@ -120,10 +122,12 @@ function renderPage() {
 // ══════════════════════════════════════════
 async function api(method, url, body=null) {
   const tk = localStorage.getItem(LS.TOKEN) || '';
+  // InfinityFree strips custom headers on GET/DELETE — append _token as query param
+  if (tk && (method === 'GET' || method === 'DELETE') && !url.match(/[?&]_token=/)) {
+    url += (url.includes('?') ? '&' : '?') + '_token=' + encodeURIComponent(tk);
+  }
   const headers = { 'Content-Type': 'application/json' };
-  // InfinityFree يحجب Authorization header — نستخدم X-Token بدلاً منه
   if (tk) headers['X-Token'] = tk;
-  // نرسل كلاهما كـ fallback
   if (tk) headers['Authorization'] = 'Bearer ' + tk;
   try {
     const res = await fetch(url, {
@@ -166,6 +170,45 @@ async function loadProds() {
   const r = await api('GET', `${BASE}/products.php`);
   prods = (r.ok && Array.isArray(r.data) && r.data.length) ? r.data : DEMO;
   renderProds();
+  renderMarquee();
+}
+
+// ── Product color palette for marquee cards ──────────────────
+const MQ_COLORS = [
+  {bg:'#1a1408',glow:'#c9a84c',text:'#e8d5a3'},  // gold
+  {bg:'#180c14',glow:'#d4547a',text:'#f0a0b8'},  // rose
+  {bg:'#10101e',glow:'#7a6de8',text:'#b0aaf5'},  // violet
+  {bg:'#081514',glow:'#3da8a4',text:'#8bd4d1'},  // teal
+  {bg:'#1a110a',glow:'#e8943a',text:'#f0c08a'},  // amber
+  {bg:'#0c1018',glow:'#5b9bd5',text:'#a0c4ee'},  // blue
+];
+const MQ_MIN_REAL = 4;  // minimum real products before using DEMO fallback
+const MQ_MAX      = 8;  // max cards shown in marquee
+
+function isActiveProduct(p) {
+  return p.is_active !== 0 && p.is_active !== '0';
+}
+
+function renderMarquee() {
+  const track = document.getElementById('mq-track');
+  if (!track) return;
+  const list = (prods.length ? prods : DEMO).filter(isActiveProduct);
+  // Use DEMO if we have too few real products to fill the marquee
+  const src = list.length >= MQ_MIN_REAL ? list.slice(0, MQ_MAX) : DEMO;
+  const cards = src.map((p, i) => {
+    const nm  = lang === 'ar' ? p.name_ar : p.name_en;
+    const col = MQ_COLORS[i % MQ_COLORS.length];
+    const img = p.image
+      ? `<img src="${escHtml(p.image)}" alt="${escHtml(nm)}" loading="lazy" onerror="this.style.display='none'">`
+      : '<span style="font-size:36px">🫙</span>';
+    return `<div class="mq-card" style="box-shadow:0 4px 24px -6px ${col.glow}55" onclick="showProd(${p.id})">
+      <div class="mq-img" style="background:radial-gradient(circle at 50% 60%,${col.glow}28 0%,${col.bg} 70%)">${img}</div>
+      <div class="mq-nm">${escHtml(nm)}</div>
+      <div class="mq-pr" style="color:${col.glow}">${p.price} <span style="font-size:9px;font-weight:400;color:${col.text}">${t('aed')}</span></div>
+    </div>`;
+  }).join('');
+  // Duplicate for seamless infinite loop
+  track.innerHTML = cards + cards;
 }
 
 function setFlt(f, btn) {
@@ -220,7 +263,7 @@ function renderProds() {
   if (!grid) return;
   const q = (document.getElementById('srchIn')?.value||'').toLowerCase().trim();
   let list = prods.filter(p => {
-    if (p.is_active === 0 || p.is_active === '0') return false;
+    if (!isActiveProduct(p)) return false;
     const mc = curFlt==='all' || p.category===curFlt;
     const ms = !q || p.name_ar.toLowerCase().includes(q) || p.name_en.toLowerCase().includes(q) || (p.brand||'').toLowerCase().includes(q);
     return mc && ms;
@@ -1059,6 +1102,7 @@ document.querySelectorAll('.ov').forEach(m => {
 // INIT
 // ══════════════════════════════════════════
 updBdg();
-loadProds();
+renderMarquee();  // show DEMO cards immediately while API loads
+loadProds();      // update marquee + grid with real data
 loadFavIds();
 document.querySelectorAll('[data-ar]').forEach(el => el.textContent = el.getAttribute('data-'+lang));

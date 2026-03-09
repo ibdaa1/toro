@@ -32,10 +32,34 @@ img{display:block;max-width:100%}
 @keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 
 /* ═══ HERO ═══ */
-.hero{padding:32px 16px 24px;text-align:center;background:radial-gradient(ellipse at center,rgba(201,168,76,.07) 0%,transparent 70%)}
+.hero{padding:32px 16px 18px;text-align:center;background:radial-gradient(ellipse at center,rgba(201,168,76,.07) 0%,transparent 70%)}
 .h-eye{font-size:10px;letter-spacing:5px;color:var(--g);text-transform:uppercase;margin-bottom:8px;opacity:.8}
 .h-tit{font-family:'Playfair Display',serif;font-size:46px;letter-spacing:8px;color:var(--g);font-style:italic;line-height:1;margin-bottom:4px}
 .h-sub{font-size:11px;color:var(--mu);letter-spacing:3px;text-transform:uppercase}
+.h-tag{font-size:13px;color:var(--g2);margin-top:10px;font-style:italic;opacity:.75;letter-spacing:1px}
+
+/* ═══ PRODUCT MARQUEE ═══ */
+.mq-wrap{overflow:hidden;padding:18px 0 4px;position:relative}
+.mq-wrap::before,.mq-wrap::after{content:'';position:absolute;top:0;bottom:0;width:48px;z-index:2;pointer-events:none}
+.mq-wrap::before{inset-inline-start:0;background:linear-gradient(to right,var(--d),transparent)}
+.mq-wrap::after{inset-inline-end:0;background:linear-gradient(to left,var(--d),transparent)}
+.mq-track{display:flex;gap:10px;width:max-content;animation:mq-ltr 32s linear infinite;direction:ltr}
+.mq-track:hover{animation-play-state:paused}
+@keyframes mq-ltr{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.mq-card{flex-shrink:0;width:110px;background:var(--d2);border-radius:14px;overflow:hidden;cursor:pointer;border:1px solid rgba(255,255,255,.06);transition:transform .22s,box-shadow .22s}
+.mq-card:hover{transform:translateY(-5px) scale(1.04)}
+.mq-img{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:38px;position:relative;overflow:hidden}
+.mq-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mq-nm{font-size:10px;padding:5px 7px 1px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.mq-pr{font-size:11px;padding:1px 7px 7px;font-weight:800}
+
+/* ═══ TRUST BADGES ═══ */
+.trust-row{display:flex;align-items:center;justify-content:center;gap:0;padding:12px 14px 0;overflow-x:auto;scrollbar-width:none}
+.trust-row::-webkit-scrollbar{display:none}
+.trust-item{display:flex;align-items:center;gap:6px;padding:7px 14px;flex-shrink:0}
+.trust-ic{font-size:16px}
+.trust-ar{font-size:12px;color:var(--mu);white-space:nowrap;letter-spacing:.3px}
+.trust-sep{width:1px;height:20px;background:rgba(201,168,76,.15);flex-shrink:0}
 
 /* ═══ SEARCH ═══ */
 .sw{padding:14px 14px 10px;position:relative}

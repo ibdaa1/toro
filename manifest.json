@@ -1,0 +1,36 @@
+{
+  "name": "TORO — عطور فاخرة أصيلة",
+  "short_name": "TORO",
+  "description": "متجر TORO للعطور الفاخرة في الإمارات العربية المتحدة. أرقى العطور الرجالية والنسائية. توصيل سريع والدفع عند الاستلام.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#c9a84c",
+  "orientation": "portrait-primary",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["shopping", "lifestyle"],
+  "icons": [
+    {
+      "src": "assets/img/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "المنتجات",
+      "short_name": "عطور",
+      "description": "تصفح عطور TORO الفاخرة",
+      "url": "/"
+    },
+    {
+      "name": "السلة",
+      "short_name": "السلة",
+      "description": "عرض سلة التسوق",
+      "url": "/?cart=1"
+    }
+  ]
+}

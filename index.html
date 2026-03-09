@@ -31,6 +31,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TORO">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="assets/img/icon.svg">
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/main.css">
@@ -55,7 +57,32 @@
     <div class="h-eye" id="t-eye">عطور فاخرة أصيلة</div>
     <div class="h-tit">TORO</div>
     <div class="h-sub" id="t-sub">الإمارات العربية المتحدة</div>
+    <div class="h-tag" id="t-tag">الفاخر لا يحتاج مناسبة</div>
   </div>
+
+  <!-- Animated product marquee -->
+  <div class="mq-wrap" aria-hidden="true">
+    <div class="mq-track" id="mq-track"></div>
+  </div>
+
+  <!-- Trust badges -->
+  <div class="trust-row">
+    <div class="trust-item">
+      <span class="trust-ic">🚚</span>
+      <span class="trust-ar" data-ar="توصيل مجاني" data-en="Free Delivery">توصيل مجاني</span>
+    </div>
+    <div class="trust-sep"></div>
+    <div class="trust-item">
+      <span class="trust-ic">💳</span>
+      <span class="trust-ar" data-ar="الدفع عند الاستلام" data-en="Cash on Delivery">الدفع عند الاستلام</span>
+    </div>
+    <div class="trust-sep"></div>
+    <div class="trust-item">
+      <span class="trust-ic">✨</span>
+      <span class="trust-ar" data-ar="أصيل 100%" data-en="100% Authentic">أصيل 100%</span>
+    </div>
+  </div>
+
   <div class="sw">
     <span class="sic">🔍</span>
     <input id="srchIn" placeholder="ابحث عن عطر أو ماركة..." oninput="doSearch()">
@@ -220,5 +247,13 @@
 <div class="toast" id="toast"></div>
 
 <script src="assets/js/main.js"></script>
+<script>
+  // Register service worker for PWA
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () =>
+      navigator.serviceWorker.register('sw.js').catch(() => {})
+    );
+  }
+</script>
 </body>
 </html>
