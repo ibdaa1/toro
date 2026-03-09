@@ -7,10 +7,29 @@ $method = $_SERVER['REQUEST_METHOD'];
 $body   = json_decode(file_get_contents('php://input'), true) ?? [];
 $id     = isset($_GET['id']) ? (int)$_GET['id'] : null;
 
+// Auto-create stock_movements table if it doesn't exist yet
+// (handles deployments where setup.php hasn't been re-run)
+function ensureStockTable($db) {
+    $result = $db->query("CREATE TABLE IF NOT EXISTS `stock_movements` (
+        `id`         INT AUTO_INCREMENT PRIMARY KEY,
+        `product_id` INT NOT NULL,
+        `type`       ENUM('in','out','adjustment') DEFAULT 'in',
+        `quantity`   INT NOT NULL,
+        `balance`    INT NOT NULL COMMENT 'stock level after movement',
+        `reason`     VARCHAR(255) DEFAULT '',
+        `user_id`    INT DEFAULT NULL,
+        `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE,
+        FOREIGN KEY (`user_id`)    REFERENCES `users`(`id`)    ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    return $result !== false;
+}
+
 // ─── GET — list movements ──────────────────────────────
 if ($method === 'GET') {
     authUser(true);
     $db = getDB();
+    if (!ensureStockTable($db)) { $db->close(); ok([]); } // table can't be created yet — return empty
 
     if ($id) {
         // Movements for a specific product
@@ -59,6 +78,7 @@ if ($method === 'POST') {
     if ($qty <= 0)       err('الكمية يجب أن تكون أكبر من صفر / Quantity must be > 0');
 
     $db = getDB();
+    if (!ensureStockTable($db)) { $db->close(); err('حدث خطأ في إعداد جدول المخزون / Stock table setup failed', 500); }
 
     // Fetch current stock
     $pStmt = $db->prepare("SELECT id, stock FROM products WHERE id = ? LIMIT 1");

@@ -85,7 +85,7 @@ if ($method === 'POST') {
         "INSERT INTO products (name_ar, name_en, brand, origin, category, description_ar, description_en, price, price_before, stock, image, is_active)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     );
-    $stmt->bind_param('sssssssddiis',
+    $stmt->bind_param('sssssssddisi',
         $nameAr, $nameEn, $brand, $origin, $category,
         $descAr, $descEn, $price, $pBefore, $stock, $image, $active
     );
@@ -127,7 +127,7 @@ if ($method === 'PUT' && $id) {
          description_ar=?, description_en=?, price=?, price_before=?, stock=?,
          image=?, is_active=? WHERE id=?"
     );
-    $stmt->bind_param('sssssssddiisi',
+    $stmt->bind_param('sssssssddisii',
         $nameAr, $nameEn, $brand, $origin, $category,
         $descAr, $descEn, $price, $pBefore, $stock, $image, $active, $id
     );

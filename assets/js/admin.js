@@ -509,7 +509,6 @@ function renderOrdersTable(list) {
       </td>
       <td><div class="act-row">
         <button class="btn-sm btn-view" onclick='showOrderDetail(${JSON.stringify(o).replace(/'/g,"&#39;")})'>${t('viewDetails')}</button>
-        <button class="btn-sm btn-wa-sm" onclick='waOrder(${JSON.stringify(o).replace(/'/g,"&#39;")})'>📱</button>
       </div></td>
     </tr>`).join('')}</tbody>
   </table></div>`;
@@ -833,8 +832,6 @@ async function addStockMovement() {
 }
 
 // ── SALES REPORTS ────────────────────────────────────────
-let revenueChart = null;
-let statusChart  = null;
 
 async function loadReports() {
   const period = document.getElementById('rpt-period')?.value || '30days';
@@ -882,98 +879,130 @@ async function loadReports() {
   renderStatusChart(d.by_status || []);
 }
 
+// ── Revenue chart: pure SVG, no external deps ───────────
 function renderRevenueChart(data) {
-  const canvas = document.getElementById('revenue-chart');
-  if (!canvas) return;
-  if (revenueChart) { revenueChart.destroy(); revenueChart = null; }
+  const el = document.getElementById('revenue-chart-wrap');
+  if (!el) return;
+  if (!data.length) {
+    el.innerHTML = `<div class="empty-state" style="padding:40px 0"><div class="ei">📊</div><p>${lang==='ar'?'لا توجد بيانات للفترة المحددة':'No data for selected period'}</p></div>`;
+    return;
+  }
 
-  const labels  = data.map(d => d.period);
-  const values  = data.map(d => parseFloat(d.revenue));
-  const counts  = data.map(d => parseInt(d.orders_count));
+  const width = 700, height = 220;
+  const padLeft = 52, padRight = 12, padTop = 16, padBottom = 48;
+  const chartWidth  = width  - padLeft - padRight;
+  const chartHeight = height - padTop  - padBottom;
 
-  revenueChart = new Chart(canvas, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: lang==='ar'?'الإيراد (د.إ)':'Revenue (AED)',
-          data: values,
-          backgroundColor: 'rgba(201,168,76,0.7)',
-          borderColor: '#c9a84c',
-          borderWidth: 1,
-          yAxisID: 'y',
-        },
-        {
-          label: lang==='ar'?'عدد الطلبات':'Orders',
-          data: counts,
-          type: 'line',
-          borderColor: '#4ca3c9',
-          backgroundColor: 'rgba(76,163,201,.15)',
-          tension: 0.3,
-          yAxisID: 'y1',
-          pointRadius: 3,
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { labels: { color: '#c9a84c' } } },
-      scales: {
-        x:  { ticks: { color: '#888', maxRotation: 45 }, grid: { color: 'rgba(255,255,255,.05)' } },
-        y:  { ticks: { color: '#c9a84c' }, grid: { color: 'rgba(201,168,76,.1)' }, position: 'left' },
-        y1: { ticks: { color: '#4ca3c9' }, grid: { display: false }, position: 'right' }
-      }
-    }
-  });
+  const revenues = data.map(d => parseFloat(d.revenue));
+  const counts   = data.map(d => parseInt(d.orders_count || 0));
+  const maxRev   = Math.max(...revenues, 1);
+  const maxCnt   = Math.max(...counts, 1);
+  const n        = data.length;
+  const slotW    = chartWidth / Math.max(n, 1);
+  const barW     = Math.max(4, slotW * 0.65);
+
+  // Grid lines & Y labels
+  const steps = 4;
+  let grid = '';
+  for (let i = 0; i <= steps; i++) {
+    const y   = padTop + chartHeight - (chartHeight * i / steps);
+    const val = (maxRev * i / steps);
+    const lbl = val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val.toFixed(0);
+    grid += `<line x1="${padLeft}" y1="${y.toFixed(1)}" x2="${width - padRight}" y2="${y.toFixed(1)}" stroke="rgba(255,255,255,.06)" stroke-width="1"/>`;
+    grid += `<text x="${padLeft - 4}" y="${(y + 4).toFixed(1)}" text-anchor="end" fill="#666" font-size="9">${lbl}</text>`;
+  }
+
+  // Bars + count dots
+  let bars = '', dots = '', xLabels = '';
+  const pts = [];
+  for (let i = 0; i < n; i++) {
+    const barHeight = Math.max(2, (revenues[i] / maxRev) * chartHeight);
+    const cx = padLeft + i * slotW + slotW / 2;
+    const bx = cx - barW / 2;
+    const by = padTop + chartHeight - barHeight;
+    const dotY = padTop + chartHeight - (counts[i] / maxCnt) * chartHeight;
+
+    bars += `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${barW.toFixed(1)}" height="${barHeight.toFixed(1)}" fill="rgba(201,168,76,.75)" rx="2">` +
+            `<title>${data[i].period}: ${revenues[i].toFixed(0)} ${lang==='ar'?'د.إ':'AED'} / ${counts[i]} ${lang==='ar'?'طلب':'orders'}</title></rect>`;
+
+    pts.push(`${cx.toFixed(1)},${dotY.toFixed(1)}`);
+    dots += `<circle cx="${cx.toFixed(1)}" cy="${dotY.toFixed(1)}" r="3" fill="#4ca3c9"><title>${counts[i]} ${lang==='ar'?'طلب':'orders'}</title></circle>`;
+
+    const lbl = data[i].period?.slice(-5) || '';
+    xLabels += `<text x="${cx.toFixed(1)}" y="${height - 2}" text-anchor="middle" fill="#666" font-size="8" transform="rotate(-30,${cx.toFixed(1)},${height - 2})">${lbl}</text>`;
+  }
+  const polyline = pts.length > 1
+    ? `<polyline points="${pts.join(' ')}" fill="none" stroke="#4ca3c9" stroke-width="1.5" stroke-linejoin="round"/>`
+    : '';
+
+  // Legend
+  const legendX = padLeft;
+  const leg = `<rect x="${legendX}" y="4" width="10" height="10" fill="rgba(201,168,76,.75)" rx="1"/>` +
+              `<text x="${legendX + 14}" y="13" fill="#999" font-size="9">${lang==='ar'?'الإيراد':'Revenue'}</text>` +
+              `<circle cx="${legendX + 80}" cy="9" r="3" fill="#4ca3c9"/>` +
+              `<text x="${legendX + 87}" y="13" fill="#999" font-size="9">${lang==='ar'?'الطلبات':'Orders'}</text>`;
+
+  el.innerHTML = `<svg viewBox="0 0 ${width} ${height}" style="width:100%;display:block;max-height:220px" xmlns="http://www.w3.org/2000/svg">
+    ${grid}
+    <line x1="${padLeft}" y1="${padTop}" x2="${padLeft}" y2="${padTop + chartHeight}" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
+    <line x1="${padLeft}" y1="${padTop + chartHeight}" x2="${width - padRight}" y2="${padTop + chartHeight}" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
+    ${bars}${polyline}${dots}${xLabels}${leg}
+  </svg>`;
 }
 
 function renderTopProducts(data) {
   const el = document.getElementById('rpt-top-products');
   if (!el) return;
-  if (!data.length) { el.innerHTML = `<div class="empty-state"><p>${t('noProducts')}</p></div>`; return; }
-  el.innerHTML = `<div class="tw"><table>
-    <thead><tr>
-      <th>#</th><th>${t('product')}</th><th>${t('brand')}</th>
-      <th>${t('qty')}</th><th>${t('total')} (${t('aed')})</th>
-    </tr></thead>
-    <tbody>${data.map((p,i) => `<tr>
-      <td style="color:var(--g);font-weight:700">${i+1}</td>
-      <td style="font-weight:500">${escHtml(lang==='ar'?p.name_ar:p.name_en)}</td>
-      <td style="color:var(--mu)">${escHtml(p.brand)}</td>
-      <td style="color:var(--gr);font-weight:700">${fmtNum(p.total_sold)} ${t('totalSold')}</td>
-      <td style="color:var(--g);font-weight:700">${fmtNum(Math.round(p.revenue))}</td>
-    </tr>`).join('')}</tbody>
-  </table></div>`;
+  if (!data.length) { el.innerHTML = `<div class="empty-state" style="padding:20px"><p>${t('noProducts')}</p></div>`; return; }
+  const maxSold = Math.max(...data.map(p => parseInt(p.total_sold || 0)), 1);
+  el.innerHTML = `<div style="padding:12px">${data.map((p, i) => {
+    const sold = parseInt(p.total_sold || 0);
+    const pct  = Math.round(sold / maxSold * 100);
+    const nm   = escHtml(lang === 'ar' ? p.name_ar : p.name_en);
+    return `<div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div>
+          <span style="color:var(--g);font-weight:700;margin-${lang==='ar'?'left':'right'}:6px">${i+1}.</span>
+          <span style="font-weight:500">${nm}</span>
+          <span style="color:var(--mu);font-size:11px;margin-${lang==='ar'?'right':'left'}:6px">${escHtml(p.brand)}</span>
+        </div>
+        <div style="text-align:${lang==='ar'?'left':'right'}">
+          <span style="color:var(--gr);font-weight:700">${fmtNum(sold)} ${t('totalSold')}</span>
+          <div style="font-size:10px;color:var(--mu)">${fmtNum(Math.round(p.revenue))} ${t('aed')}</div>
+        </div>
+      </div>
+      <div style="height:6px;background:rgba(255,255,255,.07);border-radius:3px">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--g),rgba(201,168,76,.4));border-radius:3px;transition:width .6s"></div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
 }
 
+// ── Status breakdown: horizontal progress bars ───────────
 function renderStatusChart(data) {
-  const canvas = document.getElementById('status-chart');
-  if (!canvas) return;
-  if (statusChart) { statusChart.destroy(); statusChart = null; }
-  if (!data.length) return;
-
+  const el = document.getElementById('status-chart-wrap');
+  if (!el) return;
+  if (!data.length) { el.innerHTML = `<div class="empty-state" style="padding:20px"><p>${lang==='ar'?'لا توجد بيانات':'No data'}</p></div>`; return; }
+  const total = data.reduce((s, d) => s + parseInt(d.count || 0), 0) || 1;
   const colorMap = { pending:'#f0a500', confirmed:'#4ca3c9', shipped:'#7a6de8',
                      delivered:'#4caf72', cancelled:'#c94c4c' };
-  statusChart = new Chart(canvas, {
-    type: 'doughnut',
-    data: {
-      labels: data.map(d => t(d.status) || d.status),
-      datasets: [{
-        data: data.map(d => d.count),
-        backgroundColor: data.map(d => colorMap[d.status] || '#888'),
-        borderWidth: 2,
-        borderColor: '#1a1a1a',
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { position: 'bottom', labels: { color: '#ccc', padding: 12, font: { size: 11 } } }
-      }
-    }
-  });
+  el.innerHTML = `<div style="padding:16px">${data.map(d => {
+    const cnt   = parseInt(d.count || 0);
+    const pct   = Math.round(cnt / total * 100);
+    const color = colorMap[d.status] || '#888';
+    return `<div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:13px;font-weight:500">${t(d.status) || d.status}</span>
+        <span style="font-size:13px;font-weight:700;color:${color}">${cnt} <small style="color:var(--mu)">(${pct}%)</small></span>
+      </div>
+      <div style="height:10px;background:rgba(255,255,255,.07);border-radius:5px">
+        <div style="height:100%;width:${pct}%;background:${color};border-radius:5px;transition:width .7s"></div>
+      </div>
+    </div>`;
+  }).join('')}
+  <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07);font-size:11px;color:var(--mu);text-align:center">
+    ${lang==='ar'?'الإجمالي':'Total'}: <strong style="color:var(--tx)">${fmtNum(total)}</strong> ${lang==='ar'?'طلب':'orders'}
+  </div></div>`;
 }
 
 // ── INIT ─────────────────────────────────────────────────
