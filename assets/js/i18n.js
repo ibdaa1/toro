@@ -99,6 +99,13 @@ const TR = {
   acc_created: { ar: '✓ تم إنشاء الحساب',  en: '✓ Account created' },
   enter_creds: { ar: 'أدخل البريد وكلمة المرور', en: 'Enter email and password' },
 
+  // ── Auth form field labels ──────────────────────────────
+  email_lbl:      { ar: 'البريد الإلكتروني', en: 'Email' },
+  pass_lbl:       { ar: 'كلمة المرور',        en: 'Password' },
+  pass_hint_lbl:  { ar: 'كلمة المرور (٦+)',   en: 'Password (6+)' },
+  name_lbl:       { ar: 'الاسم',              en: 'Name' },
+  name_ph:        { ar: 'اسمك الكامل',        en: 'Full Name' },
+
   // ── Access control ──────────────────────────────────────
   access_denied: { ar: 'وصول مرفوض',        en: 'Access Denied' },
   admin_only:    { ar: 'هذه الصفحة للمديرين فقط. سجّل دخولك بحساب الأدمن.', en: 'This page is for admins only. Please login with an admin account.' },
@@ -174,6 +181,40 @@ const TR = {
   preview_lbl: { ar: 'معاينة',            en: 'Preview' },
   bad_link:    { ar: 'رابط غير صحيح',     en: 'Invalid link' },
   store_link:  { ar: '🛍 المتجر',         en: '🛍 Store' },
+
+  // ── Bottom-nav labels (no emoji) ───────────────────────
+  nav_cart:    { ar: 'السلة',             en: 'Cart' },
+  nav_fav:     { ar: 'المفضلة',           en: 'Favorites' },
+  nav_orders:  { ar: 'طلباتي',            en: 'Orders' },
+
+  // ── Address placeholder ─────────────────────────────────
+  address_ph:  { ar: 'الإمارة / المدينة / الحي / الشارع', en: 'Emirate / City / District / Street' },
+
+  // ── Order detail modal ──────────────────────────────────
+  ord_detail_title: { ar: 'تفاصيل الطلب', en: 'Order Details' },
+
+  // ── Admin product-form field labels ─────────────────────
+  adm_f_nar:    { ar: 'الاسم بالعربي *',         en: 'Name (Arabic) *' },
+  adm_f_nen:    { ar: 'الاسم بالإنجليزي *',       en: 'Name (English) *' },
+  adm_f_brand:  { ar: 'الماركة *',               en: 'Brand *' },
+  adm_f_origin: { ar: 'الأصل',                   en: 'Origin' },
+  adm_f_cat:    { ar: 'التصنيف',                  en: 'Category' },
+  adm_f_price:  { ar: 'السعر الحالي (درهم) *',   en: 'Current Price (AED) *' },
+  adm_f_before: { ar: 'السعر قبل الخصم',           en: 'Price Before Discount' },
+  adm_f_stock:  { ar: 'المخزون',                  en: 'Stock' },
+  adm_f_status: { ar: 'الحالة',                   en: 'Status' },
+  adm_f_image:  { ar: 'رابط الصورة',              en: 'Image URL' },
+  adm_f_dar:    { ar: 'الوصف بالعربي',            en: 'Description (Arabic)' },
+  adm_f_den:    { ar: 'الوصف بالإنجليزي',         en: 'Description (English)' },
+
+  // ── Admin product-form placeholders ─────────────────────
+  adm_ph_nar:   { ar: 'عود الملكي',               en: 'Royal Oud' },
+  adm_ph_nen:   { ar: 'Royal Oud',                en: 'Royal Oud' },
+  adm_ph_brand: { ar: 'TORO, Chanel...',          en: 'TORO, Chanel...' },
+  adm_ph_origin:{ ar: 'UAE, France...',           en: 'UAE, France...' },
+  adm_ph_image: { ar: 'https://example.com/photo.jpg', en: 'https://example.com/photo.jpg' },
+  adm_ph_dar:   { ar: 'وصف العطر...',             en: 'Fragrance description...' },
+  adm_ph_den:   { ar: 'Description...',           en: 'Description...' },
 
   // ── About page ───────────────────────────────────────────
   about_title:   { ar: 'من نحن',           en: 'About Us' },

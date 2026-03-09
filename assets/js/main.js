@@ -44,30 +44,30 @@ function applyLang() {
   document.documentElement.setAttribute('lang', lang);
   const btn = document.getElementById('lbtn');
   if (btn) btn.textContent = lang==='ar'?'EN':'AR';
+  applyI18n();
+}
+
+// ══════════════════════════════════════════
+// I18N APPLICATION
+// Reads every [data-i18n], [data-i18n-ph], [data-i18n-label] element and
+// fills text / placeholder / aria-label from the i18n.js TR dictionary.
+// ══════════════════════════════════════════
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph')));
+  });
+  document.querySelectorAll('[data-i18n-label]').forEach(el => {
+    el.setAttribute('aria-label', t(el.getAttribute('data-i18n-label')));
+  });
 }
 
 function swLang() {
   lang = lang==='ar' ? 'en' : 'ar';
   localStorage.setItem(LS.LANG, lang);
-  applyLang();
-  // Update all data-ar / data-en elements
-  document.querySelectorAll('[data-ar]').forEach(el => el.textContent = el.getAttribute('data-'+lang));
-  // Update elements with stable IDs that carry translated text
-  const ids = {
-    't-eye':  t('eye'),   't-sub': t('sub'),   't-tag': t('tag'),
-    't-cart': t('pg_cart'), 't-chk': t('pg_chk'), 't-ord': t('pg_ord'),
-    't-fav':  t('pg_fav'),
-    't-addr': t('address_lbl'), 't-notes': t('notes_lbl'),
-    't-place':t('place_order'), 't-save':  t('adm_save_prod'),
-    't-dash': t('pg_dash'),     't-qty':   t('qty_lbl'),
-    't-chk-note': t('chk_note'), 't-wa-send': t('wa_btn'),
-    't-about': t('about_title')
-  };
-  Object.entries(ids).forEach(([id, val]) => {
-    const el = document.getElementById(id); if (el) el.textContent = val;
-  });
-  const si = document.getElementById('srchIn');
-  if (si) si.placeholder = t('sph');
+  applyLang();   // calls applyI18n() internally
   renderMarquee();
   renderPage();
 }
@@ -230,7 +230,7 @@ function renderProdCard(p, i=0) {
       </div>
       <div class="cbts">
         <button class="cadd" onclick="addCart(${p.id},1)"><span>${t('add_cart')}</span></button>
-        <button class="cwa" onclick="waProduct(${p.id})" title="اطلب عبر واتساب" aria-label="اطلب عبر واتساب">
+        <button class="cwa" onclick="waProduct(${p.id})" title="${escHtml(t('wa_order'))}" aria-label="${escHtml(t('wa_order'))}">
           ${SVG.whatsapp}
         </button>
       </div>
@@ -497,19 +497,19 @@ function aTab(tab,btn) {
 }
 function showLogin() {
   document.getElementById('aForm').innerHTML = `
-    <div class="fg"><label class="fl">البريد الإلكتروني / Email</label>
+    <div class="fg"><label class="fl">${escHtml(t('email_lbl'))}</label>
       <input class="fi" id="lEm" type="email" placeholder="example@email.com" autocomplete="email" maxlength="150"></div>
-    <div class="fg"><label class="fl">كلمة المرور / Password</label>
+    <div class="fg"><label class="fl">${escHtml(t('pass_lbl'))}</label>
       <input class="fi" id="lPw" type="password" placeholder="••••••••" autocomplete="current-password"></div>
     <button class="btn-g" style="width:100%" onclick="doLogin()">${t('login_btn')}</button>`;
 }
 function showReg() {
   document.getElementById('aForm').innerHTML = `
-    <div class="fg"><label class="fl">الاسم / Name</label>
-      <input class="fi" id="rNm" placeholder="${(lang==='ar'?'اسمك الكامل':'Full Name')}" autocomplete="name" maxlength="100"></div>
-    <div class="fg"><label class="fl">البريد الإلكتروني / Email</label>
+    <div class="fg"><label class="fl">${escHtml(t('name_lbl'))}</label>
+      <input class="fi" id="rNm" placeholder="${escHtml(t('name_ph'))}" autocomplete="name" maxlength="100"></div>
+    <div class="fg"><label class="fl">${escHtml(t('email_lbl'))}</label>
       <input class="fi" id="rEm" type="email" placeholder="example@email.com" autocomplete="email" maxlength="150"></div>
-    <div class="fg"><label class="fl">كلمة المرور / Password (6+)</label>
+    <div class="fg"><label class="fl">${escHtml(t('pass_hint_lbl'))}</label>
       <input class="fi" id="rPw" type="password" placeholder="••••••••" autocomplete="new-password"></div>
     <button class="btn-g" style="width:100%" onclick="doReg()">${t('create_acc')}</button>`;
 }
@@ -702,11 +702,11 @@ function renderProdTable(list) {
         <td style="color:var(--g);font-weight:700">${p.price} <small style="font-weight:400;color:var(--mu)">${t('currency')}</small></td>
         <td>${disc?`<span style="color:var(--re);font-weight:700">-${disc}%</span>`:'-'}</td>
         <td style="${p.stock<=3?'color:var(--re)':''}">${p.stock}</td>
-        <td><span class="${active?'badge-on':'badge-off'}">${active?(lang==='ar'?'نشط':'Active'):(lang==='ar'?'مخفي':'Hidden')}</span></td>
+        <td><span class="${active?'badge-on':'badge-off'}">${active?t('status_on'):t('status_off')}</span></td>
         <td><div class="act-row">
           <button class="btn-sm btn-edit" onclick="openPF(${p.id})">✏️</button>
           <button class="btn-sm btn-del" onclick="delProd(${p.id})">🗑</button>
-          <button class="btn-sm btn-wa-sm" onclick="waProduct(${p.id})" title="WhatsApp">📱</button>
+          <button class="btn-sm btn-wa-sm" onclick="waProduct(${p.id})" title="${escHtml(t('wa_order'))}">📱</button>
         </div></td>
       </tr>`;
     }).join('')}</tbody>
@@ -885,9 +885,7 @@ function waOrderAdmin(o) {
 // Product Form
 function openPF(id=null) {
   const p = id ? prods.find(x=>x.id==id) : null;
-  document.getElementById('pfTit').textContent = id
-    ? (lang==='ar'?'✏️ تعديل المنتج':'✏️ Edit Product')
-    : (lang==='ar'?'+ إضافة منتج جديد':'+ Add New Product');
+  document.getElementById('pfTit').textContent = id ? t('adm_edit_prod') : t('adm_new_prod');
   document.getElementById('f_id').value  = id||'';
   document.getElementById('f_nar').value = p?.name_ar||'';
   document.getElementById('f_nen').value = p?.name_en||'';
@@ -908,8 +906,8 @@ function prevImg() {
   const url = document.getElementById('f_im')?.value?.trim();
   const el  = document.getElementById('imgPrev');
   el.innerHTML = url
-    ? `<img src="${escHtml(url)}" onerror="this.parentElement.innerHTML='<span>رابط غير صحيح</span>'">`
-    : '<span>معاينة / Preview</span>';
+    ? `<img src="${escHtml(url)}" onerror="this.parentElement.innerHTML='<span>${escHtml(t('bad_link'))}</span>'">`
+    : `<span>${escHtml(t('preview_lbl'))}</span>`;
 }
 async function saveProd() {
   const id = document.getElementById('f_id').value;
@@ -981,7 +979,7 @@ async function toggleFav(productId) {
     renderProds();
     if (curPg === 'favorites') renderFavorites();
   } else {
-    toast(r.msg || (lang==='ar'?'خطأ':'Error'), 'er');
+    toast(r.msg || t('error_lbl'), 'er');
   }
 }
 
@@ -1091,4 +1089,3 @@ updBdg();
 renderMarquee();  // show DEMO cards immediately while API loads
 loadProds();      // update marquee + grid with real data
 loadFavIds();
-document.querySelectorAll('[data-ar]').forEach(el => el.textContent = el.getAttribute('data-'+lang));
