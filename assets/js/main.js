@@ -19,57 +19,17 @@ let modalQty    = 1;
 let admCurrentTab = 'products';
 let admSearchQ  = '';
 
+// Expose lang to i18n.js helpers (t / ts read window._lang)
+window._lang = lang;
+
 // Apply saved lang immediately
 applyLang();
-
-// ══════════════════════════════════════════
-// TRANSLATIONS
-// ══════════════════════════════════════════
-const TR = {
-  eye:   {ar:'عطور فاخرة أصيلة',       en:'Authentic Luxury Fragrances'},
-  sub:   {ar:'الإمارات العربية المتحدة', en:'United Arab Emirates'},
-  tag:   {ar:'الفاخر لا يحتاج مناسبة', en:'Luxury Needs No Occasion'},
-  sph:   {ar:'ابحث عن عطر أو ماركة...', en:'Search perfumes or brands...'},
-  ct:    {ar:'🛒 السلة',en:'🛒 Cart'},
-  cht:   {ar:'💳 إتمام الطلب',en:'💳 Checkout'},
-  ot:    {ar:'📦 طلباتي',en:'📦 My Orders'},
-  al:    {ar:'العنوان التفصيلي',en:'Delivery Address'},
-  nl:    {ar:'ملاحظات',en:'Notes'},
-  pl:    {ar:'تأكيد الطلب',en:'Place Order'},
-  ac:    {ar:'أضف للسلة',en:'Add to Cart'},
-  ec:    {ar:'السلة فارغة',en:'Cart is empty'},
-  no:    {ar:'لا توجد طلبات',en:'No orders yet'},
-  sb:    {ar:'المجموع',en:'Subtotal'},
-  sh:    {ar:'الشحن',en:'Shipping'},
-  fr:    {ar:'مجاني',en:'Free'},
-  tot:   {ar:'الإجمالي',en:'Total'},
-  aed:   {ar:'د.إ',en:'AED'},
-  sv:    {ar:'وفّر',en:'Save'},
-  ori:   {ar:'الأصل',en:'Origin'},
-  stk:   {ar:'متبقي',en:'Left'},
-  sw:    {ar:'حفظ المنتج',en:'Save Product'},
-  dsh:   {ar:'لوحة التحكم',en:'Dashboard'},
-  aok:   {ar:'✓ أضيف للسلة',en:'✓ Added to cart'},
-  ook:   {ar:'✓ تم تقديم طلبك!',en:'✓ Order placed!'},
-  lr:    {ar:'سجّل دخولك أولاً',en:'Please login first'},
-  qty:   {ar:'الكمية',en:'Quantity'},
-  chknote:{ar:'يمكنك إتمام الطلب عبر الموقع أو إرساله مباشرة على واتساب',en:'Complete your order online or send via WhatsApp'},
-  wabtn: {ar:'واتساب',en:'WhatsApp'},
-  status:{
-    pending:   {ar:'قيد الانتظار',en:'Pending'},
-    confirmed: {ar:'مؤكد',en:'Confirmed'},
-    shipped:   {ar:'تم الشحن',en:'Shipped'},
-    delivered: {ar:'تم التوصيل',en:'Delivered'},
-    cancelled: {ar:'ملغي',en:'Cancelled'}
-  }
-};
-const t  = k => TR[k]?.[lang] || k;
-const ts = s => TR.status[s]?.[lang] || s;
 
 // ══════════════════════════════════════════
 // LANGUAGE
 // ══════════════════════════════════════════
 function applyLang() {
+  window._lang = lang;
   document.body.setAttribute('data-lang', lang);
   document.documentElement.setAttribute('dir', lang==='ar'?'rtl':'ltr');
   document.documentElement.setAttribute('lang', lang);
@@ -81,14 +41,22 @@ function swLang() {
   lang = lang==='ar' ? 'en' : 'ar';
   localStorage.setItem(LS.LANG, lang);
   applyLang();
+  // Update all data-ar / data-en elements
   document.querySelectorAll('[data-ar]').forEach(el => el.textContent = el.getAttribute('data-'+lang));
+  // Update elements with stable IDs that carry translated text
   const ids = {
-    't-eye':t('eye'),'t-sub':t('sub'),'t-tag':t('tag'),'t-cart':t('ct'),'t-chk':t('cht'),
-    't-ord':t('ot'),'t-addr':t('al'),'t-notes':t('nl'),'t-place':t('pl'),
-    't-save':t('sw'),'t-dash':t('dsh'),'t-qty':t('qty'),
-    't-chk-note':t('chknote'),'t-wa-send':t('wabtn')
+    't-eye':  t('eye'),   't-sub': t('sub'),   't-tag': t('tag'),
+    't-cart': t('pg_cart'), 't-chk': t('pg_chk'), 't-ord': t('pg_ord'),
+    't-fav':  t('pg_fav'),
+    't-addr': t('address_lbl'), 't-notes': t('notes_lbl'),
+    't-place':t('place_order'), 't-save':  t('adm_save_prod'),
+    't-dash': t('pg_dash'),     't-qty':   t('qty_lbl'),
+    't-chk-note': t('chk_note'), 't-wa-send': t('wa_btn'),
+    't-about': t('about_title')
   };
-  Object.entries(ids).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.textContent=val;});
+  Object.entries(ids).forEach(([id, val]) => {
+    const el = document.getElementById(id); if (el) el.textContent = val;
+  });
   const si = document.getElementById('srchIn');
   if (si) si.placeholder = t('sph');
   renderMarquee();
@@ -115,6 +83,7 @@ function renderPage() {
   if (curPg==='profile')   renderProfile();
   if (curPg==='checkout')  renderChkSumm();
   if (curPg==='admin')     initAdmin();
+  if (curPg==='about')     renderAbout();
 }
 
 // ══════════════════════════════════════════
@@ -204,7 +173,7 @@ function renderMarquee() {
     return `<div class="mq-card" style="box-shadow:0 4px 24px -6px ${col.glow}55" onclick="showProd(${p.id})">
       <div class="mq-img" style="background:radial-gradient(circle at 50% 60%,${col.glow}28 0%,${col.bg} 70%)">${img}</div>
       <div class="mq-nm">${escHtml(nm)}</div>
-      <div class="mq-pr" style="color:${col.glow}">${p.price} <span style="font-size:9px;font-weight:400;color:${col.text}">${t('aed')}</span></div>
+      <div class="mq-pr" style="color:${col.glow}">${p.price} <span style="font-size:9px;font-weight:400;color:${col.text}">${t('currency')}</span></div>
     </div>`;
   }).join('');
   // Duplicate for seamless infinite loop
@@ -223,20 +192,18 @@ function renderProdCard(p, i=0) {
   const nm   = lang==='ar' ? p.name_ar : p.name_en;
   const disc = p.price_before ? Math.round((1-p.price/p.price_before)*100) : 0;
   const isFav = favIds.has(p.id);
-      const favTitle = isFav
-        ? (lang==='ar' ? 'إزالة من المفضلة' : 'Remove from favorites')
-        : (lang==='ar' ? 'إضافة للمفضلة'    : 'Add to favorites');
+  const favTitle = isFav ? t('fav_remove') : t('fav_add');
   return `
   <div class="pc" style="animation-delay:${i*0.055}s">
     <div class="pim" onclick="showProd(${p.id})">
       ${p.image ? `<img src="${p.image}" alt="${escHtml(nm)}" loading="lazy" onerror="this.style.display='none'">` : '<div class="pfb">🫙</div>'}
       ${disc ? `<div class="dbd">-${disc}%</div>` : ''}
-      ${p.stock>0&&p.stock<=3 ? `<div class="sbd">${p.stock} ${t('stk')}</div>` : ''}
+      ${p.stock>0&&p.stock<=3 ? `<div class="sbd">${p.stock} ${t('stock_lbl')}</div>` : ''}
       <button class="fav-btn${isFav?' fav-on':''}" onclick="event.stopPropagation();toggleFav(${p.id})" title="${escHtml(favTitle)}">${isFav?'❤️':'🤍'}</button>
       <div class="prb">
         <div class="prb-row">
-          ${p.price_before ? `<span class="prb-was">${p.price_before} ${t('aed')}</span>` : ''}
-          <span class="prb-now">${p.price} ${t('aed')}</span>
+          ${p.price_before ? `<span class="prb-was">${p.price_before} ${t('currency')}</span>` : ''}
+          <span class="prb-now">${p.price} ${t('currency')}</span>
           ${disc ? `<span class="prb-d">-${disc}%</span>` : ''}
         </div>
       </div>
@@ -247,11 +214,11 @@ function renderProdCard(p, i=0) {
       <div class="prc">
         ${p.price_before ? `<span class="pwas">${p.price_before}</span>` : ''}
         <span class="pnow">${p.price}</span>
-        <span class="pcur">${t('aed')}</span>
+        <span class="pcur">${t('currency')}</span>
         ${disc ? `<span class="pdsc">-${disc}%</span>` : ''}
       </div>
       <div class="cbts">
-        <button class="cadd" onclick="addCart(${p.id},1)"><span>${t('ac')}</span></button>
+        <button class="cadd" onclick="addCart(${p.id},1)"><span>${t('add_cart')}</span></button>
         <button class="cwa" onclick="waProduct(${p.id})" title="اطلب عبر واتساب">📱</button>
       </div>
     </div>
@@ -269,7 +236,7 @@ function renderProds() {
     return mc && ms;
   });
   if (!list.length) {
-    grid.innerHTML = `<div style="grid-column:1/-1"><div class="empty"><div class="ei">🔍</div><p>${lang==='ar'?'لا نتائج':'No results'}</p></div></div>`;
+    grid.innerHTML = `<div style="grid-column:1/-1"><div class="empty"><div class="ei">🔍</div><p>${t('no_results')}</p></div></div>`;
     return;
   }
   grid.innerHTML = list.map((p,i) => renderProdCard(p, i)).join('');
@@ -289,20 +256,20 @@ function showProd(id) {
       <div class="pdbr">${escHtml(p.brand)}${p.origin?' · '+escHtml(p.origin):''}</div>
       <div class="pdnm">${escHtml(nm)}</div>
       <div class="pdmt">
-        ${p.origin ? `🌍 ${t('ori')}: ${escHtml(p.origin)} &nbsp;·&nbsp; ` : ''}
-        📦 ${p.stock>0?(lang==='ar'?'متوفر':'In Stock'):(lang==='ar'?'نفد':'Out of Stock')}
+        ${p.origin ? `🌍 ${t('origin_lbl')}: ${escHtml(p.origin)} &nbsp;·&nbsp; ` : ''}
+        📦 ${p.stock>0?(t('in_stock')):(t('out_stock'))}
       </div>
-      <div class="pdds">${escHtml(desc) || (lang==='ar'?'لا يوجد وصف':'No description')}</div>
+      <div class="pdds">${escHtml(desc) || (t('no_desc'))}</div>
       <div class="pdpc">
-        ${p.price_before ? `<span class="pdwas">${p.price_before} ${t('aed')}</span>` : ''}
-        <span class="pdnow">${p.price} ${t('aed')}</span>
-        ${disc ? `<span class="pdsv">${t('sv')} ${save} ${t('aed')} (${disc}%)</span>` : ''}
+        ${p.price_before ? `<span class="pdwas">${p.price_before} ${t('currency')}</span>` : ''}
+        <span class="pdnow">${p.price} ${t('currency')}</span>
+        ${disc ? `<span class="pdsv">${t('save_lbl')} ${save} ${t('currency')} (${disc}%)</span>` : ''}
       </div>
     </div>`;
   modalProdId = id;
   modalQty = 1;
   document.getElementById('mQty').textContent = 1;
-  document.getElementById('pdAddBtn').textContent = t('ac');
+  document.getElementById('pdAddBtn').textContent = t('add_cart');
   document.getElementById('pdMod').classList.add('open');
 }
 
@@ -318,64 +285,22 @@ function waFromModal()  { waProduct(modalProdId, modalQty); cm('pdMod'); }
 // ══════════════════════════════════════════
 function waProduct(id, qty=1) {
   const p = prods.find(x=>x.id==id); if(!p) return;
-  const nm   = lang==='ar' ? p.name_ar : p.name_en;
-  const disc = p.price_before ? ` (كان ${p.price_before} ${t('aed')})` : '';
-  const msg = lang==='ar'
-    ? `✨ *متجر TORO للعطور*\n` +
-      `━━━━━━━━━━━━━━━━━━\n` +
-      `مرحباً 👋\nأرغب في طلب المنتج التالي:\n\n` +
-      `🫙 *${nm}*\n` +
-      `🏷️ الماركة: ${p.brand}\n` +
-      `🌍 المنشأ: ${p.origin || '—'}\n` +
-      `💰 السعر: *${p.price} ${t('aed')}*${disc}\n` +
-      `📦 الكمية: ${qty}\n\n` +
-      `💵 *الإجمالي: ${(p.price*qty).toFixed(2)} ${t('aed')}*\n` +
-      `━━━━━━━━━━━━━━━━━━\n` +
-      `💳 الدفع عند الاستلام`
-    : `✨ *TORO Perfume Store*\n` +
-      `━━━━━━━━━━━━━━━━━━\n` +
-      `Hello 👋\nI'd like to order:\n\n` +
-      `🫙 *${nm}*\n` +
-      `🏷️ Brand: ${p.brand}\n` +
-      `🌍 Origin: ${p.origin || '—'}\n` +
-      `💰 Price: *${p.price} ${t('aed')}*\n` +
-      `📦 Qty: ${qty}\n\n` +
-      `💵 *Total: ${(p.price*qty).toFixed(2)} ${t('aed')}*\n` +
-      `━━━━━━━━━━━━━━━━━━\n` +
-      `💳 Cash on Delivery`;
+  const msg = TW.product(lang, p, qty, t('currency'));
   window.open(`https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 function sendWhatsApp() {
   const cart = getCart();
-  if (!cart.length) { toast(t('ec'),'er'); return; }
+  if (!cart.length) { toast(t('cart_empty'),'er'); return; }
   const lines = cart.map(c => {
     const p = prods.find(x=>x.id==c.product_id); if(!p) return null;
     const nm = lang==='ar' ? p.name_ar : p.name_en;
-    return `🫙 *${nm}* × ${c.qty} — ${(p.price*c.qty).toFixed(0)} ${t('aed')}`;
+    return `🫙 *${nm}* × ${c.qty} — ${(p.price*c.qty).toFixed(0)} ${t('currency')}`;
   }).filter(Boolean);
   const total = calcTotal(cart);
   const addr  = document.getElementById('chkAddr')?.value?.trim() || '';
   const notes = document.getElementById('chkNotes')?.value?.trim() || '';
-  let msg = lang==='ar'
-    ? `✨ *متجر TORO للعطور*\n` +
-      `━━━━━━━━━━━━━━━━━━\n` +
-      `مرحباً 👋 لدي طلب جديد:\n\n` +
-      `${lines.join('\n')}\n\n` +
-      `━━━━━━━━━━━━━━━━━━\n` +
-      `💰 *الإجمالي: ${total.toFixed(2)} ${t('aed')}*\n` +
-      `🚚 الشحن: مجاني\n` +
-      `💳 الدفع عند الاستلام`
-    : `✨ *TORO Perfume Store*\n` +
-      `━━━━━━━━━━━━━━━━━━\n` +
-      `Hello 👋 New Order:\n\n` +
-      `${lines.join('\n')}\n\n` +
-      `━━━━━━━━━━━━━━━━━━\n` +
-      `💰 *Total: ${total.toFixed(2)} ${t('aed')}*\n` +
-      `🚚 Shipping: Free\n` +
-      `💳 Cash on Delivery`;
-  if (addr)  msg += `\n📍 ${lang==='ar'?'العنوان':'Address'}: ${addr}`;
-  if (notes) msg += `\n📝 ${lang==='ar'?'ملاحظات':'Notes'}: ${notes}`;
+  const msg = TW.cart(lang, lines, total, t('currency'), addr, notes);
   window.open(`https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
@@ -394,7 +319,7 @@ function addCart(id, qty=1) {
   if (ex) ex.qty += qty; else cart.push({product_id:id, qty});
   setCart(cart);
   updBdg();
-  toast(t('aok'), 'ok');
+  toast(t('added_cart'), 'ok');
 }
 function updBdg() {
   const n  = getCart().reduce((s,c)=>s+c.qty,0);
@@ -405,7 +330,7 @@ function renderCart() {
   const cart = getCart();
   const el = document.getElementById('cartBody'); if(!el) return;
   if (!cart.length) {
-    el.innerHTML = `<div class="empty"><div class="ei">🛒</div><p>${t('ec')}</p></div>`;
+    el.innerHTML = `<div class="empty"><div class="ei">🛒</div><p>${t('cart_empty')}</p></div>`;
     return;
   }
   const rows = cart.map(c=>{
@@ -415,12 +340,12 @@ function renderCart() {
       <div class="cimg">${p.image?`<img src="${p.image}" onerror="this.style.display='none'">`:'🫙'}</div>
       <div class="cinf">
         <div class="cnm">${escHtml(nm)}</div>
-        <div class="cpr">${p.price} ${t('aed')}</div>
+        <div class="cpr">${p.price} ${t('currency')}</div>
         <div class="qr">
           <button class="qb" onclick="chgQty(${p.id},-1)">−</button>
           <span class="qv">${c.qty}</span>
           <button class="qb" onclick="chgQty(${p.id},1)">+</button>
-          <span style="font-size:11px;color:var(--mu);margin-${lang==='ar'?'right':'left'}:auto">= ${(p.price*c.qty).toFixed(0)} ${t('aed')}</span>
+          <span style="font-size:11px;color:var(--mu);margin-${lang==='ar'?'right':'left'}:auto">= ${(p.price*c.qty).toFixed(0)} ${t('currency')}</span>
         </div>
       </div>
       <button class="rmb" onclick="rmCart(${p.id})">🗑</button>
@@ -428,11 +353,11 @@ function renderCart() {
   }).join('');
   const sub = calcTotal(cart);
   el.innerHTML = rows + `<div class="csm">
-    <div class="sr"><span>${t('sb')}</span><span>${sub.toFixed(2)} ${t('aed')}</span></div>
-    <div class="sr"><span>${t('sh')}</span><span style="color:var(--gr)">${t('fr')}</span></div>
-    <div class="sr tot"><span>${t('tot')}</span><span>${sub.toFixed(2)} ${t('aed')}</span></div>
+    <div class="sr"><span>${t('subtotal')}</span><span>${sub.toFixed(2)} ${t('currency')}</span></div>
+    <div class="sr"><span>${t('shipping')}</span><span style="color:var(--gr)">${t('free')}</span></div>
+    <div class="sr tot"><span>${t('total')}</span><span>${sub.toFixed(2)} ${t('currency')}</span></div>
     <div class="cart-btns">
-      <button class="btn-g" onclick="goChk()">${t('cht').replace('💳 ','')}</button>
+      <button class="btn-g" onclick="goChk()">${t('pg_chk').replace('💳 ','')}</button>
       <button class="btn-wa" onclick="sendWhatsApp()">📱</button>
     </div>
   </div>`;
@@ -450,25 +375,25 @@ function rmCart(id) {
   updBdg(); renderCart();
 }
 function goChk() {
-  if (!localStorage.getItem(LS.TOKEN)) { toast(t('lr'),'er'); nav('profile'); return; }
+  if (!localStorage.getItem(LS.TOKEN)) { toast(t('login_first'),'er'); nav('profile'); return; }
   renderChkSumm(); nav('checkout');
 }
 function renderChkSumm() {
   const sub = calcTotal(getCart());
   const el = document.getElementById('chkSumm'); if(!el) return;
   el.innerHTML = `<div class="csm">
-    <div class="sr"><span>${t('sb')}</span><span>${sub.toFixed(2)} ${t('aed')}</span></div>
-    <div class="sr"><span>${t('sh')}</span><span style="color:var(--gr)">${t('fr')}</span></div>
-    <div class="sr tot"><span>${t('tot')}</span><span>${sub.toFixed(2)} ${t('aed')}</span></div>
+    <div class="sr"><span>${t('subtotal')}</span><span>${sub.toFixed(2)} ${t('currency')}</span></div>
+    <div class="sr"><span>${t('shipping')}</span><span style="color:var(--gr)">${t('free')}</span></div>
+    <div class="sr tot"><span>${t('total')}</span><span>${sub.toFixed(2)} ${t('currency')}</span></div>
   </div>`;
 }
 async function placeOrder() {
   const tk = localStorage.getItem(LS.TOKEN);
-  if (!tk) { toast(t('lr'),'er'); return; }
+  if (!tk) { toast(t('login_first'),'er'); return; }
   const cart = getCart();
-  if (!cart.length) { toast(t('ec'),'er'); return; }
+  if (!cart.length) { toast(t('cart_empty'),'er'); return; }
   const addr = document.getElementById('chkAddr')?.value?.trim();
-  if (!addr) { toast(lang==='ar'?'أدخل العنوان':'Enter address','er'); return; }
+  if (!addr) { toast(t('enter_addr'),'er'); return; }
   const btn = document.getElementById('placeBtn');
   btn.disabled=true;
   document.getElementById('t-place').textContent='⏳';
@@ -478,18 +403,18 @@ async function placeOrder() {
     notes: document.getElementById('chkNotes')?.value||''
   });
   btn.disabled=false;
-  document.getElementById('t-place').textContent = t('pl');
+  document.getElementById('t-place').textContent = t('place_order');
   if (r.ok) {
     setCart([]);
     updBdg();
-    toast(t('ook'),'ok');
+    toast(t('order_ok'),'ok');
     document.getElementById('chkAddr').value='';
     document.getElementById('chkNotes').value='';
     nav('orders');
   } else {
     toast(r.msg||'Error','er');
     // If token invalid, redirect to login
-    if (r.msg && r.msg.includes('nauthorized')) { toast(t('lr'),'er'); nav('profile'); }
+    if (r.msg && r.msg.includes('nauthorized')) { toast(t('login_first'),'er'); nav('profile'); }
   }
 }
 
@@ -499,13 +424,13 @@ async function placeOrder() {
 async function renderOrders() {
   const el = document.getElementById('ordBody'); if(!el) return;
   if (!localStorage.getItem(LS.TOKEN)) {
-    el.innerHTML = `<div class="empty"><div class="ei">🔐</div><p>${t('lr')}</p></div>`;
+    el.innerHTML = `<div class="empty"><div class="ei">🔐</div><p>${t('login_first')}</p></div>`;
     return;
   }
   el.innerHTML = '<div class="ldw"><div class="ld"></div></div>';
   const r = await api('GET', `${BASE}/orders.php`);
   if (!r.ok || !r.data?.length) {
-    el.innerHTML = `<div class="empty"><div class="ei">📦</div><p>${t('no')}</p></div>`;
+    el.innerHTML = `<div class="empty"><div class="ei">📦</div><p>${t('no_orders')}</p></div>`;
     return;
   }
   const scls = {pending:'sp',confirmed:'sc2',shipped:'ss',delivered:'sd',cancelled:'sx'};
@@ -516,7 +441,7 @@ async function renderOrders() {
         <span class="ost ${scls[o.status]||'sp'}">${ts(o.status)}</span>
       </div>
       <div class="oit">${(o.items||[]).map(i=>`${escHtml(lang==='ar'?i.name_ar:i.name_en)} × ${i.qty}`).join(' / ')}</div>
-      <div class="otot">${Number(o.total).toFixed(2)} ${t('aed')}</div>
+      <div class="otot">${Number(o.total).toFixed(2)} ${t('currency')}</div>
       ${o.address?`<div style="font-size:11px;color:var(--mu);margin-top:5px">📍 ${escHtml(o.address)}</div>`:''}
     </div>`).join('');
 }
@@ -534,18 +459,18 @@ function renderProfile() {
       <div class="pnm2">${escHtml(u.name)}</div>
       <div class="pem">${escHtml(u.email)}</div>
       <div>
-        <button class="bol" onclick="nav('orders')">${lang==='ar'?'📦 طلباتي':'📦 My Orders'}</button>
-        ${u.role==='admin'?`<a class="bol" href="admin/index.html" style="display:inline-block">${lang==='ar'?'⚙️ لوحة التحكم':'⚙️ Dashboard'}</a>`:''}
+        <button class="bol" onclick="nav('orders')">${t('my_orders')}</button>
+        ${u.role==='admin'?`<a class="bol" href="admin/index.html" style="display:inline-block">${t('admin_panel')}</a>`:''}
         <br><br>
-        <button class="bdr" onclick="doLogout()">${lang==='ar'?'تسجيل الخروج':'Logout'}</button>
+        <button class="bdr" onclick="doLogout()">${t('logout_btn')}</button>
       </div>
     </div></div>`;
   } else {
     el.innerHTML = `<div class="aw"><div class="ac">
       <div class="alo"><div class="alt">TORO</div></div>
       <div class="atbs">
-        <button class="atb2 on" onclick="aTab('login',this)">${lang==='ar'?'تسجيل الدخول':'Login'}</button>
-        <button class="atb2" onclick="aTab('reg',this)">${lang==='ar'?'حساب جديد':'Register'}</button>
+        <button class="atb2 on" onclick="aTab('login',this)">${t('login_btn')}</button>
+        <button class="atb2" onclick="aTab('reg',this)">${t('register_btn')}</button>
       </div>
       <div id="aForm"></div>
     </div></div>`;
@@ -563,43 +488,43 @@ function showLogin() {
       <input class="fi" id="lEm" type="email" placeholder="example@email.com" autocomplete="email" maxlength="150"></div>
     <div class="fg"><label class="fl">كلمة المرور / Password</label>
       <input class="fi" id="lPw" type="password" placeholder="••••••••" autocomplete="current-password"></div>
-    <button class="btn-g" style="width:100%" onclick="doLogin()">${lang==='ar'?'دخول':'Login'}</button>`;
+    <button class="btn-g" style="width:100%" onclick="doLogin()">${t('login_btn')}</button>`;
 }
 function showReg() {
   document.getElementById('aForm').innerHTML = `
     <div class="fg"><label class="fl">الاسم / Name</label>
-      <input class="fi" id="rNm" placeholder="${lang==='ar'?'اسمك الكامل':'Full Name'}" autocomplete="name" maxlength="100"></div>
+      <input class="fi" id="rNm" placeholder="${(lang==='ar'?'اسمك الكامل':'Full Name')}" autocomplete="name" maxlength="100"></div>
     <div class="fg"><label class="fl">البريد الإلكتروني / Email</label>
       <input class="fi" id="rEm" type="email" placeholder="example@email.com" autocomplete="email" maxlength="150"></div>
     <div class="fg"><label class="fl">كلمة المرور / Password (6+)</label>
       <input class="fi" id="rPw" type="password" placeholder="••••••••" autocomplete="new-password"></div>
-    <button class="btn-g" style="width:100%" onclick="doReg()">${lang==='ar'?'إنشاء الحساب':'Create Account'}</button>`;
+    <button class="btn-g" style="width:100%" onclick="doReg()">${t('create_acc')}</button>`;
 }
 async function doLogin() {
   const em = document.getElementById('lEm')?.value?.trim();
   const pw = document.getElementById('lPw')?.value;
-  if (!em||!pw) { toast(lang==='ar'?'أدخل البريد وكلمة المرور':'Enter email and password','er'); return; }
+  if (!em||!pw) { toast(t('enter_creds'),'er'); return; }
   const r = await api('POST', `${BASE}/auth.php?action=login`, {email:em, password:pw});
   if (r.ok && r.data?.token) {
     localStorage.setItem(LS.TOKEN, r.data.token);
     localStorage.setItem(LS.USER, JSON.stringify(r.data.user));
-    toast((lang==='ar'?'مرحباً ':'Welcome ')+r.data.user.name,'ok');
+    toast((t('welcome'))+r.data.user.name,'ok');
     renderProfile();
   } else {
-    toast(r.msg || (lang==='ar'?'بيانات خاطئة':'Invalid credentials'),'er');
+    toast(r.msg || (t('bad_creds')),'er');
   }
 }
 async function doReg() {
   const nm = document.getElementById('rNm')?.value?.trim();
   const em = document.getElementById('rEm')?.value?.trim();
   const pw = document.getElementById('rPw')?.value;
-  if (!nm||!em||!pw) { toast(lang==='ar'?'أكمل جميع الحقول':'Fill all fields','er'); return; }
-  if (pw.length<6) { toast(lang==='ar'?'كلمة المرور 6 أحرف على الأقل':'Min 6 characters','er'); return; }
+  if (!nm||!em||!pw) { toast(t('fill_all'),'er'); return; }
+  if (pw.length<6) { toast(t('pw_short'),'er'); return; }
   const r = await api('POST', `${BASE}/auth.php?action=register`, {name:nm,email:em,password:pw});
   if (r.ok && r.data?.token) {
     localStorage.setItem(LS.TOKEN, r.data.token);
     localStorage.setItem(LS.USER, JSON.stringify(r.data.user));
-    toast(lang==='ar'?'✓ تم إنشاء الحساب':'✓ Account created','ok');
+    toast(t('acc_created'),'ok');
     renderProfile();
   } else {
     toast(r.msg||'Error','er');
@@ -608,7 +533,7 @@ async function doReg() {
 function doLogout() {
   localStorage.removeItem(LS.TOKEN);
   localStorage.removeItem(LS.USER);
-  toast(lang==='ar'?'تم تسجيل الخروج':'Logged out');
+  toast(t('logged_out'));
   renderProfile();
 }
 
@@ -627,10 +552,10 @@ async function initAdmin() {
   if (!isAdmin()) {
     el.innerHTML = `<div class="access-denied">
       <div class="ei">⛔</div>
-      <h3>${lang==='ar'?'وصول مرفوض':'Access Denied'}</h3>
-      <p>${lang==='ar'?'هذه الصفحة للمديرين فقط. سجّل دخولك بحساب الأدمن.':'This page is for admins only. Please login with an admin account.'}</p>
+      <h3>${t('access_denied')}</h3>
+      <p>${t('admin_only')}</p>
       <br>
-      <button class="btn-g" style="margin:0 auto;display:block;width:fit-content;padding:12px 24px" onclick="nav('profile')">${lang==='ar'?'تسجيل الدخول':'Login'}</button>
+      <button class="btn-g" style="margin:0 auto;display:block;width:fit-content;padding:12px 24px" onclick="nav('profile')">${t('login_btn')}</button>
     </div>`;
     return;
   }
@@ -639,9 +564,9 @@ async function initAdmin() {
     <div class="adm-wrap">
       <div class="adm-stats" id="admStats"><div class="ldw"><div class="ld"></div></div></div>
       <div class="adm-tabs" id="admTabs">
-        <button class="adm-tab on" onclick="admTab('products',this)">${lang==='ar'?'📦 المنتجات':'📦 Products'}</button>
-        <button class="adm-tab" onclick="admTab('orders',this)">${lang==='ar'?'🧾 الطلبات':'🧾 Orders'}</button>
-        <button class="adm-tab" onclick="admTab('users',this)">${lang==='ar'?'👥 العملاء':'👥 Customers'}</button>
+        <button class="adm-tab on" onclick="admTab('products',this)">${t('adm_products')}</button>
+        <button class="adm-tab" onclick="admTab('orders',this)">${t('adm_orders')}</button>
+        <button class="adm-tab" onclick="admTab('users',this)">${t('adm_users')}</button>
       </div>
       <div id="admBody"><div class="ldw"><div class="ld"></div></div></div>
     </div>`;
@@ -664,23 +589,23 @@ async function loadAdmStats() {
     <div class="stat-card">
       <div class="stat-icon">📦</div>
       <div class="stat-val">${s.total_products}</div>
-      <div class="stat-lbl">${lang==='ar'?'منتجات نشطة':'Active Products'}</div>
+      <div class="stat-lbl">${t('stat_prods')}</div>
     </div>
     <div class="stat-card blue">
       <div class="stat-icon">🧾</div>
       <div class="stat-val">${s.total_orders}</div>
-      <div class="stat-lbl">${lang==='ar'?'إجمالي الطلبات':'Total Orders'}</div>
-      ${s.pending_orders>0?`<div style="font-size:10px;color:var(--or);margin-top:4px">⏳ ${s.pending_orders} ${lang==='ar'?'معلق':'pending'}</div>`:''}
+      <div class="stat-lbl">${t('stat_orders')}</div>
+      ${s.pending_orders>0?`<div style="font-size:10px;color:var(--or);margin-top:4px">⏳ ${s.pending_orders} ${t('adm_pend')}</div>`:''}
     </div>
     <div class="stat-card green">
       <div class="stat-icon">👥</div>
       <div class="stat-val">${s.total_users}</div>
-      <div class="stat-lbl">${lang==='ar'?'عملاء مسجلون':'Registered Customers'}</div>
+      <div class="stat-lbl">${t('stat_users')}</div>
     </div>
     <div class="stat-card orange">
       <div class="stat-icon">💰</div>
       <div class="stat-val">${rev.toFixed(0)}</div>
-      <div class="stat-lbl">${lang==='ar'?'الإيرادات (د.إ)':'Revenue (AED)'}</div>
+      <div class="stat-lbl">${t('stat_rev')}</div>
       <div class="rev-bar"><div class="rev-fill" style="width:${Math.min(100,(rev/maxRev)*100)}%"></div></div>
     </div>`;
 }
@@ -705,11 +630,11 @@ async function loadAdmProds() {
   el.innerHTML = `
     <button class="btn-add" onclick="openPF()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      ${lang==='ar'?'إضافة منتج جديد':'Add New Product'}
+      ${t('adm_add_prod')}
     </button>
     <div class="adm-search">
       <span class="sic">🔍</span>
-      <input placeholder="${lang==='ar'?'بحث في المنتجات...':'Search products...'}" oninput="admProdSearch(this.value)" value="${admSearchQ}">
+      <input placeholder="${t('adm_srch_prod')}" oninput="admProdSearch(this.value)" value="${admSearchQ}">
     </div>
     <div class="tw" id="prodTableWrap">
       ${renderProdTable(list)}
@@ -728,21 +653,21 @@ function admProdSearch(q) {
 }
 
 function renderProdTable(list) {
-  if (!list.length) return `<div class="adm-empty"><div class="ei">📦</div><p>${lang==='ar'?'لا توجد منتجات':'No products found'}</p></div>`;
+  if (!list.length) return `<div class="adm-empty"><div class="ei">📦</div><p>${t('adm_no_prods')}</p></div>`;
   const scls = {men:'cat-m',women:'cat-w',unisex:'cat-u'};
   const catLbls = {men:{ar:'رجالي',en:'Men'},women:{ar:'نسائي',en:'Women'},unisex:{ar:'للجنسين',en:'Unisex'}};
   return `<table>
     <thead><tr>
       <th>📷</th>
-      <th>${lang==='ar'?'المنتج':'Product'}</th>
-      <th>${lang==='ar'?'الماركة':'Brand'}</th>
-      <th>${lang==='ar'?'الفئة':'Category'}</th>
-      <th>${lang==='ar'?'السعر قبل':'Before'}</th>
-      <th>${lang==='ar'?'السعر بعد':'After'}</th>
-      <th>${lang==='ar'?'الخصم':'Disc'}</th>
-      <th>${lang==='ar'?'المخزون':'Stock'}</th>
-      <th>${lang==='ar'?'الحالة':'Status'}</th>
-      <th>${lang==='ar'?'إجراء':'Action'}</th>
+      <th>${t('th_product')}</th>
+      <th>${t('th_brand')}</th>
+      <th>${t('th_category')}</th>
+      <th>${t('th_before')}</th>
+      <th>${t('th_after')}</th>
+      <th>${t('th_disc')}</th>
+      <th>${t('th_stock')}</th>
+      <th>${t('th_status')}</th>
+      <th>${t('th_action')}</th>
     </tr></thead>
     <tbody>${list.map(p=>{
       const disc = p.price_before?Math.round((1-p.price/p.price_before)*100):0;
@@ -761,7 +686,7 @@ function renderProdTable(list) {
         <td style="color:var(--tx);font-weight:500">${escHtml(p.brand)}</td>
         <td><span class="${catCls}">${catLbl}</span></td>
         <td>${p.price_before?`<span style="text-decoration:line-through;color:var(--mu)">${p.price_before}</span>`:'-'}</td>
-        <td style="color:var(--g);font-weight:700">${p.price} <small style="font-weight:400;color:var(--mu)">${t('aed')}</small></td>
+        <td style="color:var(--g);font-weight:700">${p.price} <small style="font-weight:400;color:var(--mu)">${t('currency')}</small></td>
         <td>${disc?`<span style="color:var(--re);font-weight:700">-${disc}%</span>`:'-'}</td>
         <td style="${p.stock<=3?'color:var(--re)':''}">${p.stock}</td>
         <td><span class="${active?'badge-on':'badge-off'}">${active?(lang==='ar'?'نشط':'Active'):(lang==='ar'?'مخفي':'Hidden')}</span></td>
@@ -787,7 +712,7 @@ async function loadAdmOrds() {
   el.innerHTML = `
     <div class="adm-search">
       <span class="sic">🔍</span>
-      <input placeholder="${lang==='ar'?'بحث في الطلبات...':'Search orders...'}" oninput="filterOrdsTable(this.value, ${JSON.stringify(r.data).replace(/"/g,'&quot;')})">
+      <input placeholder="${t('adm_srch_ord')}" oninput="filterOrdsTable(this.value, ${JSON.stringify(r.data).replace(/"/g,'&quot;')})">
     </div>
     <div id="ordsTableWrap" class="tw">
       ${renderOrdsTable(r.data, sts, scls)}
@@ -807,16 +732,16 @@ function filterOrdsTable(q, data) {
 }
 
 function renderOrdsTable(data, sts, scls) {
-  if (!data.length) return `<div class="adm-empty"><div class="ei">🧾</div><p>${lang==='ar'?'لا توجد طلبات':'No orders'}</p></div>`;
+  if (!data.length) return `<div class="adm-empty"><div class="ei">🧾</div><p>${t('adm_no_ords')}</p></div>`;
   return `<table>
     <thead><tr>
       <th>#</th>
-      <th>${lang==='ar'?'العميل':'Customer'}</th>
-      <th>${lang==='ar'?'الإجمالي':'Total'}</th>
-      <th>${lang==='ar'?'الحالة':'Status'}</th>
-      <th>${lang==='ar'?'التاريخ':'Date'}</th>
-      <th>${lang==='ar'?'تحديث':'Update'}</th>
-      <th>${lang==='ar'?'إجراء':'Action'}</th>
+      <th>${t('th_customer')}</th>
+      <th>${t('th_ttl')}</th>
+      <th>${t('th_status')}</th>
+      <th>${t('th_date')}</th>
+      <th>${t('th_update')}</th>
+      <th>${t('th_action')}</th>
     </tr></thead>
     <tbody>${data.map(o=>`<tr>
       <td style="color:var(--g);font-weight:700">#${o.id}</td>
@@ -824,7 +749,7 @@ function renderOrdsTable(data, sts, scls) {
         <div style="color:var(--tx);font-weight:500">${escHtml(o.user_name||'-')}</div>
         ${o.email?`<div style="font-size:10px;color:var(--mu)">${escHtml(o.email)}</div>`:''}
       </td>
-      <td style="color:var(--g);font-weight:700">${Number(o.total).toFixed(0)} <small style="color:var(--mu);font-weight:400">${t('aed')}</small></td>
+      <td style="color:var(--g);font-weight:700">${Number(o.total).toFixed(0)} <small style="color:var(--mu);font-weight:400">${t('currency')}</small></td>
       <td><span class="ost ${scls[o.status]||'sp'}">${ts(o.status)}</span></td>
       <td style="white-space:nowrap">${o.created_at?.slice(0,10)||''}</td>
       <td>
@@ -833,7 +758,7 @@ function renderOrdsTable(data, sts, scls) {
         </select>
       </td>
       <td><div class="act-row">
-        <button class="btn-sm btn-view" onclick='showOrdDetail(${JSON.stringify(o).replace(/'/g,"&#39;")})'>${lang==='ar'?'عرض':'View'}</button>
+        <button class="btn-sm btn-view" onclick='showOrdDetail(${JSON.stringify(o).replace(/'/g,"&#39;")})'>${t('view_lbl')}</button>
         <button class="btn-sm btn-wa-sm" onclick='waOrderAdmin(${JSON.stringify(o).replace(/'/g,"&#39;")})'>📱</button>
       </div></td>
     </tr>`).join('')}</tbody>
@@ -846,37 +771,37 @@ function showOrdDetail(o) {
     <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">
       <div>
         <div style="font-size:13px;color:var(--tx)">${escHtml(lang==='ar'?i.name_ar:i.name_en)}</div>
-        <div style="font-size:11px;color:var(--mu)">${lang==='ar'?'الكمية':'Qty'}: ${i.qty}</div>
+        <div style="font-size:11px;color:var(--mu)">${t('qty_lbl')}: ${i.qty}</div>
       </div>
-      <div style="font-size:13px;color:var(--g);font-weight:700">${(i.price*i.qty).toFixed(0)} ${t('aed')}</div>
+      <div style="font-size:13px;color:var(--g);font-weight:700">${(i.price*i.qty).toFixed(0)} ${t('currency')}</div>
     </div>`).join('');
   
-  document.getElementById('ordDetailTitle').textContent = `${lang==='ar'?'طلب رقم':'Order'} #${o.id}`;
+  document.getElementById('ordDetailTitle').textContent = `${t('order_no')} #${o.id}`;
   document.getElementById('ordDetailBody').innerHTML = `
     <div style="margin-bottom:12px">
       <span class="ost ${scls[o.status]||'sp'}">${ts(o.status)}</span>
       <span style="font-size:11px;color:var(--mu);margin-${lang==='ar'?'right':'left'}:8px">${o.created_at?.slice(0,16)||''}</span>
     </div>
     <div style="background:var(--d3);border-radius:var(--r);padding:12px;margin-bottom:12px">
-      <div style="font-size:12px;color:var(--mu);margin-bottom:4px">${lang==='ar'?'العميل':'Customer'}</div>
+      <div style="font-size:12px;color:var(--mu);margin-bottom:4px">${t('th_customer')}</div>
       <div style="font-weight:600">${escHtml(o.user_name||'-')}</div>
       ${o.email?`<div style="font-size:12px;color:var(--mu)">${escHtml(o.email)}</div>`:''}
     </div>
     ${o.address?`<div style="background:var(--d3);border-radius:var(--r);padding:12px;margin-bottom:12px">
-      <div style="font-size:12px;color:var(--mu);margin-bottom:4px">📍 ${lang==='ar'?'العنوان':'Address'}</div>
+      <div style="font-size:12px;color:var(--mu);margin-bottom:4px">📍 ${t('address_lbl2')}</div>
       <div style="font-size:13px">${escHtml(o.address)}</div>
     </div>`:''}
     ${o.notes?`<div style="background:var(--d3);border-radius:var(--r);padding:12px;margin-bottom:12px">
-      <div style="font-size:12px;color:var(--mu);margin-bottom:4px">📝 ${lang==='ar'?'ملاحظات':'Notes'}</div>
+      <div style="font-size:12px;color:var(--mu);margin-bottom:4px">📝 ${t('notes_lbl2')}</div>
       <div style="font-size:13px">${escHtml(o.notes)}</div>
     </div>`:''}
     <div style="margin-bottom:12px">${items}</div>
     <div style="display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid rgba(201,168,76,.2)">
-      <span style="font-size:15px;font-weight:700;color:var(--g)">${lang==='ar'?'الإجمالي':'Total'}</span>
-      <span style="font-size:17px;font-weight:800;color:var(--g)">${Number(o.total).toFixed(2)} ${t('aed')}</span>
+      <span style="font-size:15px;font-weight:700;color:var(--g)">${t('th_ttl')}</span>
+      <span style="font-size:17px;font-weight:800;color:var(--g)">${Number(o.total).toFixed(2)} ${t('currency')}</span>
     </div>
     <button class="btn-wa" style="width:100%;justify-content:center;gap:8px;font-size:14px" onclick='waOrderAdmin(${JSON.stringify(o).replace(/'/g,"&#39;")})'>
-      📱 ${lang==='ar'?'تواصل عبر واتساب':'Contact via WhatsApp'}
+      📱 ${t('wa_contact')}
     </button>`;
   document.getElementById('ordDetailMod').classList.add('open');
 }
@@ -888,7 +813,7 @@ async function loadAdmUsers() {
   el.innerHTML = `
     <div class="adm-search">
       <span class="sic">🔍</span>
-      <input placeholder="${lang==='ar'?'بحث في العملاء...':'Search customers...'}" oninput="filterUsersTable(this.value, ${JSON.stringify(r.data).replace(/"/g,'&quot;')})">
+      <input placeholder="${t('adm_srch_usr')}" oninput="filterUsersTable(this.value, ${JSON.stringify(r.data).replace(/"/g,'&quot;')})">
     </div>
     <div id="usersTableWrap" class="tw">
       ${renderUsersTable(r.data)}
@@ -905,14 +830,14 @@ function filterUsersTable(q, data) {
 }
 
 function renderUsersTable(data) {
-  if (!data.length) return `<div class="adm-empty"><div class="ei">👥</div><p>${lang==='ar'?'لا يوجد مستخدمون':'No users found'}</p></div>`;
+  if (!data.length) return `<div class="adm-empty"><div class="ei">👥</div><p>${t('adm_no_usrs')}</p></div>`;
   return `<table>
     <thead><tr>
       <th>#</th>
-      <th>${lang==='ar'?'الاسم':'Name'}</th>
-      <th>${lang==='ar'?'البريد الإلكتروني':'Email'}</th>
-      <th>${lang==='ar'?'الدور':'Role'}</th>
-      <th>${lang==='ar'?'تاريخ التسجيل':'Joined'}</th>
+      <th>${t('th_name')}</th>
+      <th>${t('th_email')}</th>
+      <th>${t('th_role')}</th>
+      <th>${t('th_joined')}</th>
     </tr></thead>
     <tbody>${data.map(u=>`<tr>
       <td style="color:var(--mu)">${u.id}</td>
@@ -926,7 +851,7 @@ function renderUsersTable(data) {
       </td>
       <td style="color:var(--mu)">${escHtml(u.email)}</td>
       <td><span class="${u.role==='admin'?'badge-on':''}">
-        ${u.role==='admin'?(lang==='ar'?'⚙️ مدير':'⚙️ Admin'):(lang==='ar'?'👤 عميل':'👤 Customer')}
+        ${u.role==='admin'?(t('role_admin')):(t('role_cust'))}
       </span></td>
       <td>${u.created_at?.slice(0,10)||''}</td>
     </tr>`).join('')}</tbody>
@@ -935,15 +860,12 @@ function renderUsersTable(data) {
 
 async function updOrdSt(id, status) {
   const r = await api('PUT', `${BASE}/orders.php?id=${id}`, {status});
-  if (r.ok) toast(lang==='ar'?'✓ تم تحديث الحالة':'✓ Status updated','ok');
+  if (r.ok) toast(t('adm_st_upd'),'ok');
   else toast(r.msg||'Error','er');
 }
 
 function waOrderAdmin(o) {
-  const items = (o.items||[]).map(i=>`🫙 *${lang==='ar'?i.name_ar:i.name_en}* × ${i.qty} — ${(i.price*i.qty).toFixed(0)} ${t('aed')}`).join('\n');
-  const msg = lang==='ar'
-    ? `✨ *متجر TORO للعطور*\n━━━━━━━━━━━━━━━━━━\n📋 *طلب رقم #${o.id}*\n\n${items}\n\n━━━━━━━━━━━━━━━━━━\n💰 *الإجمالي: ${Number(o.total).toFixed(2)} ${t('aed')}*\n👤 العميل: ${o.user_name||'—'}\n📍 العنوان: ${o.address||'—'}\n💳 الدفع عند الاستلام`
-    : `✨ *TORO Perfume Store*\n━━━━━━━━━━━━━━━━━━\n📋 *Order #${o.id}*\n\n${items}\n\n━━━━━━━━━━━━━━━━━━\n💰 *Total: ${Number(o.total).toFixed(2)} ${t('aed')}*\n👤 Customer: ${o.user_name||'—'}\n📍 Address: ${o.address||'—'}\n💳 Cash on Delivery`;
+  const msg = TW.adminOrder(lang, o, t('currency'));
   window.open(`https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
@@ -993,14 +915,14 @@ async function saveProd() {
     is_active:      parseInt(document.getElementById('f_ac').value)
   };
   if (!data.name_ar||!data.name_en||!data.brand||data.price<=0) {
-    toast(lang==='ar'?'الاسم والماركة والسعر مطلوبة':'Name, brand and price required','er');
+    toast(t('adm_prod_required'),'er');
     return;
   }
   const url = id ? `${BASE}/products.php?id=${id}` : `${BASE}/products.php`;
   const r   = await api(id?'PUT':'POST', url, data);
   if (r.ok) {
     cm('pfMod');
-    toast(lang==='ar'?'✓ تم الحفظ':'✓ Saved','ok');
+    toast(t('adm_saved'),'ok');
     await loadProds();
     if (admCurrentTab==='products') await loadAdmProds();
   } else {
@@ -1008,10 +930,10 @@ async function saveProd() {
   }
 }
 async function delProd(id) {
-  if (!confirm(lang==='ar'?'حذف هذا المنتج نهائياً؟':'Delete this product permanently?')) return;
+  if (!confirm(t('adm_del_conf'))) return;
   const r = await api('DELETE', `${BASE}/products.php?id=${id}`);
   if (r.ok) {
-    toast(lang==='ar'?'تم الحذف':'Deleted');
+    toast(t('adm_deleted'));
     await loadProds();
     if (admCurrentTab==='products') await loadAdmProds();
   } else toast(r.msg||'Error','er');
@@ -1033,15 +955,15 @@ async function loadFavIds() {
 
 async function toggleFav(productId) {
   const tk = localStorage.getItem(LS.TOKEN);
-  if (!tk) { toast(lang==='ar'?'سجّل دخولك لإضافة للمفضلة':'Login to add to favorites', 'er'); return; }
+  if (!tk) { toast(t('fav_login'), 'er'); return; }
   const r = await api('POST', `${BASE}/favorites.php`, { product_id: productId });
   if (r.ok) {
     if (r.data.action === 'added') {
       favIds.add(productId);
-      toast(lang==='ar'?'❤️ أضيف للمفضلة':'❤️ Added to favorites', 'ok');
+      toast(t('fav_added'), 'ok');
     } else {
       favIds.delete(productId);
-      toast(lang==='ar'?'🤍 حُذف من المفضلة':'🤍 Removed from favorites');
+      toast(t('fav_removed'));
     }
     renderProds();
     if (curPg === 'favorites') renderFavorites();
@@ -1057,8 +979,8 @@ async function renderFavorites() {
   if (!tk) {
     el.innerHTML = `<div class="empty" style="padding:60px 20px">
       <div class="ei">🔒</div>
-      <p style="margin-bottom:14px">${lang==='ar'?'سجّل دخولك لعرض المفضلة':'Login to view your favorites'}</p>
-      <button class="btn-g" onclick="nav('profile')">${lang==='ar'?'تسجيل الدخول':'Login'}</button>
+      <p style="margin-bottom:14px">${t('fav_login2')}</p>
+      <button class="btn-g" onclick="nav('profile')">${t('login_btn')}</button>
     </div>`;
     return;
   }
@@ -1069,7 +991,7 @@ async function renderFavorites() {
     return;
   }
   if (!r.data.length) {
-    el.innerHTML = `<div class="empty"><div class="ei">🤍</div><p>${lang==='ar'?'لا توجد منتجات في المفضلة':'No favorites yet'}</p></div>`;
+    el.innerHTML = `<div class="empty"><div class="ei">🤍</div><p>${t('fav_empty')}</p></div>`;
     return;
   }
   // Update favIds from response
@@ -1078,8 +1000,59 @@ async function renderFavorites() {
 }
 
 // ══════════════════════════════════════════
-// SECURITY: HTML Escape
+// ABOUT US PAGE
 // ══════════════════════════════════════════
+function renderAbout() {
+  const el = document.getElementById('aboutBody'); if (!el) return;
+  el.innerHTML = `
+    <div class="about-wrap">
+      <!-- Hero banner -->
+      <div class="about-hero">
+        <div class="about-logo">TORO</div>
+        <div class="about-tagline">${escHtml(t('about_tagline'))}</div>
+      </div>
+
+      <!-- Story -->
+      <div class="about-card">
+        <div class="about-sec-title">📖 ${escHtml(t('about_story_title'))}</div>
+        <p class="about-text">${escHtml(t('about_story'))}</p>
+      </div>
+
+      <!-- Values -->
+      <div class="about-vals">
+        <div class="about-val-card">
+          <div class="about-val-ic">✨</div>
+          <div class="about-val-title">${escHtml(t('about_val1_title'))}</div>
+          <p class="about-val-text">${escHtml(t('about_val1'))}</p>
+        </div>
+        <div class="about-val-card">
+          <div class="about-val-ic">💬</div>
+          <div class="about-val-title">${escHtml(t('about_val2_title'))}</div>
+          <p class="about-val-text">${escHtml(t('about_val2'))}</p>
+        </div>
+        <div class="about-val-card">
+          <div class="about-val-ic">🚚</div>
+          <div class="about-val-title">${escHtml(t('about_val3_title'))}</div>
+          <p class="about-val-text">${escHtml(t('about_val3'))}</p>
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div class="about-card about-contact">
+        <div class="about-sec-title">📞 ${escHtml(t('about_contact_title'))}</div>
+        <a class="about-cta about-cta-wa"
+           href="https://wa.me/${WA_NUM}"
+           target="_blank" rel="noopener noreferrer">
+          📱 ${escHtml(t('about_wa_cta'))}
+        </a>
+        <a class="about-cta about-cta-ig"
+           href="https://instagram.com/toro.perfumes.uae"
+           target="_blank" rel="noopener noreferrer">
+          📸 ${escHtml(t('about_follow'))}
+        </a>
+      </div>
+    </div>`;
+}
 function escHtml(str) {
   if (!str) return '';
   return String(str)

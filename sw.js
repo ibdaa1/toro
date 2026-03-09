@@ -4,6 +4,7 @@ const STATIC = [
   '/',
   '/index.html',
   '/assets/css/main.css',
+  '/assets/js/i18n.js',
   '/assets/js/main.js',
   '/manifest.json',
   '/assets/img/icon.svg'

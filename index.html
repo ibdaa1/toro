@@ -134,6 +134,12 @@
 <!-- PROFILE -->
 <div class="pg" id="pg-profile"><div id="profBody"></div></div>
 
+<!-- ABOUT -->
+<div class="pg" id="pg-about">
+  <div class="ptit" id="t-about">من نحن</div>
+  <div id="aboutBody"></div>
+</div>
+
 <!-- ADMIN -->
 <div class="pg" id="pg-admin">
   <div class="ptit">⚙️ <span id="t-dash">لوحة التحكم</span></div>
@@ -153,6 +159,10 @@
   <button class="bni" onclick="nav('favorites')" id="bn-favorites">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
     <span data-ar="المفضلة" data-en="Favorites">المفضلة</span>
+  </button>
+  <button class="bni" onclick="nav('about')" id="bn-about">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span data-ar="من نحن" data-en="About">من نحن</span>
   </button>
   <button class="bni" onclick="nav('orders')" id="bn-orders">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
@@ -246,6 +256,7 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="assets/js/i18n.js"></script>
 <script src="assets/js/main.js"></script>
 <script>
   // Register service worker for PWA
