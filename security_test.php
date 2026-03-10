@@ -20,7 +20,12 @@ header('Content-Type: text/plain; charset=utf-8');
 echo "=== SECURITY TEST ===\n\n";
 
 // ── Check 1: HTTPS ───────────────────────────────────────────
-if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') {
+// InfinityFree runs behind a reverse proxy; HTTPS may be signalled
+// via HTTP_X_FORWARDED_PROTO instead of (or alongside) $_SERVER['HTTPS'].
+$isHttps = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on')
+        || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+
+if (!$isHttps) {
     echo "\xE2\x9D\x8C HTTPS NOT ENABLED\n";
 } else {
     echo "\xE2\x9C\x85 HTTPS ENABLED\n";

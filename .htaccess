@@ -1,0 +1,24 @@
+# ─────────────────────────────────────────────────────────────
+# Root .htaccess — InfinityFree / LiteSpeed
+# ─────────────────────────────────────────────────────────────
+
+# Prevent directory listing
+Options -Indexes
+
+# ── Block sensitive version-control / config dirs ────────────
+# These are matched as URL paths and returned as 404 so attackers
+# get no information about whether the directory exists.
+# RedirectMatch uses mod_alias which is always available on LiteSpeed.
+RedirectMatch 404 /\.git(/.*)?$
+RedirectMatch 404 /\.env(/.*)?$
+RedirectMatch 404 /\.svn(/.*)?$
+RedirectMatch 404 /\.hg(/.*)?$
+
+# ── HTTP → HTTPS redirect ─────────────────────────────────────
+# Redirect all plain-HTTP requests to the HTTPS equivalent.
+# RewriteEngine at the root level is safe on InfinityFree/LiteSpeed.
+# The api/ sub-directory has its own .htaccess with RewriteEngine Off
+# to prevent any cascade that could disrupt API POST request bodies.
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
