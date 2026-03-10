@@ -7,6 +7,7 @@ const STATIC = [
   './assets/css/main.css',
   './assets/js/i18n.js',
   './assets/js/main.js',
+  './assets/js/sw-register.js',
   './manifest.json',
   './favicon.ico',
   './assets/img/icon.svg',

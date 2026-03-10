@@ -267,23 +267,6 @@
 
 <script src="assets/js/i18n.js"></script>
 <script src="assets/js/main.js"></script>
-<script>
-  // Register service worker for PWA
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      // updateViaCache:'none' forces the browser to always check for a new sw.js,
-      // bypassing HTTP cache — critical for users stuck on old cached versions.
-      navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
-        .catch(() => {});
-    });
-
-    // Auto-reload the page the moment a new service worker takes control,
-    // so users immediately get the latest HTML/JS/CSS from the new cache.
-    let _swRefreshing = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!_swRefreshing) { _swRefreshing = true; location.reload(); }
-    });
-  }
-</script>
+<script src="assets/js/sw-register.js"></script>
 </body>
 </html>

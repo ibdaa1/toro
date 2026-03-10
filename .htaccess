@@ -5,6 +5,9 @@
 # Prevent directory listing
 Options -Indexes
 
+# Serve index.php before index.html so security headers are always set
+DirectoryIndex index.php index.html
+
 # ── Block sensitive version-control / config dirs ────────────
 # These are matched as URL paths and returned as 404 so attackers
 # get no information about whether the directory exists.
@@ -22,3 +25,10 @@ RedirectMatch 404 /\.hg(/.*)?$
 RewriteEngine On
 RewriteCond %{HTTPS} !=on
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# ── Route direct index.html requests through index.php ────────
+# Ensures security headers are set even when the file is requested
+# by its exact name (e.g., by the Sucuri / Observatory scanner).
+RewriteCond %{THE_REQUEST} \s/+index\.html[\s?/]
+RewriteRule ^index\.html$ /index.php [L,R=301]
+
