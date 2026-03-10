@@ -1,0 +1,75 @@
+# ────────────────────────────────────────────────
+# .htaccess — Production Ready for InfinityFree
+# Protects sensitive files, enforces HTTPS, API headers
+# ────────────────────────────────────────────────
+
+RewriteEngine On
+
+# ==============================
+# FORCE HTTPS
+# ==============================
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# ==============================
+# PASS AUTHORIZATION HEADER TO PHP
+# Needed for API authentication
+# ==============================
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# ==============================
+# PASS CUSTOM TOKEN HEADER
+# ==============================
+RewriteCond %{HTTP:X-Token} .
+RewriteRule .* - [E=HTTP_X_TOKEN:%{HTTP:X-Token}]
+
+# ==============================
+# BLOCK ACCESS TO GIT
+# ==============================
+RewriteRule (^|/)\.git - [F,L]
+
+# ==============================
+# BLOCK SENSITIVE FILES
+# ==============================
+<FilesMatch "\.(env|ini|log|sh|sql|bak|config)$">
+Order allow,deny
+Deny from all
+</FilesMatch>
+
+# ==============================
+# BLOCK DIRECTORY LISTING
+# ==============================
+Options -Indexes
+
+# ==============================
+# PROTECT IMPORTANT FILES
+# ==============================
+<FilesMatch "(composer\.json|composer\.lock|package\.json|package-lock\.json)">
+Order allow,deny
+Deny from all
+</FilesMatch>
+
+# ==============================
+# BASIC ANTI SQL/XSS INJECTION
+# ==============================
+RewriteCond %{QUERY_STRING} (\.\./|\<|\>|%3C|%3E|union|select|insert|drop|update|script) [NC]
+RewriteRule .* - [F,L]
+
+# ==============================
+# API ROUTING (OPTIONAL)
+# ==============================
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ api/$1 [L,QSA]
+
+# ==============================
+# DEFAULT INDEX FILES
+# ==============================
+DirectoryIndex index.php index.html
+
+# ==============================
+# CUSTOM ERROR PAGES (OPTIONAL)
+# ==============================
+ErrorDocument 404 /index.php
+ErrorDocument 403 /index.php

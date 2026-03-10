@@ -1,0 +1,101 @@
+{
+  "general": {
+    "method_not_allowed": "الطريقة غير مسموحة",
+    "not_found": "غير موجود",
+    "server_error": "خطأ في الخادم",
+    "db_error": "خطأ في قاعدة البيانات",
+    "ok": "تمت العملية بنجاح",
+    "forbidden": "ممنوع",
+    "unauthorized": "غير مصرح",
+    "fields_required": "جميع الحقول مطلوبة",
+    "invalid_data": "بيانات غير صحيحة",
+    "too_many_requests": "طلبات كثيرة جداً، يرجى التباطؤ"
+  },
+  "auth": {
+    "fields_required": "جميع الحقول مطلوبة",
+    "name_too_long": "الاسم طويل جداً",
+    "invalid_email": "البريد الإلكتروني غير صحيح",
+    "email_too_long": "البريد الإلكتروني طويل جداً",
+    "password_too_short": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+    "password_too_long": "كلمة المرور طويلة جداً",
+    "email_exists": "البريد الإلكتروني مسجل مسبقاً",
+    "invalid_credentials": "بيانات خاطئة",
+    "account_deactivated": "تم تعطيل هذا الحساب",
+    "unauthorized": "غير مصرح — لم يتم العثور على التوكن",
+    "invalid_token": "صيغة التوكن غير صحيحة",
+    "session_expired": "انتهت الجلسة، يرجى تسجيل الدخول من جديد",
+    "invalid_user_id": "معرف المستخدم غير صحيح",
+    "user_not_found": "المستخدم غير موجود",
+    "admin_only": "هذه الصفحة للمديرين فقط",
+    "registration_failed": "فشل التسجيل",
+    "login_success": "تم تسجيل الدخول بنجاح",
+    "register_success": "تم إنشاء الحساب بنجاح"
+  },
+  "products": {
+    "not_found": "المنتج غير موجود",
+    "name_price_required": "اسم المنتج والسعر مطلوبان",
+    "missing_fields": "البيانات غير مكتملة",
+    "insert_failed": "فشل إنشاء المنتج",
+    "update_failed": "فشل التحديث",
+    "created": "تم إنشاء المنتج",
+    "updated": "تم التحديث",
+    "deleted": "تم الحذف"
+  },
+  "orders": {
+    "cart_empty": "السلة فارغة",
+    "address_required": "العنوان مطلوب",
+    "address_too_long": "العنوان طويل جداً",
+    "notes_too_long": "الملاحظات طويلة جداً",
+    "too_many_items": "عدد المنتجات كبير جداً",
+    "invalid_product_data": "بيانات المنتج غير صحيحة",
+    "product_not_found": "منتج غير موجود",
+    "insufficient_stock": "المخزون غير كافٍ",
+    "creation_failed": "فشل إنشاء الطلب",
+    "invalid_status": "حالة الطلب غير صحيحة",
+    "status_updated": "تم تحديث حالة الطلب"
+  },
+  "payments": {
+    "invalid_method": "طريقة الدفع غير صحيحة",
+    "order_required": "معرف الطلب مطلوب",
+    "order_not_found": "الطلب غير موجود",
+    "not_authorized": "غير مصرح بهذا الإجراء",
+    "already_exists": "سجل الدفع موجود مسبقاً لهذا الطلب",
+    "insert_failed": "فشل إنشاء سجل الدفع",
+    "invalid_status": "حالة الدفع غير صحيحة",
+    "update_failed": "فشل تحديث الدفع",
+    "updated": "تم تحديث الدفع",
+    "created": "تم إنشاء سجل الدفع"
+  },
+  "stock": {
+    "invalid_type": "نوع حركة المخزون غير صحيح",
+    "product_required": "معرف المنتج مطلوب",
+    "qty_positive": "الكمية يجب أن تكون أكبر من صفر",
+    "product_not_found": "المنتج غير موجود",
+    "insufficient_stock": "الكمية المطلوبة أكبر من المخزون المتاح",
+    "update_failed": "فشل تحديث المخزون",
+    "record_failed": "فشل تسجيل حركة المخزون",
+    "updated": "تم تحديث المخزون",
+    "table_error": "خطأ في إعداد جدول المخزون"
+  },
+  "users": {
+    "cannot_deactivate_last_admin": "لا يمكن تعطيل آخر حساب مدير",
+    "is_active_required": "حقل is_active مطلوب",
+    "update_failed": "فشل التحديث",
+    "activated": "تم تفعيل الحساب",
+    "deactivated": "تم تعطيل الحساب"
+  },
+  "favorites": {
+    "product_required": "معرف المنتج مطلوب",
+    "product_not_found": "المنتج غير موجود",
+    "add_failed": "فشل إضافة المفضلة",
+    "added": "تمت الإضافة إلى المفضلة",
+    "removed": "تمت الإزالة من المفضلة"
+  },
+  "upload": {
+    "no_file": "لم يتم توفير ملف صورة",
+    "file_too_large": "الملف كبير جداً. الحد الأقصى 5 ميجابايت",
+    "invalid_type": "نوع الملف غير صحيح. يُسمح فقط بـ JPG وPNG وWebP وGIF",
+    "dir_error": "تعذّر إنشاء مجلد الرفع",
+    "save_failed": "فشل حفظ الملف"
+  }
+}
