@@ -401,30 +401,79 @@
       </div>
     </div>
 
-    <!-- Image section with tabs -->
+    <!-- Multi-image section: up to 3 images -->
     <div class="fg">
       <label class="fl" data-i18n="image"></label>
-      <div class="img-tabs">
-        <button class="img-tab active" data-tab="url"    onclick="setImgTab('url')" data-i18n="urlTab"></button>
-        <button class="img-tab"        data-tab="upload" onclick="setImgTab('upload')" data-i18n="uploadImage"></button>
-      </div>
-
-      <!-- URL tab -->
-      <div id="img-url-section">
-        <input class="fi" id="f_im" placeholder="https://example.com/photo.jpg" oninput="updateImgPreview()" maxlength="500">
-        <div class="ipr" id="imgPrev"><span data-i18n="preview"></span></div>
-      </div>
-
-      <!-- Upload tab -->
-      <div id="img-file-section" style="display:none">
-        <div class="img-drop-zone" id="img-drop-zone">
-          <div class="drop-icon">🖼️</div>
-          <div class="drop-text" data-i18n="clickOrDrop"></div>
-          <div class="drop-sub" data-i18n="imageFormats"></div>
-          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif"
-                 onchange="handleFileUpload(this)">
+      <div class="img-slots">
+        <!-- Slot 1 -->
+        <div class="img-slot">
+          <div class="img-slot-num">1</div>
+          <div class="img-slot-body">
+            <div class="img-tabs">
+              <button class="img-tab active" data-tab="url"    onclick="setImgTab('url',1)"    data-i18n="urlTab"></button>
+              <button class="img-tab"        data-tab="upload" onclick="setImgTab('upload',1)" data-i18n="uploadImage"></button>
+            </div>
+            <div id="img-url-section-1">
+              <input class="fi" id="f_im_1" placeholder="https://..." oninput="updateImgPreview(1)" maxlength="500">
+              <div class="ipr" id="imgPrev1"><span data-i18n="preview"></span></div>
+            </div>
+            <div id="img-file-section-1" style="display:none">
+              <div class="img-drop-zone" id="img-drop-zone-1">
+                <div class="drop-icon">🖼️</div>
+                <div class="drop-text" data-i18n="clickOrDrop"></div>
+                <div class="drop-sub" data-i18n="imageFormats"></div>
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handleFileUpload(this,1)">
+              </div>
+              <div id="upload-status-1" style="font-size:12px;color:var(--mu);margin-top:6px;text-align:center"></div>
+            </div>
+          </div>
         </div>
-        <div id="upload-status" style="font-size:12px;color:var(--mu);margin-top:6px;text-align:center"></div>
+        <!-- Slot 2 -->
+        <div class="img-slot">
+          <div class="img-slot-num">2</div>
+          <div class="img-slot-body">
+            <div class="img-tabs">
+              <button class="img-tab active" data-tab="url"    onclick="setImgTab('url',2)"    data-i18n="urlTab"></button>
+              <button class="img-tab"        data-tab="upload" onclick="setImgTab('upload',2)" data-i18n="uploadImage"></button>
+            </div>
+            <div id="img-url-section-2">
+              <input class="fi" id="f_im_2" placeholder="https://..." oninput="updateImgPreview(2)" maxlength="500">
+              <div class="ipr" id="imgPrev2"><span data-i18n="preview"></span></div>
+            </div>
+            <div id="img-file-section-2" style="display:none">
+              <div class="img-drop-zone" id="img-drop-zone-2">
+                <div class="drop-icon">🖼️</div>
+                <div class="drop-text" data-i18n="clickOrDrop"></div>
+                <div class="drop-sub" data-i18n="imageFormats"></div>
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handleFileUpload(this,2)">
+              </div>
+              <div id="upload-status-2" style="font-size:12px;color:var(--mu);margin-top:6px;text-align:center"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Slot 3 -->
+        <div class="img-slot">
+          <div class="img-slot-num">3</div>
+          <div class="img-slot-body">
+            <div class="img-tabs">
+              <button class="img-tab active" data-tab="url"    onclick="setImgTab('url',3)"    data-i18n="urlTab"></button>
+              <button class="img-tab"        data-tab="upload" onclick="setImgTab('upload',3)" data-i18n="uploadImage"></button>
+            </div>
+            <div id="img-url-section-3">
+              <input class="fi" id="f_im_3" placeholder="https://..." oninput="updateImgPreview(3)" maxlength="500">
+              <div class="ipr" id="imgPrev3"><span data-i18n="preview"></span></div>
+            </div>
+            <div id="img-file-section-3" style="display:none">
+              <div class="img-drop-zone" id="img-drop-zone-3">
+                <div class="drop-icon">🖼️</div>
+                <div class="drop-text" data-i18n="clickOrDrop"></div>
+                <div class="drop-sub" data-i18n="imageFormats"></div>
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handleFileUpload(this,3)">
+              </div>
+              <div id="upload-status-3" style="font-size:12px;color:var(--mu);margin-top:6px;text-align:center"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 

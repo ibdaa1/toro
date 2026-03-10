@@ -460,37 +460,54 @@ function openProductForm(id = null) {
   document.getElementById('f_pr').value    = p?.price   || '';
   document.getElementById('f_pb').value    = p?.price_before || '';
   document.getElementById('f_st').value    = p?.stock   || '';
-  document.getElementById('f_im').value    = p?.image   || '';
   document.getElementById('f_ac').value    = (p?.is_active === 0 || p?.is_active === '0') ? '0' : '1';
   document.getElementById('f_dar').value   = p?.description_ar || '';
   document.getElementById('f_den').value   = p?.description_en || '';
-  updateImgPreview();
-  // Reset upload tab to URL tab
-  setImgTab('url');
+  // Populate up to 3 image slots from images_arr (or fallback to legacy image field)
+  const imgs = p?.images_arr?.length ? p.images_arr : (p?.image ? [p.image] : []);
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById(`f_im_${i}`);
+    if (el) el.value = imgs[i-1] || '';
+    updateImgPreview(i);
+    setImgTab('url', i);
+  }
   document.getElementById('pf-modal').classList.add('open');
 }
 
-function updateImgPreview() {
-  const url = document.getElementById('f_im')?.value?.trim();
-  const el  = document.getElementById('imgPrev');
+function updateImgPreview(slot) {
+  const n   = slot || 1;
+  const url = document.getElementById(`f_im_${n}`)?.value?.trim();
+  const el  = document.getElementById(`imgPrev${n}`);
   if (!el) return;
   el.innerHTML = url
     ? `<img src="${escHtml(url)}" onerror="this.parentElement.innerHTML='<span style=\'color:var(--re)\'>رابط غير صحيح / Invalid URL</span>'">`
     : `<span>${lang === 'ar' ? 'معاينة' : 'Preview'}</span>`;
 }
 
-function setImgTab(tab) {
-  document.querySelectorAll('.img-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  document.getElementById('img-url-section').style.display  = tab === 'url'    ? '' : 'none';
-  document.getElementById('img-file-section').style.display = tab === 'upload' ? '' : 'none';
+function setImgTab(tab, slot) {
+  const n = slot || 1;
+  const container = document.getElementById(`f_im_${n}`)?.closest('.img-slot-body') ||
+                    document.getElementById('pf-modal');
+  if (!container) return;
+  container.querySelectorAll('.img-tab').forEach(b => {
+    // Only affect tabs in the same slot
+    if (b.closest('.img-slot-body') === document.getElementById(`f_im_${n}`)?.closest('.img-slot-body')) {
+      b.classList.toggle('active', b.dataset.tab === tab);
+    }
+  });
+  const urlSec  = document.getElementById(`img-url-section-${n}`);
+  const fileSec = document.getElementById(`img-file-section-${n}`);
+  if (urlSec)  urlSec.style.display  = tab === 'url'    ? '' : 'none';
+  if (fileSec) fileSec.style.display = tab === 'upload' ? '' : 'none';
 }
 
-async function handleFileUpload(input) {
+async function handleFileUpload(input, slot) {
+  const n    = slot || 1;
   const file = input.files[0];
   if (!file) return;
 
-  const dropZone = document.getElementById('img-drop-zone');
-  const statusEl = document.getElementById('upload-status');
+  const dropZone = document.getElementById(`img-drop-zone-${n}`);
+  const statusEl = document.getElementById(`upload-status-${n}`);
   if (statusEl) statusEl.textContent = t('uploading');
 
   const fd = new FormData();
@@ -498,12 +515,12 @@ async function handleFileUpload(input) {
 
   const r = await api('POST', `${BASE}/upload.php`, fd, true);
   if (r.ok && r.data?.url) {
-    document.getElementById('f_im').value = r.data.url;
-    updateImgPreview();
+    document.getElementById(`f_im_${n}`).value = r.data.url;
+    updateImgPreview(n);
     if (statusEl) statusEl.textContent = '✓';
     toast(lang === 'ar' ? '✓ تم رفع الصورة' : '✓ Image uploaded', 'ok');
     // Switch back to URL tab to show preview
-    setImgTab('url');
+    setImgTab('url', n);
   } else {
     if (statusEl) statusEl.textContent = t('uploadFailed');
     toast(r.msg || t('uploadFailed'), 'er');
@@ -512,6 +529,12 @@ async function handleFileUpload(input) {
 
 async function saveProduct() {
   const id   = document.getElementById('f_id').value;
+  // Collect up to 3 images
+  const imagesArr = [];
+  for (let i = 1; i <= 3; i++) {
+    const v = (document.getElementById(`f_im_${i}`)?.value || '').trim();
+    if (v) imagesArr.push(v);
+  }
   const data = {
     name_ar:        document.getElementById('f_nar').value.trim(),
     name_en:        document.getElementById('f_nen').value.trim(),
@@ -521,7 +544,8 @@ async function saveProduct() {
     price:          parseFloat(document.getElementById('f_pr').value) || 0,
     price_before:   parseFloat(document.getElementById('f_pb').value) || null,
     stock:          parseInt(document.getElementById('f_st').value)  || 0,
-    image:          document.getElementById('f_im').value.trim(),
+    image:          imagesArr[0] || '',
+    images_arr:     imagesArr,
     description_ar: document.getElementById('f_dar').value,
     description_en: document.getElementById('f_den').value,
     is_active:      parseInt(document.getElementById('f_ac').value),

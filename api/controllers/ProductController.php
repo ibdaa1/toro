@@ -15,6 +15,11 @@ class ProductController {
         $method = reqMethod();
         $id     = qInt('id') ? qInt('id') : null;
 
+        // One-time auto-migration: ensure `images` column exists
+        $mdb = getDB();
+        Product::ensureImagesColumn($mdb);
+        $mdb->close();
+
         switch ($method) {
             case 'GET':    $this->get($id);    break;
             case 'POST':   $this->post();      break;
@@ -95,6 +100,22 @@ class ProductController {
         $body    = getBody();
         $rawImg  = trim(isset($body['image']) ? $body['image'] : '');
 
+        // Support up to 3 images sent as `images_arr` array
+        $imagesArr = [];
+        if (!empty($body['images_arr']) && is_array($body['images_arr'])) {
+            foreach (array_slice($body['images_arr'], 0, 3) as $u) {
+                $u = trim((string)$u);
+                if (isValidImageUrl($u)) {
+                    $imagesArr[] = $u;
+                }
+            }
+        }
+        // Fall back to single `image` field
+        if (empty($imagesArr) && isValidImageUrl($rawImg)) {
+            $imagesArr = [$rawImg];
+        }
+        $firstImage = $imagesArr[0] ?? '';
+
         return [
             'name_ar'        => sanitize(isset($body['name_ar'])       ? $body['name_ar']       : '', 200),
             'name_en'        => sanitize(isset($body['name_en'])       ? $body['name_en']       : '', 200),
@@ -108,7 +129,8 @@ class ProductController {
             'price_before'   => !empty($body['price_before'])
                                     ? round((float)$body['price_before'], 2) : null,
             'stock'          => max(0, (int)(isset($body['stock'])     ? $body['stock']   : 0)),
-            'image'          => isValidImageUrl($rawImg) ? $rawImg : '',
+            'image'          => $firstImage,
+            'images_arr'     => $imagesArr,
             'is_active'      => isset($body['is_active']) ? (int)(bool)$body['is_active'] : 1,
         ];
     }

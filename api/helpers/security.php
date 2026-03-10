@@ -105,8 +105,24 @@ function isValidImageUrl(string $url): bool
 }
 
 /**
- * Generate secure random token
+ * Parse a product's image storage field into an array of valid URLs.
+ * The field may be:
+ *   - a plain URL string (legacy single-image)
+ *   - a JSON-encoded array of URL strings (new multi-image)
+ * Returns an array of up to 3 validated URLs.
  */
+function parseProductImages(string $raw): array {
+    if ($raw === '') return [];
+    if ($raw[0] === '[') {
+        $arr = @json_decode($raw, true);
+        if (is_array($arr)) {
+            $valid = array_values(array_filter(array_map('trim', $arr), 'isValidImageUrl'));
+            return array_slice($valid, 0, 3);
+        }
+    }
+    return isValidImageUrl($raw) ? [$raw] : [];
+}
+
 function generateToken(int $bytes = 32): string
 {
     return bin2hex(random_bytes($bytes));

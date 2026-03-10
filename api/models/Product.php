@@ -3,8 +3,38 @@
 // models/Product.php — Product model
 // ─────────────────────────────────────────────────────────────
 require_once __DIR__ . '/../config/constants.php';
+require_once __DIR__ . '/../helpers/security.php';
 
 class Product {
+    /**
+     * Ensure the `images` TEXT column exists (one-time auto-migration).
+     * Silently ignores MySQL error 1060 (duplicate column).
+     */
+    public static function ensureImagesColumn($db) {
+        $db->query(
+            "ALTER TABLE products ADD COLUMN images TEXT NULL DEFAULT NULL AFTER image"
+        );
+        // Error 1060 = duplicate column name — safe to ignore
+        $db->errno; // suppress PHP warning by accessing errno
+    }
+
+    /**
+     * Decode the `images` column (or legacy `image` column) into an array,
+     * and add convenience `images_arr` and updated `image` keys to a row.
+     */
+    private static function decodeImages(array &$row) {
+        // `images` column (JSON array) takes priority over legacy `image`
+        $raw = isset($row['images']) && $row['images'] !== null && $row['images'] !== ''
+            ? $row['images']
+            : ($row['image'] ?? '');
+
+        $arr = parseProductImages($raw);
+
+        // Backward-compat: keep `image` as the first URL
+        $row['image']      = $arr[0] ?? '';
+        $row['images_arr'] = $arr;
+    }
+
     /**
      * Find one product by ID. Returns array or null.
      */
@@ -18,7 +48,9 @@ class Product {
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
         $stmt->close();
-        return $row ? $row : null;
+        if (!$row) return null;
+        self::decodeImages($row);
+        return $row;
     }
 
     /**
@@ -54,6 +86,10 @@ class Product {
         $stmt->execute();
         $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $stmt->close();
+        foreach ($rows as &$row) {
+            self::decodeImages($row);
+        }
+        unset($row);
         return $rows;
     }
 
@@ -61,21 +97,23 @@ class Product {
      * Insert a new product. Returns new ID or 0.
      */
     public static function create($db, $data) {
+        $imagesJson = self::encodeImages($data);
+        $firstImage = $data['image'] ?? '';
         $stmt = $db->prepare(
             "INSERT INTO products
                 (name_ar, name_en, brand, origin, category,
                  description_ar, description_en, price, price_before,
-                 stock, image, is_active)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                 stock, image, images, is_active)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
         if (!$stmt) return 0;
         $stmt->bind_param(
-            'sssssssddisi',
+            'sssssssddissi',
             $data['name_ar'], $data['name_en'], $data['brand'],
             $data['origin'], $data['category'],
             $data['description_ar'], $data['description_en'],
             $data['price'], $data['price_before'],
-            $data['stock'], $data['image'], $data['is_active']
+            $data['stock'], $firstImage, $imagesJson, $data['is_active']
         );
         $stmt->execute();
         $newId = $db->insert_id;
@@ -87,26 +125,41 @@ class Product {
      * Update an existing product.
      */
     public static function update($db, $id, $data) {
+        $imagesJson = self::encodeImages($data);
+        $firstImage = $data['image'] ?? '';
         $stmt = $db->prepare(
             "UPDATE products SET
                 name_ar=?, name_en=?, brand=?, origin=?, category=?,
                 description_ar=?, description_en=?, price=?, price_before=?,
-                stock=?, image=?, is_active=?
+                stock=?, image=?, images=?, is_active=?
              WHERE id=?"
         );
         if (!$stmt) return false;
         $stmt->bind_param(
-            'sssssssddisii',
+            'sssssssddissii',
             $data['name_ar'], $data['name_en'], $data['brand'],
             $data['origin'], $data['category'],
             $data['description_ar'], $data['description_en'],
             $data['price'], $data['price_before'],
-            $data['stock'], $data['image'], $data['is_active'],
+            $data['stock'], $firstImage, $imagesJson, $data['is_active'],
             $id
         );
         $ok = $stmt->execute();
         $stmt->close();
         return $ok;
+    }
+
+    /**
+     * Encode images array for storage.
+     * Stores first URL in `image` (legacy), full JSON array in `images`.
+     */
+    private static function encodeImages(array $data): ?string {
+        $arr = $data['images_arr'] ?? [];
+        if (empty($arr)) {
+            // Fall back to single `image` field if no array provided
+            $arr = !empty($data['image']) ? [$data['image']] : [];
+        }
+        return empty($arr) ? null : json_encode(array_values($arr), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     /**

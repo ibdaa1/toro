@@ -136,12 +136,12 @@ function toast(msg, type='') {
 // PRODUCTS
 // ══════════════════════════════════════════
 const DEMO = [
-  {id:1,name_ar:'عود الملكي',name_en:'Royal Oud',brand:'Creed',origin:'France',category:'men',price:450,price_before:550,stock:10,image:'https://images.unsplash.com/photo-1541643600914-78b084683702?w=400&q=80',description_ar:'عطر عود فاخر برائحة خشبية غنية ودافئة',description_en:'Luxurious oud with rich warm woody notes'},
-  {id:2,name_ar:'روز دو باريس',name_en:'Rose de Paris',brand:'Chanel',origin:'France',category:'women',price:380,price_before:null,stock:15,image:'https://images.unsplash.com/photo-1588514912908-53a8b1010e6a?w=400&q=80',description_ar:'رائحة وردية ناعمة من باريس',description_en:'Soft floral rose from Paris'},
-  {id:3,name_ar:'أوريانتال نايت',name_en:'Oriental Night',brand:'TORO',origin:'UAE',category:'unisex',price:290,price_before:350,stock:8,image:'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&q=80',description_ar:'عطر شرقي دافئ بالعنبر والمسك',description_en:'Warm oriental blend with amber and musk'},
-  {id:4,name_ar:'مسك الخالص',name_en:'Pure Musk',brand:'Lattafa',origin:'UAE',category:'unisex',price:180,price_before:null,stock:20,image:'https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=400&q=80',description_ar:'مسك نقي لأناقة يومية',description_en:'Pure musk for everyday elegance'},
-  {id:5,name_ar:'جاسمين دريم',name_en:'Jasmine Dream',brand:'YSL',origin:'France',category:'women',price:520,price_before:600,stock:5,image:'https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=400&q=80',description_ar:'مزيج الياسمين والفانيليا الفاخر',description_en:'Luxurious jasmine and vanilla blend'},
-  {id:6,name_ar:'سيدار وود',name_en:'Cedar Wood',brand:'TORO',origin:'UAE',category:'men',price:320,price_before:380,stock:12,image:'https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=400&q=80',description_ar:'عطر خشب الأرز بلمسة شرقية',description_en:'Cedar fragrance with oriental touch'},
+  {id:1,name_ar:'عود الملكي',name_en:'Royal Oud',brand:'Creed',origin:'France',category:'men',price:450,price_before:550,stock:10,image:'https://images.unsplash.com/photo-1541643600914-78b084683702?w=400&q=80',images_arr:['https://images.unsplash.com/photo-1541643600914-78b084683702?w=400&q=80'],description_ar:'عطر عود فاخر برائحة خشبية غنية ودافئة',description_en:'Luxurious oud with rich warm woody notes'},
+  {id:2,name_ar:'روز دو باريس',name_en:'Rose de Paris',brand:'Chanel',origin:'France',category:'women',price:380,price_before:null,stock:15,image:'https://images.unsplash.com/photo-1588514912908-53a8b1010e6a?w=400&q=80',images_arr:['https://images.unsplash.com/photo-1588514912908-53a8b1010e6a?w=400&q=80'],description_ar:'رائحة وردية ناعمة من باريس',description_en:'Soft floral rose from Paris'},
+  {id:3,name_ar:'أوريانتال نايت',name_en:'Oriental Night',brand:'TORO',origin:'UAE',category:'unisex',price:290,price_before:350,stock:8,image:'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&q=80',images_arr:['https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&q=80'],description_ar:'عطر شرقي دافئ بالعنبر والمسك',description_en:'Warm oriental blend with amber and musk'},
+  {id:4,name_ar:'مسك الخالص',name_en:'Pure Musk',brand:'Lattafa',origin:'UAE',category:'unisex',price:180,price_before:null,stock:20,image:'https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=400&q=80',images_arr:['https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=400&q=80'],description_ar:'مسك نقي لأناقة يومية',description_en:'Pure musk for everyday elegance'},
+  {id:5,name_ar:'جاسمين دريم',name_en:'Jasmine Dream',brand:'YSL',origin:'France',category:'women',price:520,price_before:600,stock:5,image:'https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=400&q=80',images_arr:['https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=400&q=80'],description_ar:'مزيج الياسمين والفانيليا الفاخر',description_en:'Luxurious jasmine and vanilla blend'},
+  {id:6,name_ar:'سيدار وود',name_en:'Cedar Wood',brand:'TORO',origin:'UAE',category:'men',price:320,price_before:380,stock:12,image:'https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=400&q=80',images_arr:['https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=400&q=80'],description_ar:'عطر خشب الأرز بلمسة شرقية',description_en:'Cedar fragrance with oriental touch'},
 ];
 
 async function loadProds() {
@@ -174,13 +174,21 @@ function renderMarquee() {
   // Use DEMO if we have too few real products to fill the marquee
   const src = list.length >= MQ_MIN_REAL ? list.slice(0, MQ_MAX) : DEMO;
   const cards = src.map((p, i) => {
-    const nm  = lang === 'ar' ? p.name_ar : p.name_en;
-    const col = MQ_COLORS[i % MQ_COLORS.length];
-    const img = p.image
-      ? `<img src="${escHtml(p.image)}" alt="${escHtml(nm)}" loading="lazy" onerror="this.style.display='none'">`
-      : '<span style="font-size:36px">🫙</span>';
+    const nm   = lang === 'ar' ? p.name_ar : p.name_en;
+    const col  = MQ_COLORS[i % MQ_COLORS.length];
+    const imgs = p.images_arr && p.images_arr.length ? p.images_arr : (p.image ? [p.image] : []);
+    let imgHtml;
+    if (imgs.length > 1) {
+      // Multiple images: CSS keyframe slideshow inside the card
+      const frames = imgs.map((u, idx) => `<img src="${escHtml(u)}" class="mq-slide mq-slide-${idx}" alt="${escHtml(nm)}" loading="lazy" onerror="this.style.display='none'">`).join('');
+      imgHtml = `<div class="mq-slides" data-n="${imgs.length}">${frames}</div>`;
+    } else if (imgs.length === 1) {
+      imgHtml = `<img src="${escHtml(imgs[0])}" alt="${escHtml(nm)}" loading="lazy" onerror="this.style.display='none'">`;
+    } else {
+      imgHtml = '<span style="font-size:36px">🫙</span>';
+    }
     return `<div class="mq-card" style="box-shadow:0 4px 24px -6px ${col.glow}55" onclick="showProd(${p.id})">
-      <div class="mq-img" style="background:radial-gradient(circle at 50% 60%,${col.glow}28 0%,${col.bg} 70%)">${img}</div>
+      <div class="mq-img" style="background:radial-gradient(circle at 50% 60%,${col.glow}28 0%,${col.bg} 70%)">${imgHtml}</div>
       <div class="mq-nm">${escHtml(nm)}</div>
       <div class="mq-pr" style="color:${col.glow}">${p.price} <span style="font-size:9px;font-weight:400;color:${col.text}">${t('currency')}</span></div>
     </div>`;
@@ -261,11 +269,26 @@ function showProd(id) {
   const desc = lang==='ar' ? (p.description_ar||'') : (p.description_en||'');
   const disc = p.price_before ? Math.round((1-p.price/p.price_before)*100) : 0;
   const save = p.price_before ? (p.price_before-p.price).toFixed(0) : 0;
+  const imgs = p.images_arr && p.images_arr.length ? p.images_arr : (p.image ? [p.image] : []);
+
+  // Build image area
+  let imgArea = '';
+  if (imgs.length > 1) {
+    const slides = imgs.map((u,i) => `<img src="${escHtml(u)}" class="pd-slide${i===0?' pd-slide-active':''}" onerror="this.style.display='none'">`).join('');
+    const dots   = imgs.map((_,i) => `<span class="pd-dot${i===0?' pd-dot-active':''}" onclick="pdGoSlide(${i})"></span>`).join('');
+    imgArea = `<div class="pdim pd-slider" id="pdSlider">
+      ${slides}
+      <button class="pd-arr pd-arr-r" onclick="pdGoSlide(pdSlideIdx-1)">&#8249;</button>
+      <button class="pd-arr pd-arr-l" onclick="pdGoSlide(pdSlideIdx+1)">&#8250;</button>
+      <div class="pd-dots">${dots}</div>
+    </div>`;
+  } else {
+    imgArea = `<div class="pdim">${imgs[0] ? `<img src="${escHtml(imgs[0])}" onerror="this.style.display='none'">` : '🫙'}</div>`;
+  }
+
   document.getElementById('pdBody').innerHTML = `
     <div>
-      <div class="pdim">
-        ${p.image ? `<img src="${p.image}" onerror="this.style.display='none'">` : '🫙'}
-      </div>
+      ${imgArea}
       <div class="pdbr">${escHtml(p.brand)}${p.origin?' · '+escHtml(p.origin):''}</div>
       <div class="pdnm">${escHtml(nm)}</div>
       <div class="pdmt">
@@ -279,11 +302,23 @@ function showProd(id) {
         ${disc ? `<span class="pdsv">${t('save_lbl')} ${save} ${t('currency')} (${disc}%)</span>` : ''}
       </div>
     </div>`;
+  pdSlideIdx = 0;
+  pdSlideCount = imgs.length;
   modalProdId = id;
   modalQty = 1;
   document.getElementById('mQty').textContent = 1;
   document.getElementById('pdAddBtn').textContent = t('add_cart');
   document.getElementById('pdMod').classList.add('open');
+}
+
+let pdSlideIdx = 0, pdSlideCount = 1;
+function pdGoSlide(idx) {
+  if (pdSlideCount <= 1) return;
+  pdSlideIdx = ((idx % pdSlideCount) + pdSlideCount) % pdSlideCount;
+  const slider = document.getElementById('pdSlider');
+  if (!slider) return;
+  slider.querySelectorAll('.pd-slide').forEach((el,i) => el.classList.toggle('pd-slide-active', i===pdSlideIdx));
+  slider.querySelectorAll('.pd-dot').forEach((el,i)   => el.classList.toggle('pd-dot-active',   i===pdSlideIdx));
 }
 
 function chgMQty(d) {
