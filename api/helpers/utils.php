@@ -33,21 +33,21 @@ function getBody() {
  * Get an integer query string parameter with a fallback default.
  */
 function qInt($key, $default = 0) {
-    return isset($_GET[$key]) ? (int)$_GET[$key] : (int)$default;
+    return isset($_GET[$key]) ? (int)$_GET[$key] : $default;
 }
 
 /**
  * Get a string query string parameter, trimmed, with a fallback default.
  */
 function qStr($key, $default = '') {
-    return isset($_GET[$key]) ? trim((string)$_GET[$key]) : (string)$default;
+    return isset($_GET[$key]) ? trim((string)$_GET[$key]) : $default;
 }
 
 /**
  * Clamp an integer between $min and $max.
  */
 function clamp($val, $min, $max) {
-    return max($min, min($max, (int)$val));
+    return max($min, min($max, $val));
 }
 
 /**
