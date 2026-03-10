@@ -47,6 +47,7 @@ class OrderController {
         if (!$addr)                              err('العنوان مطلوب / Address required');
         if (mb_strlen($addr) > 500)              err('العنوان طويل جداً');
         if (mb_strlen($notes) > 300)             err('الملاحظات طويلة جداً');
+        if (mb_strlen($phone) > 20)              err('رقم الهاتف طويل جداً');
         if (count($items) > 50)                  err('عدد المنتجات كبير جداً');
 
         $db        = getDB();

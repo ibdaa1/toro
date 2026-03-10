@@ -484,6 +484,8 @@ async function placeOrder() {
   if (!cart.length) { toast(t('cart_empty'),'er'); return; }
   const addr = document.getElementById('chkAddr')?.value?.trim();
   if (!addr) { toast(t('enter_addr'),'er'); return; }
+  const phone = document.getElementById('chkPhone')?.value?.trim();
+  if (!phone) { toast(t('enter_phone'),'er'); document.getElementById('chkPhone')?.focus(); return; }
 
   // Open a blank window synchronously so mobile popup blockers allow it.
   // We'll navigate it to WhatsApp after the order is confirmed.
@@ -497,7 +499,7 @@ async function placeOrder() {
     items: cart,
     address: addr,
     notes: document.getElementById('chkNotes')?.value||'',
-    phone: document.getElementById('chkPhone')?.value?.trim()||'',
+    phone: phone,
     latitude:  document.getElementById('chkLat')?.value  ||null,
     longitude: document.getElementById('chkLng')?.value  ||null
   });
