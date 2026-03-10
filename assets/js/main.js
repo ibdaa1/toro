@@ -328,6 +328,33 @@ function addFromModal() { addCart(modalProdId, modalQty); cm('pdMod'); }
 function waFromModal()  { waProduct(modalProdId, modalQty); cm('pdMod'); }
 
 // ══════════════════════════════════════════
+// WHATSAPP MESSAGE BUILDERS
+// ══════════════════════════════════════════
+const TW = {
+  product(lg, p, qty, currency) {
+    const name = lg === 'ar' ? p.name_ar : p.name_en;
+    return lg === 'ar'
+      ? `✨ *متجر TORO للعطور*\n━━━━━━━━━━━━━━━━━━\n🫙 *${name}* × ${qty}\n💰 *${(p.price * qty).toFixed(2)} ${currency}*\n━━━━━━━━━━━━━━━━━━\n💳 الدفع عند الاستلام`
+      : `✨ *TORO Perfume Store*\n━━━━━━━━━━━━━━━━━━\n🫙 *${name}* × ${qty}\n💰 *${(p.price * qty).toFixed(2)} ${currency}*\n━━━━━━━━━━━━━━━━━━\n💳 Cash on Delivery`;
+  },
+  cart(lg, lines, total, currency, addr, notes) {
+    const itemsStr = lines.join('\n');
+    const extra = [addr ? `📍 ${addr}` : '', notes ? `📝 ${notes}` : ''].filter(Boolean).join('\n');
+    return lg === 'ar'
+      ? `✨ *متجر TORO للعطور*\n━━━━━━━━━━━━━━━━━━\n${itemsStr}\n━━━━━━━━━━━━━━━━━━\n💰 *الإجمالي: ${total.toFixed(2)} ${currency}*\n${extra}\n💳 الدفع عند الاستلام`.trim()
+      : `✨ *TORO Perfume Store*\n━━━━━━━━━━━━━━━━━━\n${itemsStr}\n━━━━━━━━━━━━━━━━━━\n💰 *Total: ${total.toFixed(2)} ${currency}*\n${extra}\n💳 Cash on Delivery`.trim();
+  },
+  adminOrder(lg, o, currency) {
+    const items = (o.items || []).map(i =>
+      `🫙 *${lg === 'ar' ? i.name_ar : i.name_en}* × ${i.qty} — ${(i.price * i.qty).toFixed(0)} ${currency}`
+    ).join('\n');
+    return lg === 'ar'
+      ? `✨ *متجر TORO للعطور*\n━━━━━━━━━━━━━━━━━━\n📋 *طلب رقم #${o.id}*\n\n${items}\n\n━━━━━━━━━━━━━━━━━━\n💰 *الإجمالي: ${Number(o.total).toFixed(2)} ${currency}*\n👤 ${o.user_name || '—'}\n📍 ${o.address || '—'}\n💳 الدفع عند الاستلام`
+      : `✨ *TORO Perfume Store*\n━━━━━━━━━━━━━━━━━━\n📋 *Order #${o.id}*\n\n${items}\n\n━━━━━━━━━━━━━━━━━━\n💰 *Total: ${Number(o.total).toFixed(2)} ${currency}*\n👤 ${o.user_name || '—'}\n📍 ${o.address || '—'}\n💳 Cash on Delivery`;
+  }
+};
+
+// ══════════════════════════════════════════
 // WHATSAPP
 // ══════════════════════════════════════════
 function waProduct(id, qty=1) {
@@ -336,9 +363,9 @@ function waProduct(id, qty=1) {
   window.open(`https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-function sendWhatsApp() {
+function buildWaCartUrl() {
   const cart = getCart();
-  if (!cart.length) { toast(t('cart_empty'),'er'); return; }
+  if (!cart.length) return null;
   const lines = cart.map(c => {
     const p = prods.find(x=>x.id==c.product_id); if(!p) return null;
     const nm = lang==='ar' ? p.name_ar : p.name_en;
@@ -348,7 +375,13 @@ function sendWhatsApp() {
   const addr  = document.getElementById('chkAddr')?.value?.trim() || '';
   const notes = document.getElementById('chkNotes')?.value?.trim() || '';
   const msg = TW.cart(lang, lines, total, t('currency'), addr, notes);
-  window.open(`https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
+  return `https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`;
+}
+
+function sendWhatsApp() {
+  const url = buildWaCartUrl();
+  if (!url) { toast(t('cart_empty'),'er'); return; }
+  window.open(url, '_blank');
 }
 
 // ══════════════════════════════════════════
@@ -405,7 +438,6 @@ function renderCart() {
     <div class="sr tot"><span>${t('total')}</span><span>${sub.toFixed(2)} ${t('currency')}</span></div>
     <div class="cart-btns">
       <button class="btn-g" onclick="goChk()">${t('pg_chk').replace('💳 ','')}</button>
-      <button class="btn-wa" onclick="sendWhatsApp()">📱</button>
     </div>
   </div>`;
 }
@@ -441,6 +473,12 @@ async function placeOrder() {
   if (!cart.length) { toast(t('cart_empty'),'er'); return; }
   const addr = document.getElementById('chkAddr')?.value?.trim();
   if (!addr) { toast(t('enter_addr'),'er'); return; }
+
+  // Open a blank window synchronously so mobile popup blockers allow it.
+  // We'll navigate it to WhatsApp after the order is confirmed.
+  const waUrl = buildWaCartUrl();
+  const waWin = waUrl ? window.open('', '_blank') : null;
+
   const btn = document.getElementById('placeBtn');
   btn.disabled=true;
   document.getElementById('t-place').textContent='⏳';
@@ -455,11 +493,14 @@ async function placeOrder() {
     setCart([]);
     updBdg();
     toast(t('order_ok'),'ok');
-    sendWhatsApp();
+    if (waWin && waUrl) {
+      waWin.location.href = waUrl;
+    }
     document.getElementById('chkAddr').value='';
     document.getElementById('chkNotes').value='';
     nav('orders');
   } else {
+    if (waWin) waWin.close();
     toast(r.msg||t('error_lbl'),'er');
     // If token invalid, redirect to login
     if (r.msg && r.msg.includes('nauthorized')) { toast(t('login_first'),'er'); nav('profile'); }
