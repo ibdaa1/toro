@@ -29,7 +29,7 @@ define('BCRYPT_COST',      11);
 
 // File uploads
 define('UPLOAD_MAX_SIZE',  5 * 1024 * 1024);  // 5 MB
-define('UPLOAD_DIR',       dirname(__DIR__, 1) . '/uploads/');
+define('UPLOAD_DIR',       dirname(__DIR__, 2) . '/uploads/');
 define('UPLOAD_URL_PATH',  '/uploads/');
 
 // Revenue target for progress bar (AED)

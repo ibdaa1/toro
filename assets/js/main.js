@@ -160,7 +160,6 @@ const MQ_COLORS = [
   {bg:'#1a110a',glow:'#e8943a',text:'#f0c08a'},  // amber
   {bg:'#0c1018',glow:'#5b9bd5',text:'#a0c4ee'},  // blue
 ];
-const MQ_MIN_REAL = 4;  // minimum real products before using DEMO fallback
 const MQ_MAX      = 8;  // max cards shown in marquee
 
 function isActiveProduct(p) {
@@ -170,9 +169,9 @@ function isActiveProduct(p) {
 function renderMarquee() {
   const track = document.getElementById('mq-track');
   if (!track) return;
-  const list = (prods.length ? prods : DEMO).filter(isActiveProduct);
-  // Use DEMO if we have too few real products to fill the marquee
-  const src = list.length >= MQ_MIN_REAL ? list.slice(0, MQ_MAX) : DEMO;
+  const list = prods.filter(isActiveProduct);
+  // Use real products whenever available; only fall back to DEMO when there are none
+  const src = list.length > 0 ? list.slice(0, MQ_MAX) : DEMO;
   const cards = src.map((p, i) => {
     const nm   = lang === 'ar' ? p.name_ar : p.name_en;
     const col  = MQ_COLORS[i % MQ_COLORS.length];
