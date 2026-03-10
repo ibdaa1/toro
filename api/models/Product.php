@@ -1,38 +1,39 @@
 <?php
 // ─────────────────────────────────────────────────────────────
 // models/Product.php — Product model
+// Multi-image support: JSON array stored in the `image` TEXT column.
+// Legacy plain-URL values are read transparently via parseProductImages().
+// No ALTER TABLE / schema migration needed.
 // ─────────────────────────────────────────────────────────────
 require_once __DIR__ . '/../config/constants.php';
 require_once __DIR__ . '/../helpers/security.php';
 
 class Product {
     /**
-     * Ensure the `images` TEXT column exists (one-time auto-migration).
-     * MySQL error 1060 (duplicate column name) is expected and ignored.
+     * Decode the `image` column value into an images_arr array.
+     * JSON array ("[...]") is parsed; otherwise treated as a single URL string.
+     * Adds `images_arr` virtual field and normalises `image` to the first URL.
      */
-    public static function ensureImagesColumn($db) {
-        $db->query(
-            "ALTER TABLE products ADD COLUMN images TEXT NULL DEFAULT NULL AFTER image"
-        );
-        // Intentionally ignore return value: error 1060 (duplicate column) is expected
-        // on all requests after the first migration run.
+    private static function decodeImages(array &$row) {
+        $raw = $row['image'] ?? '';
+        $arr = parseProductImages($raw);
+        $row['image']      = $arr[0] ?? '';
+        $row['images_arr'] = $arr;
     }
 
     /**
-     * Decode the `images` column (or legacy `image` column) into an array,
-     * and add convenience `images_arr` and updated `image` keys to a row.
+     * Encode the images to store in the `image` column.
+     * Single image  → plain URL string (backward compat).
+     * Multiple images → JSON array string.
      */
-    private static function decodeImages(array &$row) {
-        // `images` column (JSON array) takes priority over legacy `image`
-        $raw = isset($row['images']) && $row['images'] !== null && $row['images'] !== ''
-            ? $row['images']
-            : ($row['image'] ?? '');
-
-        $arr = parseProductImages($raw);
-
-        // Backward-compat: keep `image` as the first URL
-        $row['image']      = $arr[0] ?? '';
-        $row['images_arr'] = $arr;
+    private static function encodeImageField(array $data): string {
+        $arr = $data['images_arr'] ?? [];
+        if (empty($arr) && !empty($data['image'])) {
+            $arr = [$data['image']];
+        }
+        if (empty($arr)) return '';
+        if (count($arr) === 1) return $arr[0];
+        return json_encode(array_values($arr), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -68,7 +69,8 @@ class Product {
         }
 
         if ($search !== null && $search !== '') {
-            // Escape LIKE special characters to prevent unexpected wildcard behaviour
+            // Escape LIKE special chars (\, %, _) then wrap in wildcards for a substring search.
+            // mb_substr caps to 100 chars to prevent oversized queries.
             $escaped      = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], mb_substr($search, 0, 100));
             $s            = '%' . $escaped . '%';
             $conditions[] = '(name_ar LIKE ? OR name_en LIKE ? OR brand LIKE ?)';
@@ -97,23 +99,22 @@ class Product {
      * Insert a new product. Returns new ID or 0.
      */
     public static function create($db, $data) {
-        $imagesJson = self::encodeImages($data);
-        $firstImage = $data['image'] ?? '';
+        $imageVal = self::encodeImageField($data);
         $stmt = $db->prepare(
             "INSERT INTO products
                 (name_ar, name_en, brand, origin, category,
                  description_ar, description_en, price, price_before,
-                 stock, image, images, is_active)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                 stock, image, is_active)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
         if (!$stmt) return 0;
         $stmt->bind_param(
-            'sssssssddissi',
+            'sssssssddisi',
             $data['name_ar'], $data['name_en'], $data['brand'],
             $data['origin'], $data['category'],
             $data['description_ar'], $data['description_en'],
             $data['price'], $data['price_before'],
-            $data['stock'], $firstImage, $imagesJson, $data['is_active']
+            $data['stock'], $imageVal, $data['is_active']
         );
         $stmt->execute();
         $newId = $db->insert_id;
@@ -125,42 +126,27 @@ class Product {
      * Update an existing product.
      */
     public static function update($db, $id, $data) {
-        $imagesJson = self::encodeImages($data);
-        $firstImage = $data['image'] ?? '';
+        $imageVal = self::encodeImageField($data);
         $stmt = $db->prepare(
             "UPDATE products SET
                 name_ar=?, name_en=?, brand=?, origin=?, category=?,
                 description_ar=?, description_en=?, price=?, price_before=?,
-                stock=?, image=?, images=?, is_active=?
+                stock=?, image=?, is_active=?
              WHERE id=?"
         );
         if (!$stmt) return false;
         $stmt->bind_param(
-            'sssssssddissii',
+            'sssssssddisii',
             $data['name_ar'], $data['name_en'], $data['brand'],
             $data['origin'], $data['category'],
             $data['description_ar'], $data['description_en'],
             $data['price'], $data['price_before'],
-            $data['stock'], $firstImage, $imagesJson, $data['is_active'],
+            $data['stock'], $imageVal, $data['is_active'],
             $id
         );
         $ok = $stmt->execute();
         $stmt->close();
         return $ok;
-    }
-
-    /**
-     * Encode the images_arr array to JSON for storage in the `images` column.
-     * Returns null if no images are present.
-     * Note: the caller stores images_arr[0] in the `image` column separately.
-     */
-    private static function encodeImages(array $data): ?string {
-        $arr = $data['images_arr'] ?? [];
-        if (empty($arr)) {
-            // Fall back to single `image` field if no array provided
-            $arr = !empty($data['image']) ? [$data['image']] : [];
-        }
-        return empty($arr) ? null : json_encode(array_values($arr), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     /**

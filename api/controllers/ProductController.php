@@ -15,11 +15,6 @@ class ProductController {
         $method = reqMethod();
         $id     = qInt('id') ? qInt('id') : null;
 
-        // One-time auto-migration: ensure `images` column exists
-        $mdb = getDB();
-        Product::ensureImagesColumn($mdb);
-        $mdb->close();
-
         switch ($method) {
             case 'GET':    $this->get($id);    break;
             case 'POST':   $this->post();      break;
