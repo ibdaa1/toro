@@ -13,7 +13,7 @@ require_once __DIR__ . '/security.php';
  * @param array  $file     The $_FILES['image'] array.
  * @return array           ['url' => '...', 'filename' => '...']
  */
-function processImageUpload(array $file): array {
+function processImageUpload($file) {
     // Validate upload error
     if ($file['error'] !== UPLOAD_ERR_OK) {
         $messages = [

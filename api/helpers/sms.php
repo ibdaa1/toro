@@ -12,7 +12,7 @@
  * @param string $message Message body (max 160 chars for a single SMS).
  * @return bool           True on success, false on failure.
  */
-function sendSMS(string $to, string $message): bool {
+function sendSMS($to, $message) {
     // TODO: Integrate Twilio / Unifonic / Ooredoo SMS API
     // Example with Twilio:
     //   $client = new Twilio\Rest\Client(TWILIO_SID, TWILIO_TOKEN);
@@ -31,7 +31,7 @@ function sendSMS(string $to, string $message): bool {
  * @param string $to   Phone number.
  * @param string $otp  One-time password code.
  */
-function sendOtpSMS(string $to, string $otp): bool {
+function sendOtpSMS($to, $otp) {
     $message = "TORO: رمز التحقق الخاص بك هو $otp — Your verification code is $otp";
     return sendSMS($to, $message);
 }

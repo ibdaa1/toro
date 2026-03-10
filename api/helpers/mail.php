@@ -13,7 +13,7 @@
  * @param string $body    Plain-text body.
  * @return bool           True on success, false on failure.
  */
-function sendMail(string $to, string $subject, string $body): bool {
+function sendMail($to, $subject, $body) {
     // TODO: Integrate PHPMailer / Mailgun / SendGrid for production use.
 
     // Guard against header injection: reject any newlines in to/subject
@@ -38,7 +38,7 @@ function sendMail(string $to, string $subject, string $body): bool {
  * @param string $html    HTML body.
  * @return bool
  */
-function sendHtmlMail(string $to, string $subject, string $html): bool {
+function sendHtmlMail($to, $subject, $html) {
     if (strpbrk($to, "\r\n") !== false || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
         return false;
     }

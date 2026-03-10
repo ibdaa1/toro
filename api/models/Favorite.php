@@ -7,7 +7,7 @@ class Favorite {
     /**
      * Return all favorites for a user, including product details.
      */
-    public static function findByUser(mysqli $db, int $userId): array {
+    public static function findByUser($db, $userId) {
         $stmt = $db->prepare(
             "SELECT f.id AS fav_id, f.created_at AS added_at,
                     p.id, p.name_ar, p.name_en, p.brand, p.origin,
@@ -29,7 +29,7 @@ class Favorite {
     /**
      * Check whether a product is already in a user's favorites.
      */
-    public static function exists(mysqli $db, int $userId, int $productId): bool {
+    public static function exists($db, $userId, $productId) {
         $stmt = $db->prepare(
             "SELECT id FROM favorites WHERE user_id = ? AND product_id = ? LIMIT 1"
         );
@@ -44,7 +44,7 @@ class Favorite {
     /**
      * Add a product to favorites.
      */
-    public static function add(mysqli $db, int $userId, int $productId): bool {
+    public static function add($db, $userId, $productId) {
         $stmt = $db->prepare("INSERT INTO favorites (user_id, product_id) VALUES (?, ?)");
         if (!$stmt) return false;
         $stmt->bind_param('ii', $userId, $productId);
@@ -56,7 +56,7 @@ class Favorite {
     /**
      * Remove a product from favorites by user + product.
      */
-    public static function remove(mysqli $db, int $userId, int $productId): bool {
+    public static function remove($db, $userId, $productId) {
         $stmt = $db->prepare("DELETE FROM favorites WHERE user_id = ? AND product_id = ?");
         if (!$stmt) return false;
         $stmt->bind_param('ii', $userId, $productId);
