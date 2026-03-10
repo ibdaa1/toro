@@ -18,12 +18,18 @@ RedirectMatch 404 /\.svn(/.*)?$
 RedirectMatch 404 /\.hg(/.*)?$
 
 # ── HTTP → HTTPS redirect ─────────────────────────────────────
-# Redirect all plain-HTTP requests to the HTTPS equivalent.
-# RewriteEngine at the root level is safe on InfinityFree/LiteSpeed.
-# The api/ sub-directory has its own .htaccess with RewriteEngine Off
-# to prevent any cascade that could disrupt API POST request bodies.
+# InfinityFree uses Openresty as a reverse proxy: SSL is terminated at
+# the proxy and all backend requests arrive as HTTP, so %{HTTPS} is
+# always "off".  The proxy signals the original protocol via the
+# X-Forwarded-Proto header ("http" or "https").
+# We redirect only when BOTH indicators confirm a plain-HTTP connection:
+#   1. %{HTTPS} is "off"  (direct connection not encrypted)
+#   2. X-Forwarded-Proto is not "https"  (proxy did not terminate HTTPS)
+# Using AND logic prevents infinite redirect loops for HTTPS users whose
+# requests arrive at LiteSpeed without the %{HTTPS}=on flag.
 RewriteEngine On
-RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # ── Route direct index.html requests through index.php ────────

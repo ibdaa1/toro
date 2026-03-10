@@ -8,10 +8,29 @@
 // the static index.html without modification.
 // ─────────────────────────────────────────────────────────────
 
-// ── 1. Strict-Transport-Security (HSTS) ──────────────────────
-// Only send HSTS over HTTPS — never over plain HTTP.
+// ── 0. HTTP → HTTPS redirect ─────────────────────────────────
+// InfinityFree's Openresty proxy terminates SSL and forwards requests
+// to PHP as plain HTTP, setting X-Forwarded-Proto to signal the
+// original protocol.  If neither indicator shows HTTPS, issue a 301
+// redirect — this acts as a fallback for cases where the .htaccess
+// RewriteEngine does not run (e.g., raw HTTP traffic bypassing LiteSpeed
+// .htaccess processing on InfinityFree's free tier).
 $isHttps = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on')
         || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+if (!$isHttps) {
+    // Ensure the URI starts with / so the target is always a path on
+    // the same host, never a protocol-relative URL.  Use the canonical
+    // hostname (hardcoded to prevent open-redirect via a crafted Host
+    // header — the domain is already hardcoded site-wide in main.js and
+    // manifest.json, so this is consistent with the project's convention).
+    $rawUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
+    $uri    = '/' . ltrim($rawUri, '/');
+    header('Location: https://qooqz.infinityfreeapp.com' . $uri, true, 301);
+    exit;
+}
+
+// ── 1. Strict-Transport-Security (HSTS) ──────────────────────
+// We only reach here over HTTPS (HTTP requests were redirected above).
 if ($isHttps) {
     header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
 }
