@@ -26,6 +26,15 @@ function sanitizeString(?string $str, int $maxLen = 255): string
 }
 
 /**
+ * Sanitize string input — short alias for sanitizeString().
+ * Used throughout controllers; keeps call-sites concise.
+ */
+function sanitize($str, $maxLen = 255): string
+{
+    return sanitizeString(is_string($str) ? $str : (string)$str, (int)$maxLen);
+}
+
+/**
  * Escape output for HTML
  */
 function escHtml(?string $str): string
