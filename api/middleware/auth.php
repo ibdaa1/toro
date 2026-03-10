@@ -1,32 +1,28 @@
 <?php
 // ─────────────────────────────────────────────────────────────
 // middleware/auth.php — Authentication middleware
-// Wraps authUser() for use as an OOP middleware.
 // ─────────────────────────────────────────────────────────────
 require_once __DIR__ . '/../helpers/auth_helper.php';
 
 class AuthMiddleware {
     /**
      * Require a valid token; returns the authenticated user.
-     *
-     * @param bool $requireAdmin  Require admin role if true.
-     * @return array
      */
-    public static function handle(bool $requireAdmin = false): array {
+    public static function handle($requireAdmin = false) {
         return authUser($requireAdmin);
     }
 
     /**
      * Require an authenticated user (any role).
      */
-    public static function user(): array {
+    public static function user() {
         return self::handle(false);
     }
 
     /**
      * Require an admin user.
      */
-    public static function admin(): array {
+    public static function admin() {
         return self::handle(true);
     }
 }

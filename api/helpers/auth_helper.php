@@ -7,6 +7,7 @@ require_once __DIR__ . '/jwt.php';
 require_once __DIR__ . '/response.php';
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/constants.php';
 
 /**
  * Authenticate the current request.
@@ -14,7 +15,7 @@ require_once __DIR__ . '/../config/config.php';
  * @param bool $requireAdmin  If true, the user must have the 'admin' role.
  * @return array              The authenticated user record.
  */
-function authUser(bool $requireAdmin = false): array {
+function authUser($requireAdmin = false) {
     $token = getToken();
     if (!$token) {
         err('Unauthorized - token not found in headers/body/query', 401);

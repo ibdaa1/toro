@@ -12,9 +12,9 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/constants.php';
 
 class PaymentController {
-    public function handle(): void {
+    public function handle() {
         $method = reqMethod();
-        $id     = qInt('id') ?: null;
+        $id     = qInt('id') ? qInt('id') : null;
 
         switch ($method) {
             case 'GET':  $this->get();     break;
@@ -24,7 +24,7 @@ class PaymentController {
         }
     }
 
-    private function get(): void {
+    private function get() {
         $user = authUser();
         $db   = getDB();
         $rows = Payment::findAll($db, $user['role'] === 'admin' ? null : (int)$user['id']);
@@ -32,14 +32,14 @@ class PaymentController {
         ok($rows);
     }
 
-    private function post(): void {
+    private function post() {
         $user      = authUser();
         $body      = getBody();
-        $orderId   = (int)($body['order_id']        ?? 0);
-        $method_   = trim($body['method']           ?? 'cod');
-        $schedDate = trim($body['scheduled_date']   ?? '');
-        $reference = sanitize($body['reference']    ?? '', 100);
-        $notes     = sanitize($body['notes']        ?? '', 500);
+        $orderId   = (int)(isset($body['order_id'])        ? $body['order_id']        : 0);
+        $method_   = trim(isset($body['method'])           ? $body['method']           : 'cod');
+        $schedDate = trim(isset($body['scheduled_date'])   ? $body['scheduled_date']   : '');
+        $reference = sanitize(isset($body['reference'])    ? $body['reference']        : '', 100);
+        $notes     = sanitize(isset($body['notes'])        ? $body['notes']            : '', 500);
 
         if (!in_array($method_, PAYMENT_METHODS, true)) err('Invalid payment method');
         if ($orderId <= 0) err('Order ID required');
@@ -67,13 +67,13 @@ class PaymentController {
         ok(['id' => $newId, 'msg' => 'Payment record created']);
     }
 
-    private function put(?int $id): void {
+    private function put($id) {
         if (!$id) err('ID required', 400);
         authUser(true);
         $body      = getBody();
-        $newStatus = trim($body['status']    ?? '');
-        $reference = sanitize($body['reference'] ?? '', 100);
-        $notes     = sanitize($body['notes']     ?? '', 500);
+        $newStatus = trim(isset($body['status'])    ? $body['status']    : '');
+        $reference = sanitize(isset($body['reference']) ? $body['reference'] : '', 100);
+        $notes     = sanitize(isset($body['notes'])     ? $body['notes']     : '', 500);
 
         if (!in_array($newStatus, PAYMENT_STATUSES, true)) err('Invalid payment status');
 

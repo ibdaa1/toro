@@ -13,9 +13,9 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/constants.php';
 
 class OrderController {
-    public function handle(): void {
+    public function handle() {
         $method = reqMethod();
-        $id     = qInt('id') ?: null;
+        $id     = qInt('id') ? qInt('id') : null;
 
         switch ($method) {
             case 'GET':  $this->get();       break;
@@ -25,7 +25,7 @@ class OrderController {
         }
     }
 
-    private function get(): void {
+    private function get() {
         $user = authUser();
         $db   = getDB();
         $rows = Order::findAll($db, $user['role'] === 'admin' ? null : (int)$user['id']);
@@ -33,12 +33,12 @@ class OrderController {
         ok($rows);
     }
 
-    private function post(): void {
+    private function post() {
         $user  = authUser();
         $body  = getBody();
-        $items = $body['items']   ?? [];
-        $addr  = sanitize($body['address'] ?? '', 500);
-        $notes = sanitize($body['notes']   ?? '', 300);
+        $items = isset($body['items'])   ? $body['items']   : [];
+        $addr  = sanitize(isset($body['address']) ? $body['address'] : '', 500);
+        $notes = sanitize(isset($body['notes'])   ? $body['notes']   : '', 300);
 
         if (empty($items) || !is_array($items)) err('السلة فارغة / Cart is empty');
         if (!$addr)                              err('العنوان مطلوب / Address required');
@@ -51,8 +51,8 @@ class OrderController {
         $safeItems = [];
 
         foreach ($items as $item) {
-            $pid = (int)($item['product_id'] ?? 0);
-            $qty = (int)($item['qty'] ?? 1);
+            $pid = (int)(isset($item['product_id']) ? $item['product_id'] : 0);
+            $qty = (int)(isset($item['qty']) ? $item['qty'] : 1);
             if ($pid <= 0 || $qty <= 0 || $qty > 1000) {
                 $db->close();
                 err("بيانات المنتج غير صحيحة: $pid");
@@ -80,11 +80,11 @@ class OrderController {
         ok(['order_id' => $oid, 'total' => round($total, 2)]);
     }
 
-    private function put(?int $id): void {
+    private function put($id) {
         if (!$id) err('ID required', 400);
         authUser(true);
         $body      = getBody();
-        $rawStatus = $body['status'] ?? '';
+        $rawStatus = isset($body['status']) ? $body['status'] : '';
         if (!in_array($rawStatus, ORDER_STATUSES, true)) err('Invalid status');
 
         $db = getDB();

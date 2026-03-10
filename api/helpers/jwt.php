@@ -8,15 +8,15 @@ require_once __DIR__ . '/../config/config.php';
 /**
  * Create a signed token for the given user ID.
  */
-function makeToken(int $userId): string {
-    $payload = json_encode(['id' => $userId, 'ts' => time()]);
+function makeToken($userId) {
+    $payload = json_encode(['id' => (int)$userId, 'ts' => time()]);
     return rtrim(strtr(base64_encode($payload), '+/', '-_'), '=');
 }
 
 /**
  * Decode a token and return the payload array, or null on failure.
  */
-function decodeToken(string $token): ?array {
+function decodeToken($token) {
     $b64 = strtr(trim($token), '-_', '+/');
     $pad = strlen($b64) % 4;
     if ($pad) $b64 .= str_repeat('=', 4 - $pad);
@@ -30,12 +30,12 @@ function decodeToken(string $token): ?array {
 /**
  * Extract a bearer token from the request in priority order:
  *   1. X-Token header (passed via .htaccess rewrite)
- *   2. Authorization: Bearer … header
+ *   2. Authorization: ****** header
  *   3. getallheaders() / apache_request_headers()
  *   4. JSON body { "_token": "…" }
  *   5. Query string ?_token=…
  */
-function getToken(): ?string {
+function getToken() {
     // 1. X-Token custom header (via .htaccess)
     if (!empty($_SERVER['HTTP_X_TOKEN'])) {
         return trim($_SERVER['HTTP_X_TOKEN']);

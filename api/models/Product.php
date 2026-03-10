@@ -6,9 +6,9 @@ require_once __DIR__ . '/../config/constants.php';
 
 class Product {
     /**
-     * Find one active product by ID.
+     * Find one product by ID. Returns array or null.
      */
-    public static function findById(mysqli $db, int $id, bool $activeOnly = true): ?array {
+    public static function findById($db, $id, $activeOnly = true) {
         $sql = $activeOnly
             ? "SELECT * FROM products WHERE id = ? AND is_active = 1 LIMIT 1"
             : "SELECT * FROM products WHERE id = ? LIMIT 1";
@@ -18,22 +18,13 @@ class Product {
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
         $stmt->close();
-        return $row ?: null;
+        return $row ? $row : null;
     }
 
     /**
      * Return a list of products with optional filters.
-     *
-     * @param bool        $adminMode   If true, include inactive products.
-     * @param string|null $category
-     * @param string|null $search
      */
-    public static function findAll(
-        mysqli  $db,
-        bool    $adminMode = false,
-        ?string $category  = null,
-        ?string $search    = null
-    ): array {
+    public static function findAll($db, $adminMode = false, $category = null, $search = null) {
         $conditions = $adminMode ? [] : ['is_active = 1'];
         $params     = [];
         $types      = '';
@@ -45,7 +36,7 @@ class Product {
         }
 
         if ($search !== null && $search !== '') {
-            // Escape LIKE special characters (%, _) to prevent unexpected wildcard behaviour
+            // Escape LIKE special characters to prevent unexpected wildcard behaviour
             $escaped      = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], mb_substr($search, 0, 100));
             $s            = '%' . $escaped . '%';
             $conditions[] = '(name_ar LIKE ? OR name_en LIKE ? OR brand LIKE ?)';
@@ -67,12 +58,9 @@ class Product {
     }
 
     /**
-     * Insert a new product.
-     *
-     * @param array $data  Associative array of product fields.
-     * @return int         New product ID, 0 on failure.
+     * Insert a new product. Returns new ID or 0.
      */
-    public static function create(mysqli $db, array $data): int {
+    public static function create($db, $data) {
         $stmt = $db->prepare(
             "INSERT INTO products
                 (name_ar, name_en, brand, origin, category,
@@ -92,13 +80,13 @@ class Product {
         $stmt->execute();
         $newId = $db->insert_id;
         $stmt->close();
-        return $newId;
+        return (int)$newId;
     }
 
     /**
      * Update an existing product.
      */
-    public static function update(mysqli $db, int $id, array $data): bool {
+    public static function update($db, $id, $data) {
         $stmt = $db->prepare(
             "UPDATE products SET
                 name_ar=?, name_en=?, brand=?, origin=?, category=?,
@@ -124,7 +112,7 @@ class Product {
     /**
      * Soft-delete a product (set is_active = 0).
      */
-    public static function softDelete(mysqli $db, int $id): bool {
+    public static function softDelete($db, $id) {
         $stmt = $db->prepare("UPDATE products SET is_active = 0 WHERE id = ?");
         if (!$stmt) return false;
         $stmt->bind_param('i', $id);
@@ -134,9 +122,9 @@ class Product {
     }
 
     /**
-     * Decrement stock for a product (used when creating an order).
+     * Decrement stock for a product.
      */
-    public static function decrementStock(mysqli $db, int $id, int $qty): bool {
+    public static function decrementStock($db, $id, $qty) {
         $stmt = $db->prepare("UPDATE products SET stock = stock - ? WHERE id = ?");
         if (!$stmt) return false;
         $stmt->bind_param('ii', $qty, $id);
@@ -148,7 +136,7 @@ class Product {
     /**
      * Set the stock level directly.
      */
-    public static function setStock(mysqli $db, int $id, int $newStock): bool {
+    public static function setStock($db, $id, $newStock) {
         $stmt = $db->prepare("UPDATE products SET stock = ? WHERE id = ?");
         if (!$stmt) return false;
         $stmt->bind_param('ii', $newStock, $id);

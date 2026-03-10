@@ -11,7 +11,7 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../middleware/rate_limit.php';
 
 class AuthController {
-    public function handle(): void {
+    public function handle() {
         $method = reqMethod();
         $action = qStr('action');
 
@@ -24,13 +24,13 @@ class AuthController {
         }
     }
 
-    private function register(): void {
+    private function register() {
         RateLimitMiddleware::check(10, 60, 'register');
 
         $body  = getBody();
-        $name  = sanitize($body['name']  ?? '', 100);
-        $email = trim(strtolower($body['email'] ?? ''));
-        $pass  = $body['password'] ?? '';
+        $name  = sanitize(isset($body['name'])  ? $body['name']  : '', 100);
+        $email = trim(strtolower(isset($body['email']) ? $body['email'] : ''));
+        $pass  = isset($body['password']) ? $body['password'] : '';
 
         if (!$name || !$email || !$pass)       err('جميع الحقول مطلوبة / All fields required');
         if (mb_strlen($name) > 100)             err('الاسم طويل جداً / Name too long');
@@ -57,12 +57,12 @@ class AuthController {
         ]);
     }
 
-    private function login(): void {
+    private function login() {
         RateLimitMiddleware::check(20, 60, 'login');
 
         $body  = getBody();
-        $email = trim(strtolower($body['email'] ?? ''));
-        $pass  = $body['password'] ?? '';
+        $email = trim(strtolower(isset($body['email']) ? $body['email'] : ''));
+        $pass  = isset($body['password']) ? $body['password'] : '';
 
         if (!$email || !$pass)      err('أدخل البيانات / Enter credentials');
         if (!isValidEmail($email))  err('بيانات خاطئة / Invalid credentials', 401);

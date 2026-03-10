@@ -10,7 +10,7 @@ require_once __DIR__ . '/../helpers/response.php';
 require_once __DIR__ . '/../config/db.php';
 
 class FavoriteController {
-    public function handle(): void {
+    public function handle() {
         $user   = authUser();
         $method = reqMethod();
 
@@ -22,16 +22,16 @@ class FavoriteController {
         }
     }
 
-    private function get(array $user): void {
+    private function get($user) {
         $db   = getDB();
         $rows = Favorite::findByUser($db, (int)$user['id']);
         $db->close();
         ok($rows);
     }
 
-    private function post(array $user): void {
+    private function post($user) {
         $body      = getBody();
-        $productId = (int)($body['product_id'] ?? 0);
+        $productId = (int)(isset($body['product_id']) ? $body['product_id'] : 0);
         if ($productId <= 0) err('product_id required');
 
         $db = getDB();
@@ -53,7 +53,7 @@ class FavoriteController {
         }
     }
 
-    private function delete(array $user): void {
+    private function delete($user) {
         $productId = qInt('product_id');
         if ($productId <= 0) err('product_id required');
 

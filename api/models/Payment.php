@@ -6,9 +6,9 @@ require_once __DIR__ . '/../config/constants.php';
 
 class Payment {
     /**
-     * Return all payments (admin) or just a user's own payments.
+     * Return all payments. Pass null for admin (all), or user ID for own.
      */
-    public static function findAll(mysqli $db, ?int $userId = null): array {
+    public static function findAll($db, $userId = null) {
         if ($userId === null) {
             $stmt = $db->prepare(
                 "SELECT p.*, o.status AS order_status, u.name AS user_name, u.email
@@ -37,7 +37,7 @@ class Payment {
     /**
      * Check whether a payment record already exists for an order.
      */
-    public static function existsForOrder(mysqli $db, int $orderId): bool {
+    public static function existsForOrder($db, $orderId) {
         $stmt = $db->prepare("SELECT id FROM payments WHERE order_id = ? LIMIT 1");
         if (!$stmt) return false;
         $stmt->bind_param('i', $orderId);
@@ -49,17 +49,9 @@ class Payment {
 
     /**
      * Create a payment record. Returns new ID or 0.
+     * $scheduledDate can be a string date or null.
      */
-    public static function create(
-        mysqli  $db,
-        int     $orderId,
-        int     $userId,
-        float   $amount,
-        string  $method,
-        ?string $scheduledDate,
-        string  $reference,
-        string  $notes
-    ): int {
+    public static function create($db, $orderId, $userId, $amount, $method, $scheduledDate, $reference, $notes) {
         $stmt = $db->prepare(
             "INSERT INTO payments (order_id, user_id, amount, method, scheduled_date, reference, notes)
              VALUES (?, ?, ?, ?, ?, ?, ?)"
@@ -69,19 +61,13 @@ class Payment {
         $stmt->execute();
         $newId = $db->insert_id;
         $stmt->close();
-        return $newId;
+        return (int)$newId;
     }
 
     /**
      * Update payment status, reference and notes.
      */
-    public static function updateStatus(
-        mysqli $db,
-        int    $id,
-        string $status,
-        string $reference = '',
-        string $notes     = ''
-    ): bool {
+    public static function updateStatus($db, $id, $status, $reference = '', $notes = '') {
         if (!in_array($status, PAYMENT_STATUSES, true)) return false;
         $stmt = $db->prepare(
             "UPDATE payments SET status = ?, reference = ?, notes = ? WHERE id = ?"
@@ -94,9 +80,9 @@ class Payment {
     }
 
     /**
-     * Create a default COD payment record (used when creating an order).
+     * Create a default COD payment record.
      */
-    public static function createCOD(mysqli $db, int $orderId, int $userId, float $amount): int {
+    public static function createCOD($db, $orderId, $userId, $amount) {
         $stmt = $db->prepare(
             "INSERT IGNORE INTO payments (order_id, user_id, amount, method, status)
              VALUES (?, ?, ?, 'cod', 'pending')"
@@ -106,13 +92,13 @@ class Payment {
         $stmt->execute();
         $newId = $db->insert_id;
         $stmt->close();
-        return $newId;
+        return (int)$newId;
     }
 
     /**
      * Confirm order when payment is marked as paid.
      */
-    public static function confirmOrderOnPaid(mysqli $db, int $paymentId): void {
+    public static function confirmOrderOnPaid($db, $paymentId) {
         $stmt = $db->prepare(
             "UPDATE orders SET status = 'confirmed'
              WHERE id = (SELECT order_id FROM payments WHERE id = ?)

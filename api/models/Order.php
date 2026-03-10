@@ -6,12 +6,10 @@ require_once __DIR__ . '/../config/constants.php';
 
 class Order {
     /**
-     * Return all orders (with user info) for admins,
-     * or just the authenticated user's orders.
+     * Return all orders. Pass null for admin (all), or user ID for own orders.
      */
-    public static function findAll(mysqli $db, ?int $userId = null): array {
+    public static function findAll($db, $userId = null) {
         if ($userId === null) {
-            // Admin: all orders with user info
             $stmt = $db->prepare(
                 "SELECT o.*, u.name AS user_name, u.email
                  FROM orders o JOIN users u ON o.user_id = u.id
@@ -40,7 +38,7 @@ class Order {
     /**
      * Get items for a single order.
      */
-    public static function getItems(mysqli $db, int $orderId): array {
+    public static function getItems($db, $orderId) {
         $stmt = $db->prepare(
             "SELECT oi.*, p.name_ar, p.name_en, p.image
              FROM order_items oi
@@ -58,7 +56,7 @@ class Order {
     /**
      * Create a new order and return its ID.
      */
-    public static function create(mysqli $db, int $userId, float $total, string $address, string $notes): int {
+    public static function create($db, $userId, $total, $address, $notes) {
         $stmt = $db->prepare(
             "INSERT INTO orders (user_id, total, address, notes) VALUES (?, ?, ?, ?)"
         );
@@ -67,13 +65,13 @@ class Order {
         $stmt->execute();
         $newId = $db->insert_id;
         $stmt->close();
-        return $newId;
+        return (int)$newId;
     }
 
     /**
      * Insert a single order item.
      */
-    public static function addItem(mysqli $db, int $orderId, int $productId, int $qty, float $price): bool {
+    public static function addItem($db, $orderId, $productId, $qty, $price) {
         $stmt = $db->prepare(
             "INSERT INTO order_items (order_id, product_id, qty, price) VALUES (?, ?, ?, ?)"
         );
@@ -87,7 +85,7 @@ class Order {
     /**
      * Update an order's status.
      */
-    public static function updateStatus(mysqli $db, int $id, string $status): bool {
+    public static function updateStatus($db, $id, $status) {
         if (!in_array($status, ORDER_STATUSES, true)) return false;
         $stmt = $db->prepare("UPDATE orders SET status = ? WHERE id = ?");
         if (!$stmt) return false;
@@ -98,9 +96,9 @@ class Order {
     }
 
     /**
-     * Fetch a single order by ID (with items).
+     * Fetch a single order by ID (with items). Returns array or null.
      */
-    public static function findById(mysqli $db, int $id): ?array {
+    public static function findById($db, $id) {
         $stmt = $db->prepare(
             "SELECT o.*, u.name AS user_name, u.email
              FROM orders o JOIN users u ON o.user_id = u.id

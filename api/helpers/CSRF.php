@@ -1,21 +1,17 @@
 <?php
 // ─────────────────────────────────────────────────────────────
 // CSRF.php — CSRF token generation and validation
-//
-// Note: REST APIs secured by token-based auth (Authorization header)
-// are inherently protected against CSRF for JSON requests.
-// This class is provided for any server-rendered / form-based flows
-// that require double-submit cookie or session-based CSRF protection.
 // ─────────────────────────────────────────────────────────────
 
 class CSRF {
-    private const SESSION_KEY = 'toro_csrf_token';
-    private const HEADER_NAME = 'X-CSRF-Token';
+    // No visibility modifier — compatible with PHP 7.0
+    const SESSION_KEY = 'toro_csrf_token';
+    const HEADER_NAME = 'X-CSRF-Token';
 
     /**
      * Generate and store a new CSRF token in the session.
      */
-    public static function generateToken(): string {
+    public static function generateToken() {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -27,7 +23,7 @@ class CSRF {
     /**
      * Retrieve the current session CSRF token (generate one if missing).
      */
-    public static function getToken(): string {
+    public static function getToken() {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -39,24 +35,22 @@ class CSRF {
 
     /**
      * Validate a submitted CSRF token using a constant-time comparison.
-     *
-     * @param string|null $submitted  The token from the request header or body.
      */
-    public static function validateToken(?string $submitted): bool {
+    public static function validateToken($submitted) {
         if ($submitted === null || $submitted === '') {
             return false;
         }
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        $stored = $_SESSION[self::SESSION_KEY] ?? '';
+        $stored = isset($_SESSION[self::SESSION_KEY]) ? $_SESSION[self::SESSION_KEY] : '';
         return $stored !== '' && hash_equals($stored, $submitted);
     }
 
     /**
      * Extract the CSRF token from the request (header first, then body).
      */
-    public static function fromRequest(): ?string {
+    public static function fromRequest() {
         // From X-CSRF-Token header
         $headers = function_exists('getallheaders') ? array_change_key_case(getallheaders(), CASE_LOWER) : [];
         $headerKey = strtolower(self::HEADER_NAME);
@@ -82,7 +76,7 @@ class CSRF {
     /**
      * Require a valid CSRF token; terminate with 403 if invalid.
      */
-    public static function requireValid(): void {
+    public static function requireValid() {
         if (!self::validateToken(self::fromRequest())) {
             http_response_code(403);
             echo json_encode(['ok' => false, 'msg' => 'CSRF token invalid or missing'], JSON_UNESCAPED_UNICODE);

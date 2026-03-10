@@ -6,18 +6,15 @@
 // ─────────────────────────────────────────────────────────────
 
 class I18n {
-    private static array  $translations = [];
-    private static string $currentLang  = 'ar';
-    private static string $langDir      = '';
+    private static $translations = [];
+    private static $currentLang  = 'ar';
+    private static $langDir      = '';
 
     /**
      * Initialise the i18n system.
-     *
-     * @param string $lang    Language code ('ar' or 'en').
-     * @param string $langDir Absolute path to the lang/ directory.
      */
-    public static function init(string $lang = 'ar', string $langDir = ''): void {
-        self::$langDir     = $langDir ?: __DIR__ . '/../lang';
+    public static function init($lang = 'ar', $langDir = '') {
+        self::$langDir     = $langDir ? $langDir : __DIR__ . '/../lang';
         self::$currentLang = $lang;
         self::load($lang);
 
@@ -30,7 +27,7 @@ class I18n {
     /**
      * Load a language file into the cache.
      */
-    private static function load(string $lang): void {
+    private static function load($lang) {
         if (isset(self::$translations[$lang])) return;
 
         $file = rtrim(self::$langDir, '/') . '/' . $lang . '.json';
@@ -45,13 +42,9 @@ class I18n {
     /**
      * Translate a dot-notation key, e.g. "auth.invalid_email".
      * Falls back to Arabic, then to the key itself.
-     *
-     * @param string $key   Dot-notation key.
-     * @param string $lang  Override language for this call.
-     * @param array  $vars  Replacement variables: ['name' => 'Alice'] replaces :name.
      */
-    public static function t(string $key, string $lang = '', array $vars = []): string {
-        $useLang = $lang ?: self::$currentLang;
+    public static function t($key, $lang = '', $vars = []) {
+        $useLang = $lang ? $lang : self::$currentLang;
         $value   = self::resolve($key, $useLang);
 
         // Fallback chain: requested lang → Arabic → key itself
@@ -73,10 +66,10 @@ class I18n {
     /**
      * Resolve a dot-notation key in a loaded language array.
      */
-    private static function resolve(string $key, string $lang): ?string {
+    private static function resolve($key, $lang) {
         self::load($lang);
         $parts = explode('.', $key);
-        $node  = self::$translations[$lang] ?? [];
+        $node  = isset(self::$translations[$lang]) ? self::$translations[$lang] : [];
         foreach ($parts as $part) {
             if (!is_array($node) || !array_key_exists($part, $node)) return null;
             $node = $node[$part];
@@ -87,16 +80,16 @@ class I18n {
     /**
      * Return all translations for a language as an associative array.
      */
-    public static function all(string $lang = ''): array {
-        $useLang = $lang ?: self::$currentLang;
+    public static function all($lang = '') {
+        $useLang = $lang ? $lang : self::$currentLang;
         self::load($useLang);
-        return self::$translations[$useLang] ?? [];
+        return isset(self::$translations[$useLang]) ? self::$translations[$useLang] : [];
     }
 
     /**
      * Return the currently active language code.
      */
-    public static function getLang(): string {
+    public static function getLang() {
         return self::$currentLang;
     }
 }
@@ -104,6 +97,6 @@ class I18n {
 /**
  * Global shortcut for I18n::t().
  */
-function __t(string $key, string $lang = '', array $vars = []): string {
+function __t($key, $lang = '', $vars = []) {
     return I18n::t($key, $lang, $vars);
 }

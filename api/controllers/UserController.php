@@ -9,9 +9,9 @@ require_once __DIR__ . '/../helpers/response.php';
 require_once __DIR__ . '/../config/db.php';
 
 class UserController {
-    public function handle(): void {
+    public function handle() {
         $method = reqMethod();
-        $id     = qInt('id') ?: null;
+        $id     = qInt('id') ? qInt('id') : null;
 
         authUser(true); // admin only for all user management
 
@@ -22,14 +22,14 @@ class UserController {
         }
     }
 
-    private function get(): void {
+    private function get() {
         $db   = getDB();
         $rows = User::findAll($db);
         $db->close();
         ok($rows);
     }
 
-    private function put(?int $id): void {
+    private function put($id) {
         if (!$id) err('ID required', 400);
         $body      = getBody();
         $newActive = isset($body['is_active']) ? (int)(bool)$body['is_active'] : null;

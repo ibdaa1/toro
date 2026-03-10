@@ -11,9 +11,9 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/constants.php';
 
 class ProductController {
-    public function handle(): void {
+    public function handle() {
         $method = reqMethod();
-        $id     = qInt('id') ?: null;
+        $id     = qInt('id') ? qInt('id') : null;
 
         switch ($method) {
             case 'GET':    $this->get($id);    break;
@@ -24,7 +24,7 @@ class ProductController {
         }
     }
 
-    private function get(?int $id): void {
+    private function get($id) {
         $db = getDB();
 
         if ($id) {
@@ -40,14 +40,14 @@ class ProductController {
             $adminMode = true;
         }
 
-        $category = qStr('category') ?: null;
-        $search   = qStr('search')   ?: null;
+        $category = qStr('category') ? qStr('category') : null;
+        $search   = qStr('search')   ? qStr('search')   : null;
         $rows     = Product::findAll($db, $adminMode, $category, $search);
         $db->close();
         ok($rows);
     }
 
-    private function post(): void {
+    private function post() {
         authUser(true);
         $db   = getDB();
         $data = $this->parseBody();
@@ -64,7 +64,7 @@ class ProductController {
         ok(['id' => $newId, 'msg' => 'Product created']);
     }
 
-    private function put(?int $id): void {
+    private function put($id) {
         if (!$id) err('ID required', 400);
         authUser(true);
         $db   = getDB();
@@ -82,7 +82,7 @@ class ProductController {
         ok(['msg' => 'Updated']);
     }
 
-    private function delete(?int $id): void {
+    private function delete($id) {
         if (!$id) err('ID required', 400);
         authUser(true);
         $db = getDB();
@@ -91,23 +91,23 @@ class ProductController {
         ok(['msg' => 'Deleted']);
     }
 
-    private function parseBody(): array {
+    private function parseBody() {
         $body    = getBody();
-        $rawImg  = trim($body['image'] ?? '');
+        $rawImg  = trim(isset($body['image']) ? $body['image'] : '');
 
         return [
-            'name_ar'        => sanitize($body['name_ar']       ?? '', 200),
-            'name_en'        => sanitize($body['name_en']       ?? '', 200),
-            'brand'          => sanitize($body['brand']         ?? '', 100),
-            'origin'         => sanitize($body['origin']        ?? '', 100),
-            'category'       => in_array($body['category'] ?? '', PRODUCT_CATEGORIES, true)
+            'name_ar'        => sanitize(isset($body['name_ar'])       ? $body['name_ar']       : '', 200),
+            'name_en'        => sanitize(isset($body['name_en'])       ? $body['name_en']       : '', 200),
+            'brand'          => sanitize(isset($body['brand'])         ? $body['brand']         : '', 100),
+            'origin'         => sanitize(isset($body['origin'])        ? $body['origin']        : '', 100),
+            'category'       => in_array(isset($body['category']) ? $body['category'] : '', PRODUCT_CATEGORIES, true)
                                     ? $body['category'] : 'unisex',
-            'description_ar' => trim($body['description_ar']   ?? ''),
-            'description_en' => trim($body['description_en']   ?? ''),
-            'price'          => round((float)($body['price']   ?? 0), 2),
+            'description_ar' => trim(isset($body['description_ar'])    ? $body['description_ar']   : ''),
+            'description_en' => trim(isset($body['description_en'])    ? $body['description_en']   : ''),
+            'price'          => round((float)(isset($body['price'])    ? $body['price']   : 0), 2),
             'price_before'   => !empty($body['price_before'])
                                     ? round((float)$body['price_before'], 2) : null,
-            'stock'          => max(0, (int)($body['stock']    ?? 0)),
+            'stock'          => max(0, (int)(isset($body['stock'])     ? $body['stock']   : 0)),
             'image'          => isValidImageUrl($rawImg) ? $rawImg : '',
             'is_active'      => isset($body['is_active']) ? (int)(bool)$body['is_active'] : 1,
         ];

@@ -1,19 +1,17 @@
 <?php
 // ─────────────────────────────────────────────────────────────
 // middleware/TimezoneMiddleware.php — Timezone middleware
-// Ensures all date/time operations use the configured timezone.
 // ─────────────────────────────────────────────────────────────
 
 class TimezoneMiddleware {
     /** Default timezone for the TORO store (UAE) */
-    public const DEFAULT_TZ = 'Asia/Dubai';
+    // No visibility modifier — compatible with PHP 7.0
+    const DEFAULT_TZ = 'Asia/Dubai';
 
     /**
      * Apply the timezone for the current request.
-     *
-     * @param string $timezone  PHP timezone identifier (default: Asia/Dubai).
      */
-    public static function apply(string $timezone = self::DEFAULT_TZ): void {
+    public static function apply($timezone = self::DEFAULT_TZ) {
         if (!self::isValid($timezone)) {
             $timezone = self::DEFAULT_TZ;
         }
@@ -22,10 +20,9 @@ class TimezoneMiddleware {
 
     /**
      * Apply timezone from a request parameter or fall back to default.
-     * Clients may send ?tz=Asia/Riyadh to get localised timestamps.
      */
-    public static function applyFromRequest(): void {
-        $tz = trim($_GET['tz'] ?? '');
+    public static function applyFromRequest() {
+        $tz = trim(isset($_GET['tz']) ? $_GET['tz'] : '');
         if ($tz === '' || !self::isValid($tz)) {
             $tz = self::DEFAULT_TZ;
         }
@@ -35,29 +32,21 @@ class TimezoneMiddleware {
     /**
      * Check whether a timezone identifier is valid.
      */
-    public static function isValid(string $timezone): bool {
+    public static function isValid($timezone) {
         return in_array($timezone, timezone_identifiers_list(), true);
     }
 
     /**
      * Return the current server timezone string.
      */
-    public static function current(): string {
+    public static function current() {
         return date_default_timezone_get();
     }
 
     /**
      * Format a UTC timestamp as a localised datetime string.
-     *
-     * @param string $utcDatetime  MySQL UTC datetime string.
-     * @param string $timezone     Target timezone.
-     * @param string $format       PHP date format.
      */
-    public static function format(
-        string $utcDatetime,
-        string $timezone = self::DEFAULT_TZ,
-        string $format   = 'Y-m-d H:i:s'
-    ): string {
+    public static function format($utcDatetime, $timezone = self::DEFAULT_TZ, $format = 'Y-m-d H:i:s') {
         try {
             $dt = new DateTime($utcDatetime, new DateTimeZone('UTC'));
             $dt->setTimezone(new DateTimeZone($timezone));

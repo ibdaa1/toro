@@ -1,18 +1,13 @@
 <?php
 // ─────────────────────────────────────────────────────────────
 // middleware/rate_limit.php — File-based rate limiting
-// Suitable for shared hosting environments without Redis.
 // ─────────────────────────────────────────────────────────────
 
 class RateLimitMiddleware {
     /**
      * Check whether the current IP has exceeded the rate limit.
-     *
-     * @param int    $maxRequests  Maximum requests allowed per window.
-     * @param int    $windowSecs   Time window in seconds.
-     * @param string $action       Identifier for the rate-limited action.
      */
-    public static function check(int $maxRequests = 60, int $windowSecs = 60, string $action = 'default'): void {
+    public static function check($maxRequests = 60, $windowSecs = 60, $action = 'default') {
         $ip      = self::getClientIp();
         $key     = preg_replace('/[^a-z0-9._-]/i', '_', $action . '_' . $ip);
         $tmpDir  = sys_get_temp_dir();
@@ -25,7 +20,7 @@ class RateLimitMiddleware {
             $raw = @file_get_contents($file);
             if ($raw) {
                 $saved = json_decode($raw, true);
-                if (is_array($saved) && ($now - ($saved['window_start'] ?? 0)) < $windowSecs) {
+                if (is_array($saved) && ($now - (isset($saved['window_start']) ? $saved['window_start'] : 0)) < $windowSecs) {
                     $data = $saved;
                 }
             }
@@ -49,9 +44,9 @@ class RateLimitMiddleware {
     /**
      * Get the real client IP, accounting for proxies.
      */
-    private static function getClientIp(): string {
+    private static function getClientIp() {
         $keys = [
-            'HTTP_CF_CONNECTING_IP',  // Cloudflare
+            'HTTP_CF_CONNECTING_IP',
             'HTTP_X_FORWARDED_FOR',
             'HTTP_X_REAL_IP',
             'REMOTE_ADDR',

@@ -9,18 +9,21 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/constants.php';
 
 class ReportController {
-    public function handle(): void {
+    public function handle() {
         if (reqMethod() !== 'GET') err('Method not allowed', 405);
         authUser(true);
         $this->generate();
     }
 
-    private function generate(): void {
+    private function generate() {
         $db     = getDB();
         $period = qStr('period', '30days');
         if (!in_array($period, REPORT_PERIODS, true)) $period = '30days';
 
-        [$sinceDate, $groupFmt] = $this->dateRange($period);
+        // Use list() for PHP 7.0 compatibility (not short [] destructuring)
+        $dateRange = $this->dateRange($period);
+        $sinceDate = $dateRange[0];
+        $groupFmt  = $dateRange[1];
 
         $revenueData = $this->revenueByPeriod($db, $groupFmt, $sinceDate);
         $topProducts = $this->topProducts($db, $sinceDate);
@@ -39,16 +42,16 @@ class ReportController {
         ]);
     }
 
-    private function dateRange(string $period): array {
+    private function dateRange($period) {
         switch ($period) {
-            case '7days':   return [date('Y-m-d', strtotime('-7 days')),  '%Y-%m-%d'];
-            case '3months': return [date('Y-m-d', strtotime('-3 months')),'%Y-%m-%d'];
-            case 'year':    return [date('Y-m-d', strtotime('-1 year')),  '%Y-%m'];
-            default:        return [date('Y-m-d', strtotime('-30 days')), '%Y-%m-%d'];
+            case '7days':   return [date('Y-m-d', strtotime('-7 days')),   '%Y-%m-%d'];
+            case '3months': return [date('Y-m-d', strtotime('-3 months')), '%Y-%m-%d'];
+            case 'year':    return [date('Y-m-d', strtotime('-1 year')),   '%Y-%m'];
+            default:        return [date('Y-m-d', strtotime('-30 days')),  '%Y-%m-%d'];
         }
     }
 
-    private function revenueByPeriod(mysqli $db, string $groupFmt, string $since): array {
+    private function revenueByPeriod($db, $groupFmt, $since) {
         $stmt = $db->prepare(
             "SELECT DATE_FORMAT(created_at, ?) AS period,
                     COUNT(*) AS orders_count,
@@ -65,7 +68,7 @@ class ReportController {
         return $rows;
     }
 
-    private function topProducts(mysqli $db, string $since): array {
+    private function topProducts($db, $since) {
         $stmt = $db->prepare(
             "SELECT p.id, p.name_ar, p.name_en, p.brand,
                     SUM(oi.qty) AS total_sold,
@@ -84,14 +87,14 @@ class ReportController {
         return $rows;
     }
 
-    private function byStatus(mysqli $db): array {
+    private function byStatus($db) {
         $res = $db->query(
             "SELECT status, COUNT(*) AS count FROM orders GROUP BY status ORDER BY count DESC"
         );
         return $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
     }
 
-    private function summary(mysqli $db, string $since): array {
+    private function summary($db, $since) {
         $stmt = $db->prepare(
             "SELECT COUNT(*) AS total_orders,
                     IFNULL(SUM(total), 0)  AS total_revenue,
@@ -103,6 +106,6 @@ class ReportController {
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
         $stmt->close();
-        return $row ?? ['total_orders' => 0, 'total_revenue' => 0, 'avg_order_value' => 0];
+        return $row ? $row : ['total_orders' => 0, 'total_revenue' => 0, 'avg_order_value' => 0];
     }
 }

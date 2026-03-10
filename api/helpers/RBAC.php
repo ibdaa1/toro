@@ -9,7 +9,8 @@ class RBAC {
      * Admins have all permissions (*).
      * Customers have a limited explicit set.
      */
-    private const PERMISSIONS = [
+    // Note: no visibility modifier on const — compatible with PHP 7.0
+    const PERMISSIONS = [
         'admin'    => ['*'],
         'customer' => [
             'products:read',
@@ -25,11 +26,8 @@ class RBAC {
 
     /**
      * Check whether a user has a given permission.
-     *
-     * @param array  $user       Authenticated user array (must contain 'role').
-     * @param string $permission Permission string, e.g. "products:read".
      */
-    public static function can(array $user, string $permission): bool {
+    public static function can($user, $permission) {
         $role  = $user['role'] ?? 'customer';
         $perms = self::PERMISSIONS[$role] ?? [];
 
@@ -43,11 +41,8 @@ class RBAC {
 
     /**
      * Require a permission; terminate with 403 if not granted.
-     *
-     * @param array  $user
-     * @param string $permission
      */
-    public static function require(array $user, string $permission): void {
+    public static function require($user, $permission) {
         if (!self::can($user, $permission)) {
             http_response_code(403);
             echo json_encode(['ok' => false, 'msg' => 'Forbidden: ' . $permission], JSON_UNESCAPED_UNICODE);
@@ -58,7 +53,7 @@ class RBAC {
     /**
      * Return all permissions for a role.
      */
-    public static function getPermissions(string $role): array {
+    public static function getPermissions($role) {
         return self::PERMISSIONS[$role] ?? [];
     }
 }

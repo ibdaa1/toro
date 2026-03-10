@@ -5,9 +5,9 @@
 
 class User {
     /**
-     * Find a user by primary key.
+     * Find a user by primary key. Returns array or null.
      */
-    public static function findById(mysqli $db, int $id): ?array {
+    public static function findById($db, $id) {
         $stmt = $db->prepare(
             "SELECT id, name, email, role, is_active, created_at FROM users WHERE id = ? LIMIT 1"
         );
@@ -16,13 +16,13 @@ class User {
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
         $stmt->close();
-        return $row ?: null;
+        return $row ? $row : null;
     }
 
     /**
-     * Find a user by email address.
+     * Find a user by email address. Returns array or null.
      */
-    public static function findByEmail(mysqli $db, string $email): ?array {
+    public static function findByEmail($db, $email) {
         $stmt = $db->prepare(
             "SELECT id, name, email, password, role, is_active FROM users WHERE email = ? LIMIT 1"
         );
@@ -31,13 +31,13 @@ class User {
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
         $stmt->close();
-        return $row ?: null;
+        return $row ? $row : null;
     }
 
     /**
      * Check whether an email address is already registered.
      */
-    public static function emailExists(mysqli $db, string $email): bool {
+    public static function emailExists($db, $email) {
         $stmt = $db->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
         if (!$stmt) return false;
         $stmt->bind_param('s', $email);
@@ -50,7 +50,7 @@ class User {
     /**
      * Create a new customer account and return the new user ID.
      */
-    public static function create(mysqli $db, string $name, string $email, string $passwordHash): int {
+    public static function create($db, $name, $email, $passwordHash) {
         $stmt = $db->prepare(
             "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'customer')"
         );
@@ -59,13 +59,13 @@ class User {
         $stmt->execute();
         $newId = $db->insert_id;
         $stmt->close();
-        return $newId;
+        return (int)$newId;
     }
 
     /**
      * Return all users ordered by registration date.
      */
-    public static function findAll(mysqli $db): array {
+    public static function findAll($db) {
         $result = $db->query(
             "SELECT id, name, email, role, is_active, created_at FROM users ORDER BY created_at DESC"
         );
@@ -75,7 +75,7 @@ class User {
     /**
      * Update a user's is_active flag.
      */
-    public static function setActive(mysqli $db, int $id, int $isActive): bool {
+    public static function setActive($db, $id, $isActive) {
         $stmt = $db->prepare("UPDATE users SET is_active = ? WHERE id = ?");
         if (!$stmt) return false;
         $stmt->bind_param('ii', $isActive, $id);
@@ -87,7 +87,7 @@ class User {
     /**
      * Count active admins excluding a given user ID.
      */
-    public static function countActiveAdminsExcluding(mysqli $db, int $excludeId): int {
+    public static function countActiveAdminsExcluding($db, $excludeId) {
         $stmt = $db->prepare(
             "SELECT COUNT(*) c FROM users WHERE role='admin' AND is_active=1 AND id != ?"
         );

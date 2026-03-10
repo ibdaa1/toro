@@ -8,7 +8,7 @@ class StockMovement {
     /**
      * Auto-create the stock_movements table if it doesn't exist.
      */
-    public static function ensureTable(mysqli $db): bool {
+    public static function ensureTable($db) {
         $result = $db->query("CREATE TABLE IF NOT EXISTS `stock_movements` (
             `id`         INT AUTO_INCREMENT PRIMARY KEY,
             `product_id` INT NOT NULL,
@@ -26,8 +26,9 @@ class StockMovement {
 
     /**
      * Return movements, optionally filtered by product ID.
+     * Pass null for productId to get all movements.
      */
-    public static function findAll(mysqli $db, ?int $productId = null, int $limit = 50, int $offset = 0): array {
+    public static function findAll($db, $productId = null, $limit = 50, $offset = 0) {
         if ($productId !== null) {
             $stmt = $db->prepare(
                 "SELECT sm.*, p.name_ar, p.name_en, p.brand, u.name AS admin_name
@@ -58,15 +59,7 @@ class StockMovement {
     /**
      * Record a stock movement and return its new ID.
      */
-    public static function record(
-        mysqli $db,
-        int    $productId,
-        string $type,
-        int    $quantity,
-        int    $balance,
-        string $reason,
-        int    $userId
-    ): int {
+    public static function record($db, $productId, $type, $quantity, $balance, $reason, $userId) {
         $stmt = $db->prepare(
             "INSERT INTO stock_movements (product_id, type, quantity, balance, reason, user_id)
              VALUES (?, ?, ?, ?, ?, ?)"
@@ -76,6 +69,6 @@ class StockMovement {
         $stmt->execute();
         $newId = $db->insert_id;
         $stmt->close();
-        return $newId;
+        return (int)$newId;
     }
 }

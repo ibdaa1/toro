@@ -12,9 +12,9 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/constants.php';
 
 class StockController {
-    public function handle(): void {
+    public function handle() {
         $method = reqMethod();
-        $id     = qInt('id') ?: null;
+        $id     = qInt('id') ? qInt('id') : null;
 
         switch ($method) {
             case 'GET':  $this->get($id);  break;
@@ -23,7 +23,7 @@ class StockController {
         }
     }
 
-    private function get(?int $id): void {
+    private function get($id) {
         authUser(true);
         $db = getDB();
 
@@ -36,13 +36,13 @@ class StockController {
         ok($rows);
     }
 
-    private function post(): void {
+    private function post() {
         $user      = authUser(true);
         $body      = getBody();
-        $productId = (int)($body['product_id'] ?? 0);
-        $typeRaw   = sanitize($body['type']     ?? 'in', 20);
-        $qty       = (int)($body['quantity']    ?? 0);
-        $reason    = sanitize($body['reason']   ?? '', 255);
+        $productId = (int)(isset($body['product_id']) ? $body['product_id'] : 0);
+        $typeRaw   = sanitize(isset($body['type'])     ? $body['type']     : 'in', 20);
+        $qty       = (int)(isset($body['quantity'])    ? $body['quantity'] : 0);
+        $reason    = sanitize(isset($body['reason'])   ? $body['reason']   : '', 255);
 
         if (!in_array($typeRaw, STOCK_TYPES, true)) err('نوع الحركة غير صحيح / Invalid movement type');
         if ($productId <= 0)                         err('product_id required');
