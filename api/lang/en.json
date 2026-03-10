@@ -1,0 +1,101 @@
+{
+  "general": {
+    "method_not_allowed": "Method not allowed",
+    "not_found": "Not found",
+    "server_error": "Server error",
+    "db_error": "Database error",
+    "ok": "Operation successful",
+    "forbidden": "Forbidden",
+    "unauthorized": "Unauthorized",
+    "fields_required": "All fields are required",
+    "invalid_data": "Invalid data",
+    "too_many_requests": "Too many requests. Please slow down."
+  },
+  "auth": {
+    "fields_required": "All fields are required",
+    "name_too_long": "Name is too long",
+    "invalid_email": "Invalid email address",
+    "email_too_long": "Email is too long",
+    "password_too_short": "Password must be at least 6 characters",
+    "password_too_long": "Password is too long",
+    "email_exists": "Email is already registered",
+    "invalid_credentials": "Invalid credentials",
+    "account_deactivated": "This account has been deactivated",
+    "unauthorized": "Unauthorized — token not found in headers/body/query",
+    "invalid_token": "Invalid token format",
+    "session_expired": "Session expired — please login again",
+    "invalid_user_id": "Invalid user id in token",
+    "user_not_found": "User not found",
+    "admin_only": "This page is for admins only",
+    "registration_failed": "Registration failed",
+    "login_success": "Login successful",
+    "register_success": "Account created successfully"
+  },
+  "products": {
+    "not_found": "Product not found",
+    "name_price_required": "Product name and price are required",
+    "missing_fields": "Missing required fields",
+    "insert_failed": "Failed to create product",
+    "update_failed": "Failed to update product",
+    "created": "Product created",
+    "updated": "Updated",
+    "deleted": "Deleted"
+  },
+  "orders": {
+    "cart_empty": "Cart is empty",
+    "address_required": "Address is required",
+    "address_too_long": "Address is too long",
+    "notes_too_long": "Notes are too long",
+    "too_many_items": "Too many items in cart",
+    "invalid_product_data": "Invalid product data",
+    "product_not_found": "Product not found",
+    "insufficient_stock": "Insufficient stock for this product",
+    "creation_failed": "Order creation failed",
+    "invalid_status": "Invalid order status",
+    "status_updated": "Order status updated"
+  },
+  "payments": {
+    "invalid_method": "Invalid payment method",
+    "order_required": "Order ID is required",
+    "order_not_found": "Order not found",
+    "not_authorized": "Not authorized",
+    "already_exists": "Payment record already exists for this order",
+    "insert_failed": "Failed to create payment record",
+    "invalid_status": "Invalid payment status",
+    "update_failed": "Failed to update payment",
+    "updated": "Payment updated",
+    "created": "Payment record created"
+  },
+  "stock": {
+    "invalid_type": "Invalid movement type",
+    "product_required": "product_id is required",
+    "qty_positive": "Quantity must be greater than zero",
+    "product_not_found": "Product not found",
+    "insufficient_stock": "Requested quantity exceeds available stock",
+    "update_failed": "Stock update failed",
+    "record_failed": "Failed to record stock movement",
+    "updated": "Stock updated",
+    "table_error": "Stock table setup failed"
+  },
+  "users": {
+    "cannot_deactivate_last_admin": "Cannot deactivate the last admin account",
+    "is_active_required": "is_active field is required",
+    "update_failed": "Update failed",
+    "activated": "User activated",
+    "deactivated": "User deactivated"
+  },
+  "favorites": {
+    "product_required": "product_id is required",
+    "product_not_found": "Product not found",
+    "add_failed": "Failed to add to favorites",
+    "added": "Added to favorites",
+    "removed": "Removed from favorites"
+  },
+  "upload": {
+    "no_file": "No image file provided",
+    "file_too_large": "File too large. Max 5MB allowed.",
+    "invalid_type": "Invalid file type. Only JPG, PNG, WebP and GIF are allowed.",
+    "dir_error": "Cannot create upload directory",
+    "save_failed": "Failed to save file"
+  }
+}

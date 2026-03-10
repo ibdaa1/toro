@@ -1,6 +1,5 @@
 <?php
-require_once 'cors.php';
-require_once 'db.php';
+require_once __DIR__ . '/bootstrap.php';
 
 $db = getDB();
 
