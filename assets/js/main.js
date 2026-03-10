@@ -337,9 +337,15 @@ const TW = {
       ? `✨ *متجر TORO للعطور*\n━━━━━━━━━━━━━━━━━━\n🫙 *${name}* × ${qty}\n💰 *${(p.price * qty).toFixed(2)} ${currency}*\n━━━━━━━━━━━━━━━━━━\n💳 الدفع عند الاستلام`
       : `✨ *TORO Perfume Store*\n━━━━━━━━━━━━━━━━━━\n🫙 *${name}* × ${qty}\n💰 *${(p.price * qty).toFixed(2)} ${currency}*\n━━━━━━━━━━━━━━━━━━\n💳 Cash on Delivery`;
   },
-  cart(lg, lines, total, currency, addr, notes) {
+  cart(lg, lines, total, currency, addr, notes, phone, locLink) {
     const itemsStr = lines.join('\n');
-    const extra = [addr ? `📍 ${addr}` : '', notes ? `📝 ${notes}` : ''].filter(Boolean).join('\n');
+    const parts = [
+      addr   ? `📍 ${addr}`   : '',
+      phone  ? `📞 ${phone}`  : '',
+      locLink? `🗺 ${locLink}`: '',
+      notes  ? `📝 ${notes}`  : ''
+    ].filter(Boolean);
+    const extra = parts.join('\n');
     return lg === 'ar'
       ? `✨ *متجر TORO للعطور*\n━━━━━━━━━━━━━━━━━━\n${itemsStr}\n━━━━━━━━━━━━━━━━━━\n💰 *الإجمالي: ${total.toFixed(2)} ${currency}*\n${extra}\n💳 الدفع عند الاستلام`.trim()
       : `✨ *TORO Perfume Store*\n━━━━━━━━━━━━━━━━━━\n${itemsStr}\n━━━━━━━━━━━━━━━━━━\n💰 *Total: ${total.toFixed(2)} ${currency}*\n${extra}\n💳 Cash on Delivery`.trim();
@@ -348,9 +354,10 @@ const TW = {
     const items = (o.items || []).map(i =>
       `🫙 *${lg === 'ar' ? i.name_ar : i.name_en}* × ${i.qty} — ${(i.price * i.qty).toFixed(0)} ${currency}`
     ).join('\n');
+    const locLink = (o.latitude && o.longitude) ? `https://maps.google.com/?q=${o.latitude},${o.longitude}` : '';
     return lg === 'ar'
-      ? `✨ *متجر TORO للعطور*\n━━━━━━━━━━━━━━━━━━\n📋 *طلب رقم #${o.id}*\n\n${items}\n\n━━━━━━━━━━━━━━━━━━\n💰 *الإجمالي: ${Number(o.total).toFixed(2)} ${currency}*\n👤 ${o.user_name || '—'}\n📍 ${o.address || '—'}\n💳 الدفع عند الاستلام`
-      : `✨ *TORO Perfume Store*\n━━━━━━━━━━━━━━━━━━\n📋 *Order #${o.id}*\n\n${items}\n\n━━━━━━━━━━━━━━━━━━\n💰 *Total: ${Number(o.total).toFixed(2)} ${currency}*\n👤 ${o.user_name || '—'}\n📍 ${o.address || '—'}\n💳 Cash on Delivery`;
+      ? `✨ *متجر TORO للعطور*\n━━━━━━━━━━━━━━━━━━\n📋 *طلب رقم #${o.id}*\n\n${items}\n\n━━━━━━━━━━━━━━━━━━\n💰 *الإجمالي: ${Number(o.total).toFixed(2)} ${currency}*\n👤 ${o.user_name || '—'}\n📍 ${o.address || '—'}${o.phone ? `\n📞 ${o.phone}` : ''}${locLink ? `\n🗺 ${locLink}` : ''}\n💳 الدفع عند الاستلام`
+      : `✨ *TORO Perfume Store*\n━━━━━━━━━━━━━━━━━━\n📋 *Order #${o.id}*\n\n${items}\n\n━━━━━━━━━━━━━━━━━━\n💰 *Total: ${Number(o.total).toFixed(2)} ${currency}*\n👤 ${o.user_name || '—'}\n📍 ${o.address || '—'}${o.phone ? `\n📞 ${o.phone}` : ''}${locLink ? `\n🗺 ${locLink}` : ''}\n💳 Cash on Delivery`;
   }
 };
 
@@ -374,7 +381,11 @@ function buildWaCartUrl() {
   const total = calcTotal(cart);
   const addr  = document.getElementById('chkAddr')?.value?.trim() || '';
   const notes = document.getElementById('chkNotes')?.value?.trim() || '';
-  const msg = TW.cart(lang, lines, total, t('currency'), addr, notes);
+  const phone = document.getElementById('chkPhone')?.value?.trim() || '';
+  const lat   = document.getElementById('chkLat')?.value  || '';
+  const lng   = document.getElementById('chkLng')?.value  || '';
+  const locLink = (lat && lng) ? `https://maps.google.com/?q=${lat},${lng}` : '';
+  const msg = TW.cart(lang, lines, total, t('currency'), addr, notes, phone, locLink);
   return `https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`;
 }
 
@@ -485,7 +496,10 @@ async function placeOrder() {
   const r = await api('POST', `${BASE}/orders.php`, {
     items: cart,
     address: addr,
-    notes: document.getElementById('chkNotes')?.value||''
+    notes: document.getElementById('chkNotes')?.value||'',
+    phone: document.getElementById('chkPhone')?.value?.trim()||'',
+    latitude:  document.getElementById('chkLat')?.value  ||null,
+    longitude: document.getElementById('chkLng')?.value  ||null
   });
   btn.disabled=false;
   document.getElementById('t-place').textContent = t('place_order');
@@ -498,6 +512,10 @@ async function placeOrder() {
     }
     document.getElementById('chkAddr').value='';
     document.getElementById('chkNotes').value='';
+    document.getElementById('chkPhone').value='';
+    document.getElementById('chkLat').value='';
+    document.getElementById('chkLng').value='';
+    document.getElementById('locStatus').textContent='';
     nav('orders');
   } else {
     if (waWin) waWin.close();
@@ -880,6 +898,14 @@ function showOrdDetail(o) {
       <div style="font-size:12px;color:var(--mu);margin-bottom:4px">📍 ${t('address_lbl2')}</div>
       <div style="font-size:13px">${escHtml(o.address)}</div>
     </div>`:''}
+    ${o.phone?`<div style="background:var(--d3);border-radius:var(--r);padding:12px;margin-bottom:12px">
+      <div style="font-size:12px;color:var(--mu);margin-bottom:4px">📞 ${t('phone_lbl2')}</div>
+      <div style="font-size:13px">${escHtml(o.phone)}</div>
+    </div>`:''}
+    ${(o.latitude&&o.longitude)?`<div style="background:var(--d3);border-radius:var(--r);padding:12px;margin-bottom:12px">
+      <div style="font-size:12px;color:var(--mu);margin-bottom:4px">🗺 ${t('location_lbl')}</div>
+      <a href="https://maps.google.com/?q=${o.latitude},${o.longitude}" target="_blank" style="font-size:13px;color:var(--bl);text-decoration:underline">${t('open_map')}</a>
+    </div>`:''}
     ${o.notes?`<div style="background:var(--d3);border-radius:var(--r);padding:12px;margin-bottom:12px">
       <div style="font-size:12px;color:var(--mu);margin-bottom:4px">📝 ${t('notes_lbl2')}</div>
       <div style="font-size:13px">${escHtml(o.notes)}</div>
@@ -1157,6 +1183,73 @@ function cm(id) { document.getElementById(id)?.classList.remove('open'); }
 document.querySelectorAll('.ov').forEach(m => {
   m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
 });
+
+// ══════════════════════════════════════════
+// LOCATION HELPERS
+// ══════════════════════════════════════════
+function setLocFields(lat, lng) {
+  document.getElementById('chkLat').value = lat;
+  document.getElementById('chkLng').value = lng;
+  document.getElementById('locStatus').textContent = t('loc_selected') + ` (${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)})`;
+}
+
+function getMyLocation() {
+  if (!navigator.geolocation) { toast(t('loc_error'), 'er'); return; }
+  const btn = document.getElementById('btnGetLoc');
+  btn.disabled = true;
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      btn.disabled = false;
+      setLocFields(pos.coords.latitude, pos.coords.longitude);
+    },
+    () => { btn.disabled = false; toast(t('loc_error'), 'er'); },
+    { timeout: 10000 }
+  );
+}
+
+let _mapInst = null, _mapMarker = null, _pickedLat = null, _pickedLng = null;
+
+function openMapPicker() {
+  document.getElementById('mapPickerMod').classList.add('open');
+  // Initialize map lazily
+  setTimeout(() => {
+    const container = document.getElementById('mapPickerContainer');
+    if (!container) return;
+    const existingLat = parseFloat(document.getElementById('chkLat').value) || 25.2048;
+    const existingLng = parseFloat(document.getElementById('chkLng').value) || 55.2708;
+    if (_mapInst) {
+      _mapInst.setView([existingLat, existingLng], 13);
+      _mapInst.invalidateSize();
+    } else {
+      _mapInst = L.map('mapPickerContainer').setView([existingLat, existingLng], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap',
+        maxZoom: 19
+      }).addTo(_mapInst);
+      _mapInst.on('click', function(e) {
+        _pickedLat = e.latlng.lat;
+        _pickedLng = e.latlng.lng;
+        if (_mapMarker) { _mapMarker.setLatLng(e.latlng); }
+        else { _mapMarker = L.marker(e.latlng).addTo(_mapInst); }
+      });
+    }
+    // If already have coords, place marker
+    if (document.getElementById('chkLat').value) {
+      const ll = L.latLng(existingLat, existingLng);
+      _pickedLat = existingLat; _pickedLng = existingLng;
+      if (_mapMarker) { _mapMarker.setLatLng(ll); }
+      else { _mapMarker = L.marker(ll).addTo(_mapInst); }
+    }
+  }, 100);
+}
+
+function confirmMapLocation() {
+  if (_pickedLat === null || _pickedLng === null) {
+    toast(t('loc_error'), 'er'); return;
+  }
+  setLocFields(_pickedLat, _pickedLng);
+  cm('mapPickerMod');
+}
 
 // ══════════════════════════════════════════
 // INIT

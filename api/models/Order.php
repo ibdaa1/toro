@@ -56,12 +56,12 @@ class Order {
     /**
      * Create a new order and return its ID.
      */
-    public static function create($db, $userId, $total, $address, $notes) {
+    public static function create($db, $userId, $total, $address, $notes, $phone = '', $latitude = null, $longitude = null) {
         $stmt = $db->prepare(
-            "INSERT INTO orders (user_id, total, address, notes) VALUES (?, ?, ?, ?)"
+            "INSERT INTO orders (user_id, total, address, notes, phone, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)"
         );
         if (!$stmt) return 0;
-        $stmt->bind_param('idss', $userId, $total, $address, $notes);
+        $stmt->bind_param('idsssdd', $userId, $total, $address, $notes, $phone, $latitude, $longitude);
         $stmt->execute();
         $newId = $db->insert_id;
         $stmt->close();

@@ -39,6 +39,9 @@ class OrderController {
         $items = isset($body['items'])   ? $body['items']   : [];
         $addr  = sanitize(isset($body['address']) ? $body['address'] : '', 500);
         $notes = sanitize(isset($body['notes'])   ? $body['notes']   : '', 300);
+        $phone = sanitize(isset($body['phone'])   ? $body['phone']   : '', 20);
+        $lat   = isset($body['latitude'])  && $body['latitude']  !== null ? (float)$body['latitude']  : null;
+        $lng   = isset($body['longitude']) && $body['longitude'] !== null ? (float)$body['longitude'] : null;
 
         if (empty($items) || !is_array($items)) err('السلة فارغة / Cart is empty');
         if (!$addr)                              err('العنوان مطلوب / Address required');
@@ -65,7 +68,7 @@ class OrderController {
             $safeItems[] = ['product_id' => $pid, 'qty' => $qty, 'price' => (float)$p['price']];
         }
 
-        $oid = Order::create($db, (int)$user['id'], $total, $addr, $notes);
+        $oid = Order::create($db, (int)$user['id'], $total, $addr, $notes, $phone, $lat, $lng);
         if (!$oid) { $db->close(); err('Order creation failed', 500); }
 
         foreach ($safeItems as $item) {

@@ -174,5 +174,16 @@
   "status_confirmed": "Confirmed",
   "status_shipped": "Shipped",
   "status_delivered": "Delivered",
-  "status_cancelled": "Cancelled"
+  "status_cancelled": "Cancelled",
+  "phone_lbl": "Phone Number",
+  "phone_ph": "05xxxxxxxx",
+  "get_loc_btn": "📍 Get My Location",
+  "pick_map_btn": "🗺 Pick on Map",
+  "loc_selected": "✅ Location set",
+  "loc_error": "Could not get location",
+  "phone_lbl2": "Phone",
+  "location_lbl": "Location",
+  "open_map": "Open in Google Maps",
+  "map_modal_title": "Pick your location on the map",
+  "map_confirm_btn": "Confirm Location"
 }
