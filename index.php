@@ -8,24 +8,6 @@
 // the static index.html without modification.
 // ─────────────────────────────────────────────────────────────
 
-// ── Manifest route ────────────────────────────────────────────
-// manifest.php is rewritten to this file via .htaccess so that
-// InfinityFree/LiteSpeed always executes it through the same PHP
-// process that reliably handles all other requests.  Detecting the
-// route here (before any HTML output) guarantees a clean JSON
-// response even when the server cannot execute manifest.php directly.
-$_reqPath = parse_url(
-    isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/',
-    PHP_URL_PATH
-);
-if (basename((string)$_reqPath) === 'manifest.php') {
-    header('Content-Type: application/manifest+json; charset=utf-8');
-    header('Cache-Control: public, max-age=86400');
-    readfile(__DIR__ . '/manifest.json');
-    exit;
-}
-unset($_reqPath);
-
 // ── 0. HTTP → HTTPS redirect ─────────────────────────────────
 // InfinityFree's Openresty proxy terminates SSL and forwards requests
 // to PHP as plain HTTP, setting X-Forwarded-Proto to signal the
