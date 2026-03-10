@@ -638,9 +638,12 @@ table tbody tr:hover { background: rgba(201,168,76,.04); }
     z-index: 350;
     box-shadow: -4px 0 24px rgba(0,0,0,.5);
   }
-  [dir=ltr] .adm-sidebar { transform: translateX(-100%); }
+  [dir=ltr] .adm-sidebar { transform: translateX(-100%); box-shadow: 4px 0 24px rgba(0,0,0,.5); }
   .adm-sidebar.open { transform: translateX(0); }
+  /* Reset both margins for mobile — the [dir=ltr] global rule has higher specificity
+     so we must repeat it here with margin-left:0 to override it */
   .adm-main { margin-right: 0; margin-left: 0; padding: 16px 14px; }
+  [dir=ltr] .adm-main { margin-left: 0; }
   .adm-overlay {
     display: none;
     position: fixed;
