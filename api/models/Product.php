@@ -8,14 +8,14 @@ require_once __DIR__ . '/../helpers/security.php';
 class Product {
     /**
      * Ensure the `images` TEXT column exists (one-time auto-migration).
-     * Silently ignores MySQL error 1060 (duplicate column).
+     * MySQL error 1060 (duplicate column name) is expected and ignored.
      */
     public static function ensureImagesColumn($db) {
         $db->query(
             "ALTER TABLE products ADD COLUMN images TEXT NULL DEFAULT NULL AFTER image"
         );
-        // Error 1060 = duplicate column name — safe to ignore
-        $db->errno; // suppress PHP warning by accessing errno
+        // Intentionally ignore return value: error 1060 (duplicate column) is expected
+        // on all requests after the first migration run.
     }
 
     /**
@@ -150,8 +150,9 @@ class Product {
     }
 
     /**
-     * Encode images array for storage.
-     * Stores first URL in `image` (legacy), full JSON array in `images`.
+     * Encode the images_arr array to JSON for storage in the `images` column.
+     * Returns null if no images are present.
+     * Note: the caller stores images_arr[0] in the `image` column separately.
      */
     private static function encodeImages(array $data): ?string {
         $arr = $data['images_arr'] ?? [];

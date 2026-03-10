@@ -486,14 +486,12 @@ function updateImgPreview(slot) {
 
 function setImgTab(tab, slot) {
   const n = slot || 1;
-  const container = document.getElementById(`f_im_${n}`)?.closest('.img-slot-body') ||
-                    document.getElementById('pf-modal');
-  if (!container) return;
-  container.querySelectorAll('.img-tab').forEach(b => {
-    // Only affect tabs in the same slot
-    if (b.closest('.img-slot-body') === document.getElementById(`f_im_${n}`)?.closest('.img-slot-body')) {
-      b.classList.toggle('active', b.dataset.tab === tab);
-    }
+  const input = document.getElementById(`f_im_${n}`);
+  if (!input) return;
+  const slotBody = input.closest('.img-slot-body');
+  if (!slotBody) return;
+  slotBody.querySelectorAll('.img-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
   });
   const urlSec  = document.getElementById(`img-url-section-${n}`);
   const fileSec = document.getElementById(`img-file-section-${n}`);

@@ -278,8 +278,8 @@ function showProd(id) {
     const dots   = imgs.map((_,i) => `<span class="pd-dot${i===0?' pd-dot-active':''}" onclick="pdGoSlide(${i})"></span>`).join('');
     imgArea = `<div class="pdim pd-slider" id="pdSlider">
       ${slides}
-      <button class="pd-arr pd-arr-r" onclick="pdGoSlide(pdSlideIdx-1)">&#8249;</button>
-      <button class="pd-arr pd-arr-l" onclick="pdGoSlide(pdSlideIdx+1)">&#8250;</button>
+      <button class="pd-arr pd-arr-prev" onclick="pdGoSlide(pdSlideIdx-1)">&#8249;</button>
+      <button class="pd-arr pd-arr-next" onclick="pdGoSlide(pdSlideIdx+1)">&#8250;</button>
       <div class="pd-dots">${dots}</div>
     </div>`;
   } else {
