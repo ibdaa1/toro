@@ -12,6 +12,7 @@ input,textarea,select{font-family:inherit}
 img{display:block;max-width:100%}
 
 /* ═══ HEADER ═══ */
+.logo-img{height:32px;width:auto;object-fit:contain;display:block}
 .hdr{position:fixed;top:0;width:100%;z-index:300;min-height:var(--hdr-h);background:rgba(242,242,242,.97);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);border-bottom:1px solid rgba(44,62,80,.15);display:flex;align-items:center;justify-content:space-between;padding:env(safe-area-inset-top) 16px 0 16px}
 .logo{font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-size:22px;letter-spacing:8px;color:var(--tx);font-style:italic}
 .hdr-r{display:flex;gap:8px;align-items:center}
@@ -39,7 +40,7 @@ img{display:block;max-width:100%}
 /* ═══ HERO ═══ */
 .hero{padding:40px 16px 22px;text-align:center;background:radial-gradient(ellipse at center,rgba(44,62,80,.1) 0%,transparent 65%)}
 .h-eye{font-size:9px;letter-spacing:6px;color:var(--g);text-transform:uppercase;margin-bottom:10px;opacity:.75}
-.h-tit{font-family:'Playfair Display',serif;font-size:52px;letter-spacing:10px;color:var(--tx);font-style:italic;line-height:1;margin-bottom:6px}
+.h-logo{height:72px;width:auto;max-width:220px;object-fit:contain;display:block;margin:0 auto 12px}
 .h-sub{font-size:10px;color:var(--mu);letter-spacing:4px;text-transform:uppercase}
 .h-tag{font-size:13px;color:var(--g);margin-top:12px;font-style:italic;opacity:.7;letter-spacing:1.5px}
 

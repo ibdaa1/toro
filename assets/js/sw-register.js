@@ -23,6 +23,16 @@ if ('serviceWorker' in navigator) {
       .catch(function () {});
   });
 
+  // Check for a new service worker every time the tab becomes visible.
+  // This ensures stale caches are refreshed immediately on re-focus.
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') {
+      navigator.serviceWorker.getRegistration().then(function (reg) {
+        if (reg) reg.update();
+      });
+    }
+  });
+
   // Auto-reload the page the moment a new service worker takes control,
   // so users immediately get the latest HTML/JS/CSS from the new cache.
   var _swRefreshing = false;
