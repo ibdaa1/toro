@@ -17,6 +17,7 @@ class Payment {
                  JOIN users  u ON p.user_id  = u.id
                  ORDER BY p.created_at DESC"
             );
+            if (!$stmt) return [];
         } else {
             $stmt = $db->prepare(
                 "SELECT p.*, o.status AS order_status
@@ -25,9 +26,10 @@ class Payment {
                  WHERE p.user_id = ?
                  ORDER BY p.created_at DESC"
             );
+            if (!$stmt) return [];
             $stmt->bind_param('i', $userId);
         }
-        if (!$stmt) return [];
+
         $stmt->execute();
         $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $stmt->close();

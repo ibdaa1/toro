@@ -1,13 +1,12 @@
-RewriteEngine On
+# Disable directory listing
+Options -Indexes
 
-# Pass Authorization header to PHP (needed for LiteSpeed / some Apache setups)
-RewriteCond %{HTTP:Authorization} .
-RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-
-# Pass X-Token header through
-RewriteCond %{HTTP:X-Token} .
-RewriteRule .* - [E=HTTP_X_TOKEN:%{HTTP:X-Token}]
-
-# NOTE: CORS headers are set by PHP (api/config/cors.php) — do NOT add
-# "Header always set" directives here; mod_headers may be unavailable on
+# CORS and all response headers are set by PHP (api/config/cors.php).
+# Do NOT add "Header always set" directives — mod_headers is unavailable on
 # InfinityFree / LiteSpeed shared hosting and would cause a 500 error.
+#
+# Do NOT add RewriteEngine On here — LiteSpeed may not pass POST request
+# bodies correctly when RewriteEngine is active in a sub-directory .htaccess.
+# Authorization / X-Token headers are read by PHP via getallheaders() or
+# the HTTP_AUTHORIZATION / HTTP_X_TOKEN server variables set by LiteSpeed
+# automatically, making .htaccess rewrites unnecessary.

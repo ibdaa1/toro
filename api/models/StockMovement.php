@@ -38,6 +38,7 @@ class StockMovement {
                  WHERE sm.product_id = ?
                  ORDER BY sm.created_at DESC LIMIT 100"
             );
+            if (!$stmt) return [];
             $stmt->bind_param('i', $productId);
         } else {
             $stmt = $db->prepare(
@@ -47,9 +48,10 @@ class StockMovement {
                  LEFT JOIN users u ON sm.user_id = u.id
                  ORDER BY sm.created_at DESC LIMIT ? OFFSET ?"
             );
+            if (!$stmt) return [];
             $stmt->bind_param('ii', $limit, $offset);
         }
-        if (!$stmt) return [];
+
         $stmt->execute();
         $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $stmt->close();
