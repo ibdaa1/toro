@@ -399,11 +399,11 @@ function renderProductsTable(list) {
     <thead><tr>
       <th>${t('image')}</th>
       <th>${t('product')}</th>
-      <th>${t('brand')}</th>
-      <th>${t('category')}</th>
-      <th>${t('before')}</th>
+      <th class="col-hide-m">${t('brand')}</th>
+      <th class="col-hide-m">${t('category')}</th>
+      <th class="col-hide-m">${t('before')}</th>
       <th>${t('after')}</th>
-      <th>${t('disc')}</th>
+      <th class="col-hide-m">${t('disc')}</th>
       <th>${t('stock')}</th>
       <th>${t('status')}</th>
       <th>${t('action')}</th>
@@ -421,11 +421,11 @@ function renderProductsTable(list) {
           <div style="font-weight:500;color:var(--tx)">${escHtml(nm)}</div>
           ${p.origin ? `<div style="font-size:10px;color:var(--mu)">🌍 ${escHtml(p.origin)}</div>` : ''}
         </td>
-        <td style="font-weight:500">${escHtml(p.brand)}</td>
-        <td><span class="${scls[p.category] || 'cat-u'}">${catLbl}</span></td>
-        <td>${p.price_before ? `<span style="text-decoration:line-through;color:var(--mu)">${p.price_before}</span>` : '—'}</td>
+        <td class="col-hide-m" style="font-weight:500">${escHtml(p.brand)}</td>
+        <td class="col-hide-m"><span class="${scls[p.category] || 'cat-u'}">${catLbl}</span></td>
+        <td class="col-hide-m">${p.price_before ? `<span style="text-decoration:line-through;color:var(--mu)">${p.price_before}</span>` : '—'}</td>
         <td style="color:var(--g);font-weight:700">${p.price} <small style="color:var(--mu)">${t('aed')}</small></td>
-        <td>${disc ? `<span style="color:var(--re);font-weight:700">-${disc}%</span>` : '—'}</td>
+        <td class="col-hide-m">${disc ? `<span style="color:var(--re);font-weight:700">-${disc}%</span>` : '—'}</td>
         <td style="${p.stock <= 3 ? 'color:var(--re)' : ''}">${p.stock}</td>
         <td><span class="${active ? 'badge-on' : 'badge-off'}">${active ? t('active') : t('hidden')}</span></td>
         <td><div class="act-row">
@@ -624,7 +624,7 @@ function renderOrdersTable(list) {
       <th>${t('customer_col')}</th>
       <th>${t('total')}</th>
       <th>${t('status')}</th>
-      <th>${t('date')}</th>
+      <th class="col-hide-m">${t('date')}</th>
       <th>${t('update')}</th>
       <th>${t('action')}</th>
     </tr></thead>
@@ -636,7 +636,7 @@ function renderOrdersTable(list) {
       </td>
       <td style="color:var(--g);font-weight:700">${Number(o.total).toFixed(0)} <small style="color:var(--mu)">${t('aed')}</small></td>
       <td><span class="ost ${scls[o.status] || 'sp'}">${t(o.status)}</span></td>
-      <td style="white-space:nowrap">${fmtDate(o.created_at)}</td>
+      <td class="col-hide-m" style="white-space:nowrap">${fmtDate(o.created_at)}</td>
       <td>
         <select class="st-sel" onchange="updateOrderStatus(${o.id}, this.value)">
           ${sts.map(s => `<option value="${s}"${o.status === s ? ' selected' : ''}>${t(s)}</option>`).join('')}
@@ -752,8 +752,8 @@ function renderUsersTable(list) {
       <th>${t('name')}</th>
       <th>${t('email')}</th>
       <th>${t('role')}</th>
-      <th>${t('status')}</th>
-      <th>${t('joined')}</th>
+      <th class="col-hide-m">${t('status')}</th>
+      <th class="col-hide-m">${t('joined')}</th>
       <th>${t('action')}</th>
     </tr></thead>
     <tbody>${list.map(u => {
@@ -775,8 +775,8 @@ function renderUsersTable(list) {
         <td><span class="${u.role==='admin'?'badge-on':''}">
           ${u.role==='admin'?'⚙️ '+t('admin'):'👤 '+t('customer')}
         </span></td>
-        <td><span class="${displayActive?'badge-on':'badge-off'}">${displayActive?t('active'):t('inactive')}</span></td>
-        <td>${fmtDate(u.created_at)}</td>
+        <td class="col-hide-m"><span class="${displayActive?'badge-on':'badge-off'}">${displayActive?t('active'):t('inactive')}</span></td>
+        <td class="col-hide-m">${fmtDate(u.created_at)}</td>
         <td>
           ${(u.role !== 'admin' && activeKnown)
             ? `<button class="btn-sm ${displayActive?'btn-del':'btn-edit'}" onclick="toggleUserActive(${u.id}, ${displayActive?0:1})">
@@ -831,26 +831,26 @@ async function loadPayments() {
         <th>#</th>
         <th>${t('customer_col')}</th>
         <th>${t('total')}</th>
-        <th>${t('paymentMethod')}</th>
+        <th class="col-hide-m">${t('paymentMethod')}</th>
         <th>${t('paymentStatus')}</th>
-        <th>${t('scheduledDate')}</th>
+        <th class="col-hide-m">${t('scheduledDate')}</th>
         <th>${t('status')}</th>
-        <th>${t('date')}</th>
+        <th class="col-hide-m">${t('date')}</th>
         <th>${t('action')}</th>
       </tr></thead>
       <tbody>${payments.length ? payments.map(p => `<tr>
         <td style="color:var(--g);font-weight:700">#${p.order_id}</td>
         <td style="font-weight:500">${escHtml(p.user_name || '—')}</td>
         <td style="color:var(--g);font-weight:700">${Number(p.amount).toFixed(0)} <small style="color:var(--mu)">${t('aed')}</small></td>
-        <td><span class="pay-badge-cod">${methodLabel[p.method] || p.method}</span></td>
+        <td class="col-hide-m"><span class="pay-badge-cod">${methodLabel[p.method] || p.method}</span></td>
         <td>
           <select class="st-sel" onchange="updatePaymentStatus(${p.id}, this.value)">
             ${['pending','paid','failed','refunded'].map(s=>`<option value="${s}"${p.status===s?' selected':''}>${t(s)||s}</option>`).join('')}
           </select>
         </td>
-        <td style="color:var(--mu);font-size:11px">${p.scheduled_date || (lang==='ar'?'—':'—')}</td>
+        <td class="col-hide-m" style="color:var(--mu);font-size:11px">${p.scheduled_date || (lang==='ar'?'—':'—')}</td>
         <td><span class="ost ${orderScls[p.order_status]||'sp'}">${t(p.order_status)||p.order_status}</span></td>
-        <td style="white-space:nowrap">${fmtDate(p.created_at)}</td>
+        <td class="col-hide-m" style="white-space:nowrap">${fmtDate(p.created_at)}</td>
         <td><button class="btn-sm btn-view" onclick="showPaymentDetail(${p.id})">${t('viewDetails')}</button></td>
       </tr>`).join('') : `<tr><td colspan="9"><div class="empty-state"><div class="ei">💳</div><p>${t('noOrders')}</p></div></td></tr>`}
       </tbody>
@@ -921,17 +921,17 @@ function renderMovementsTable(list) {
   const typeLabel = { in: `<span class="badge-on">⬆ ${t('stockIn')}</span>`, out: `<span class="badge-off">⬇ ${t('stockOut')}</span>`, adjustment: `<span style="color:var(--or)">⚙ ${t('adjustment')}</span>` };
   el.innerHTML = `<div class="tw"><table>
     <thead><tr>
-      <th>#</th>
+      <th class="col-hide-m">#</th>
       <th>${t('product')}</th>
       <th>${t('movementType')}</th>
       <th>${t('quantity')}</th>
       <th>${t('balanceAfter')}</th>
-      <th>${t('reason')}</th>
-      <th>${t('name')}</th>
-      <th>${t('date')}</th>
+      <th class="col-hide-m">${t('reason')}</th>
+      <th class="col-hide-m">${t('name')}</th>
+      <th class="col-hide-m">${t('date')}</th>
     </tr></thead>
     <tbody>${list.map(m => `<tr>
-      <td style="color:var(--mu)">${m.id}</td>
+      <td class="col-hide-m" style="color:var(--mu)">${m.id}</td>
       <td>
         <div style="font-weight:500">${escHtml(lang==='ar'?m.name_ar:m.name_en)}</div>
         <div style="font-size:10px;color:var(--mu)">${escHtml(m.brand)}</div>
@@ -939,9 +939,9 @@ function renderMovementsTable(list) {
       <td>${typeLabel[m.type] || m.type}</td>
       <td style="font-weight:700;color:${m.type==='in'?'var(--gr)':m.type==='out'?'var(--re)':'var(--or)'}">${m.type==='in'?'+':m.type==='out'?'-':''}${m.quantity}</td>
       <td style="font-weight:700;color:var(--g)">${m.balance}</td>
-      <td style="color:var(--mu);font-size:12px">${escHtml(m.reason||'—')}</td>
-      <td style="color:var(--mu)">${escHtml(m.admin_name||'—')}</td>
-      <td style="white-space:nowrap">${fmtDate(m.created_at)}</td>
+      <td class="col-hide-m" style="color:var(--mu);font-size:12px">${escHtml(m.reason||'—')}</td>
+      <td class="col-hide-m" style="color:var(--mu)">${escHtml(m.admin_name||'—')}</td>
+      <td class="col-hide-m" style="white-space:nowrap">${fmtDate(m.created_at)}</td>
     </tr>`).join('')}</tbody>
   </table></div>`;
 }

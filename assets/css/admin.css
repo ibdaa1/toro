@@ -705,4 +705,14 @@ table tbody tr:hover { background: rgba(201,168,76,.04); }
 
   /* Modal fills screen on mobile */
   .modal { padding: 16px; border-radius: 14px; }
+
+  /* Hide non-essential table columns on mobile */
+  .col-hide-m { display: none !important; }
+
+  /* Allow table cells to wrap text on mobile */
+  table td { word-break: break-word; }
+
+  /* Make table action rows compact on mobile */
+  .act-row { flex-wrap: wrap; }
+  .btn-sm { min-width: 32px; }
 }
