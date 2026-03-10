@@ -28,6 +28,17 @@ RedirectMatch 404 /\.hg(/.*)?$
 # Using AND logic prevents infinite redirect loops for HTTPS users whose
 # requests arrive at LiteSpeed without the %{HTTPS}=on flag.
 RewriteEngine On
+
+# ── Route manifest.php through index.php ─────────────────────
+# On InfinityFree/LiteSpeed, direct PHP execution of manifest.php
+# is unreliable (the server may return PHP source or HTML instead of
+# executing the script).  Internally rewriting to index.php guarantees
+# that the manifest is always served by the same PHP process that
+# handles all other requests.  index.php detects the manifest route
+# via REQUEST_URI and returns the correct application/manifest+json.
+RewriteRule ^manifest\.php$ /index.php [L]
+
+# ── HTTP → HTTPS redirect ─────────────────────────────────────
 RewriteCond %{HTTPS} off
 RewriteCond %{HTTP:X-Forwarded-Proto} !https
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
