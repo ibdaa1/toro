@@ -455,6 +455,7 @@ async function placeOrder() {
     setCart([]);
     updBdg();
     toast(t('order_ok'),'ok');
+    sendWhatsApp();
     document.getElementById('chkAddr').value='';
     document.getElementById('chkNotes').value='';
     nav('orders');

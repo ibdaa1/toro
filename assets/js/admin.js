@@ -525,6 +525,28 @@ async function handleFileUpload(input, slot) {
   }
 }
 
+async function clearImg(slot) {
+  const n   = slot || 1;
+  const inp = document.getElementById(`f_im_${n}`);
+  const url = inp ? inp.value.trim() : '';
+
+  // If the URL points to our own uploads directory, delete it from the server
+  if (url && url.includes('/uploads/')) {
+    const r = await api('DELETE', `${BASE}/upload.php`, { url });
+    if (!r.ok) {
+      toast(r.msg || (lang === 'ar' ? 'فشل حذف الصورة' : 'Failed to delete image'), 'er');
+      return;
+    }
+  }
+
+  if (inp) inp.value = '';
+  const prevEl = document.getElementById(`imgPrev${n}`);
+  if (prevEl) prevEl.innerHTML = `<span data-i18n="preview">${t('preview')}</span>`;
+  const statusEl = document.getElementById(`upload-status-${n}`);
+  if (statusEl) statusEl.textContent = '';
+  toast(lang === 'ar' ? '🗑 تم حذف الصورة' : '🗑 Image removed', 'ok');
+}
+
 async function saveProduct() {
   const id   = document.getElementById('f_id').value;
   // Collect up to 3 images
