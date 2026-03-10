@@ -47,18 +47,25 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 // ── 5. Content Security Policy ───────────────────────────────
 // Resources loaded by index.html:
 //   Scripts : 'self' (i18n.js, main.js, sw-register.js)
+//             + 'unsafe-inline' required for onclick/oninput handlers in
+//             index.html and for inline event handlers in JS-generated HTML
+//             (product cards, image onerror fallbacks, admin table rows).
+//             script-src 'self' still blocks loading scripts from any
+//             external origin, which is the primary XSS vector.
 //   Styles  : 'self' (main.css) + Google Fonts stylesheet
+//             + 'unsafe-inline' required for inline style= attributes in
+//             JS-generated HTML (product cards, marquee, order tables, etc.)
 //   Fonts   : Google Fonts CDN (gstatic)
 //   Images  : 'self' + any HTTPS URL (product photos set by admin)
 //             + data: (inline SVG/base64 fallbacks)
 //   Connect : 'self' (API calls to /api/*)
 //   Worker  : 'self' (sw.js service worker)
-//   Manifest: 'self' (manifest.json)
+//   Manifest: 'self' (manifest.php)
 //   Frames  : none — this page does not embed frames
 header(
     "Content-Security-Policy: default-src 'none'; " .
-    "script-src 'self'; " .
-    "style-src 'self' https://fonts.googleapis.com; " .
+    "script-src 'self' 'unsafe-inline'; " .
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " .
     "font-src https://fonts.gstatic.com; " .
     "img-src 'self' https: data:; " .
     "connect-src 'self'; " .
