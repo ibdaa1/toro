@@ -636,3 +636,48 @@ table tbody tr:hover { background: rgba(201,168,76,.04); }
   color: var(--g);
   font-size: 18px;
 }
+
+/* ══ MOBILE RESPONSIVE ══ */
+@media (max-width: 600px) {
+  /* Header: hide name/email block — menu + logo + 3 icon-buttons fit fine */
+  .adm-user-info { display: none; }
+  /* Store link: keep emoji, hide text label */
+  .adm-store-link span { display: none; }
+  .adm-store-link { padding: 6px 10px; }
+  /* Compact logout and lang buttons */
+  .adm-logout, .adm-lang-btn { padding: 6px 10px; font-size: 11px; }
+
+  /* Dashboard 2-col mini grids collapse to 1 column */
+  .dash-mini-grid { grid-template-columns: 1fr !important; }
+
+  /* Stat cards more compact */
+  .stat-grid { gap: 8px; }
+  .stat-card { padding: 14px 12px; }
+  .stat-val  { font-size: 22px; }
+
+  /* Section card header: allow wrap so search goes to its own row */
+  .sec-hdr { flex-wrap: wrap; }
+  /* Search bar fills the row when it wraps */
+  .sec-hdr .adm-search {
+    width: 100% !important;
+    margin: 0 !important;
+    flex: 1 1 100%;
+  }
+  /* Section body padding more compact */
+  .sec-body { padding: 12px; }
+
+  /* Tables: compact cells */
+  table th { padding: 8px 8px; font-size: 10px; }
+  table td { padding: 8px 8px; font-size: 12px; }
+
+  /* Action buttons remain tappable */
+  .act-row { flex-wrap: nowrap; }
+  .btn-sm { padding: 6px 10px; font-size: 11px; }
+
+  /* Page header */
+  .adm-page-title { font-size: 18px; }
+  .adm-page-hdr   { margin-bottom: 14px; }
+
+  /* Modal fills screen on mobile */
+  .modal { padding: 16px; border-radius: 14px; }
+}
