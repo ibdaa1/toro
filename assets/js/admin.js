@@ -18,7 +18,9 @@ let allOrders     = [];
 let allUsers      = [];
 
 // ── TRANSLATIONS ─────────────────────────────────────────
-const i18n = {
+// Source of truth: assets/lang/admin-ar.json / admin-en.json
+// Inline copies below serve as immediate synchronous fallback.
+let i18n = {
   ar: {
     dashboard: 'لوحة التحكم', products: 'المنتجات', orders: 'الطلبات',
     users: 'العملاء', payments: 'جدول الدفع', stats: 'الإحصائيات',
@@ -153,6 +155,21 @@ const i18n = {
 
 function t(k) { return (i18n[lang] || i18n.ar)[k] || k; }
 
+// ── JSON LANG LOADER ─────────────────────────────────────
+// Async: loads admin-ar.json / admin-en.json and merges into i18n.
+// Keeps inline fallback above so first render is always populated.
+async function loadAdminLang() {
+  try {
+    const base = '../assets/lang/';
+    const [arRes, enRes] = await Promise.all([
+      fetch(base + 'admin-ar.json'),
+      fetch(base + 'admin-en.json')
+    ]);
+    if (arRes.ok) Object.assign(i18n.ar, await arRes.json());
+    if (enRes.ok) Object.assign(i18n.en, await enRes.json());
+  } catch (e) { /* network failure — inline fallback stays */ }
+}
+
 // ── LANGUAGE SWITCH ──────────────────────────────────────
 function applyTranslations() {
   const d = document.documentElement;
@@ -182,7 +199,7 @@ function setLang(l) {
         <div class="ei">🔒</div>
         <h3>${t('adminOnly')}</h3>
         <p>${t('loginFirst')}</p>
-        <a href="../index.html" class="btn-primary" style="margin-top:16px;display:inline-flex">${t('goToStore')}</a>
+        <a href="/" class="btn-primary" style="margin-top:16px;display:inline-flex">${t('goToStore')}</a>
       </div>`;
   } else {
     switchSection(currentSection);
@@ -263,7 +280,8 @@ function isAdmin() {
 function logout() {
   localStorage.removeItem(LS.USER);
   localStorage.removeItem(LS.TOKEN);
-  window.location.href = '../index.html';
+  // Redirect to root (served by index.php via DirectoryIndex)
+  window.location.href = '/';
 }
 
 // ── SIDEBAR ──────────────────────────────────────────────
@@ -1118,7 +1136,7 @@ function initAdmin() {
         <div class="ei">🔒</div>
         <h3>${t('adminOnly')}</h3>
         <p>${t('loginFirst')}</p>
-        <a href="../index.html" class="btn-primary" style="margin-top:16px;display:inline-flex">${t('goToStore')}</a>
+        <a href="/" class="btn-primary" style="margin-top:16px;display:inline-flex">${t('goToStore')}</a>
       </div>`;
     return;
   }
@@ -1134,4 +1152,7 @@ function initAdmin() {
   switchSection('dashboard');
 }
 
-document.addEventListener('DOMContentLoaded', initAdmin);
+document.addEventListener('DOMContentLoaded', async function () {
+  await loadAdminLang();
+  initAdmin();
+});
