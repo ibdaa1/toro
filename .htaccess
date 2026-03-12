@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────
-# Root .htaccess — InfinityFree / LiteSpeed
+# Root .htaccess — toroboutique.top (LiteSpeed / Apache)
 # ─────────────────────────────────────────────────────────────
 
 # Prevent directory listing
@@ -26,19 +26,21 @@ RedirectMatch 404 /\.hg(/.*)?$
     ForceType application/manifest+json
 </Files>
 
-# ── HTTP → HTTPS redirect ─────────────────────────────────────
-# InfinityFree uses Openresty as a reverse proxy: SSL is terminated at
-# the proxy and all backend requests arrive as HTTP, so %{HTTPS} is
-# always "off".  The proxy signals the original protocol via the
-# X-Forwarded-Proto header ("http" or "https").
-# We redirect only when BOTH indicators confirm a plain-HTTP connection:
-#   1. %{HTTPS} is "off"  (direct connection not encrypted)
-#   2. X-Forwarded-Proto is not "https"  (proxy did not terminate HTTPS)
-# Using AND logic prevents infinite redirect loops for HTTPS users whose
-# requests arrive at LiteSpeed without the %{HTTPS}=on flag.
 RewriteEngine On
 
+# ── Redirect old InfinityFree domain → production domain ─────
+# Any request arriving on qooqz.infinityfreeapp.com is permanently
+# redirected to the canonical production domain toroboutique.top.
+# This must come BEFORE the HTTP→HTTPS rule so the host change and
+# the scheme upgrade both happen in a single redirect.
+RewriteCond %{HTTP_HOST} ^qooqz\.infinityfreeapp\.com$ [NC]
+RewriteRule ^ https://toroboutique.top%{REQUEST_URI} [L,R=301]
+
 # ── HTTP → HTTPS redirect ─────────────────────────────────────
+# On shared hosting the reverse proxy terminates SSL and forwards
+# requests to PHP as plain HTTP, setting X-Forwarded-Proto to signal
+# the original protocol.  Redirect only when BOTH indicators confirm
+# a plain-HTTP connection to avoid infinite redirect loops.
 RewriteCond %{HTTPS} off
 RewriteCond %{HTTP:X-Forwarded-Proto} !https
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]

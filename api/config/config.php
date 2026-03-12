@@ -17,8 +17,8 @@ define('APP_LOCALE',  'ar');          // default language
 
 // Base URL for generating uploaded-file URLs.
 // Set to the public root of your site to avoid relying on the Host header.
-// Example: define('APP_BASE_URL', 'https://qooqz.infinityfreeapp.com');
-define('APP_BASE_URL',   'https://qooqz.infinityfreeapp.com');
+// Example: define('APP_BASE_URL', 'https://toroboutique.top');
+define('APP_BASE_URL',   'https://toroboutique.top');
 
 // From address used for outgoing emails
 define('APP_MAIL_FROM',  'noreply@toro.ae');

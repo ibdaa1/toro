@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════
 // CONFIG
 // ══════════════════════════════════════════
-const BASE   = 'https://qooqz.infinityfreeapp.com/api';
+const BASE   = 'https://toroboutique.top/api';
 const WA_NUM = '971505931141';
 
 // ══════════════════════════════════════════

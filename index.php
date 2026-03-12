@@ -25,7 +25,7 @@ if (!$isHttps) {
     // manifest.json, so this is consistent with the project's convention).
     $rawUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
     $uri    = '/' . ltrim($rawUri, '/');
-    header('Location: https://qooqz.infinityfreeapp.com' . $uri, true, 301);
+    header('Location: https://toroboutique.top' . $uri, true, 301);
     exit;
 }
 
