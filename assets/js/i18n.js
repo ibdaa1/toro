@@ -192,7 +192,18 @@ let TR_AR = {
   "status_confirmed": "مؤكد",
   "status_shipped": "تم الشحن",
   "status_delivered": "تم التوصيل",
-  "status_cancelled": "ملغي"
+  "status_cancelled": "ملغي",
+  "phone_lbl": "رقم الهاتف",
+  "phone_ph": "05xxxxxxxx",
+  "get_loc_btn": "📍 تحديد موقعي",
+  "pick_map_btn": "🗺 اختر من الخريطة",
+  "loc_selected": "✅ تم تحديد الموقع",
+  "loc_error": "تعذّر الحصول على الموقع",
+  "phone_lbl2": "الهاتف",
+  "location_lbl": "الموقع الجغرافي",
+  "open_map": "فتح في خرائط جوجل",
+  "map_modal_title": "اختر موقعك على الخريطة",
+  "map_confirm_btn": "تأكيد الموقع"
 };
 
 let TR_EN = {
@@ -371,7 +382,18 @@ let TR_EN = {
   "status_confirmed": "Confirmed",
   "status_shipped": "Shipped",
   "status_delivered": "Delivered",
-  "status_cancelled": "Cancelled"
+  "status_cancelled": "Cancelled",
+  "phone_lbl": "Phone Number",
+  "phone_ph": "05xxxxxxxx",
+  "get_loc_btn": "📍 Get My Location",
+  "pick_map_btn": "🗺 Pick on Map",
+  "loc_selected": "✅ Location set",
+  "loc_error": "Could not get location",
+  "phone_lbl2": "Phone",
+  "location_lbl": "Location",
+  "open_map": "Open in Google Maps",
+  "map_modal_title": "Pick your location on the map",
+  "map_confirm_btn": "Confirm Location"
 };
 
 // ────────────────────────────────────────────────────────────
