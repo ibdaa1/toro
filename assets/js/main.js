@@ -1261,7 +1261,7 @@ function renderAbout() {
           📱 ${escHtml(t('about_wa_cta'))}
         </a>
         <a class="about-cta about-cta-ig"
-           href="https://instagram.com/toro.perfumes.uae"
+           href="https://www.instagram.com/toro.designed?igsh=eGRnNmE3dHRscXhi&utm_source=qr"
            target="_blank" rel="noopener noreferrer">
           📸 ${escHtml(t('about_follow'))}
         </a>

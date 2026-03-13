@@ -835,9 +835,6 @@ async function loadPayments() {
   const orderScls   = { pending:'sp', confirmed:'sc2', shipped:'ss', delivered:'sd', cancelled:'sx' };
 
   el.innerHTML = `
-    <div style="background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--mu)">
-      ℹ️ ${t('payNotes')}
-    </div>
     <div class="tw"><table>
       <thead><tr>
         <th>#</th>
