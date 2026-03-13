@@ -68,6 +68,7 @@ function swLang() {
   lang = lang==='ar' ? 'en' : 'ar';
   localStorage.setItem(LS.LANG, lang);
   applyLang();   // calls applyI18n() internally
+  if (_bannerData && _bannerData.length) renderBanners(_bannerData);
   renderMarquee();
   renderPage();
 }
@@ -149,11 +150,13 @@ const DEMO = [
 // ══════════════════════════════════════════
 let _bannerTimer = null;
 let _bannerIdx   = 0;
+let _bannerData  = [];
 
 async function loadBanners() {
   const r = await api('GET', `${BASE}/banners.php`);
   if (r.ok && Array.isArray(r.data) && r.data.length) {
-    renderBanners(r.data);
+    _bannerData = r.data;
+    renderBanners(_bannerData);
   }
 }
 
@@ -623,7 +626,22 @@ async function renderOrders() {
     return;
   }
   const scls = {pending:'sp',confirmed:'sc2',shipped:'ss',delivered:'sd',cancelled:'sx'};
-  el.innerHTML = r.data.map(o=>`
+  const trackSteps = ['pending','confirmed','shipped','delivered'];
+  el.innerHTML = r.data.map(o=>{
+    const isCancelled = o.status === 'cancelled';
+    const stepIdx = trackSteps.indexOf(o.status);
+    const tracker = isCancelled
+      ? `<div class="ord-tracker cancelled"><span>${ts('cancelled')}</span></div>`
+      : `<div class="ord-tracker">
+          ${trackSteps.map((s,i)=>`
+            <div class="trk-step${i <= stepIdx ? ' done' : ''}">
+              <div class="trk-dot"></div>
+              <div class="trk-lbl">${ts(s)}</div>
+            </div>
+            ${i < trackSteps.length-1 ? `<div class="trk-line${i < stepIdx ? ' done' : ''}"></div>` : ''}
+          `).join('')}
+        </div>`;
+    return `
     <div class="oc">
       <div class="oh">
         <span class="oid">#${o.id} · ${o.created_at?.slice(0,10)||''}</span>
@@ -632,7 +650,9 @@ async function renderOrders() {
       <div class="oit">${(o.items||[]).map(i=>`${escHtml(lang==='ar'?i.name_ar:i.name_en)} × ${i.qty}`).join(' / ')}</div>
       <div class="otot">${Number(o.total).toFixed(2)} ${t('currency')}</div>
       ${o.address?`<div style="font-size:11px;color:var(--mu);margin-top:5px">📍 ${escHtml(o.address)}</div>`:''}
-    </div>`).join('');
+      ${tracker}
+    </div>`;
+  }).join('');
 }
 
 // ══════════════════════════════════════════
