@@ -93,8 +93,15 @@ function normalizeEmail(string $email): string
  */
 function isValidImageUrl(string $url): bool
 {
-    if (strlen($url) > 500) {
+    if (strlen($url) > 500 || $url === '') {
         return false;
+    }
+
+    // Accept root-relative paths for locally uploaded files (e.g. /uploads/toro_xxx.jpg)
+    // Filename is restricted to safe characters (alphanumeric, underscore, hyphen, dot)
+    // and must end with an allowed image extension.
+    if (preg_match('#^/uploads/[\w\-]+(\.(?:jpe?g|png|webp|gif))$#i', $url)) {
+        return true;
     }
 
     if (!filter_var($url, FILTER_VALIDATE_URL)) {
