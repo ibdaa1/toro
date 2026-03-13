@@ -219,7 +219,7 @@ function bannerNext(total) {
 
 async function loadProds() {
   const r = await api('GET', `${BASE}/products.php`);
-  prods = (r.ok && Array.isArray(r.data) && r.data.length) ? r.data : DEMO;
+  prods = (r.ok && Array.isArray(r.data)) ? r.data : [];
   renderProds();
   renderMarquee();
 }
@@ -243,8 +243,12 @@ function renderMarquee() {
   const track = document.getElementById('mq-track');
   if (!track) return;
   const list = prods.filter(isActiveProduct);
-  // Use real products whenever available; only fall back to DEMO when there are none
-  const src = list.length > 0 ? list.slice(0, MQ_MAX) : DEMO;
+  // If no real products yet, hide the marquee track until data loads
+  const src = list.slice(0, MQ_MAX);
+  if (!src.length) {
+    track.innerHTML = '';
+    return;
+  }
   const cards = src.map((p, i) => {
     const nm   = lang === 'ar' ? p.name_ar : p.name_en;
     const col  = MQ_COLORS[i % MQ_COLORS.length];
@@ -1330,7 +1334,6 @@ function confirmMapLocation() {
 // INIT
 // ══════════════════════════════════════════
 updBdg();
-renderMarquee();  // show DEMO cards immediately while API loads
 loadProds();      // update marquee + grid with real data
 loadBanners();    // load banner carousel from API
 loadFavIds();
