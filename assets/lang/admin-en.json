@@ -151,5 +151,20 @@
   "preview": "Preview",
   "urlTab": "🔗 URL Link",
   "storeLink": "Store",
-  "deleteImage": "🗑 Delete Image"
+  "deleteImage": "🗑 Delete Image",
+  "banners": "Banners",
+  "bannersSub": "Manage animated banner images on the homepage",
+  "bannersList": "Banners List",
+  "addBanner": "Add Banner",
+  "editBanner": "Edit Banner",
+  "newBanner": "New Banner",
+  "bannerImage": "Banner Image",
+  "bannerTitleAr": "Title (Arabic)",
+  "bannerTitleEn": "Title (English)",
+  "bannerSubAr": "Subtitle (Arabic)",
+  "bannerSubEn": "Subtitle (English)",
+  "bannerLink": "Link (optional)",
+  "bannerOrder": "Sort Order",
+  "bannerActive": "Active",
+  "navBanners": "Content"
 }

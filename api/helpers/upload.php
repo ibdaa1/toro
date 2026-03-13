@@ -67,19 +67,8 @@ function processImageUpload($file) {
         err('Failed to save file', 500);
     }
 
-// Build URL — use configured base URL if available, otherwise derive from request
-    if (defined('APP_BASE_URL') && APP_BASE_URL !== '') {
-        $imageUrl = rtrim(APP_BASE_URL, '/') . '/uploads/' . $filename;
-    } else {
-        $scheme    = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        // Validate host header to prevent host injection attacks
-        $host      = $_SERVER['HTTP_HOST'] ?? '';
-        $host      = preg_replace('/[^a-zA-Z0-9.\-:]/', '', $host); // strip unsafe chars
-        if ($host === '') $host = 'localhost';
-        $scriptDir = dirname(dirname($_SERVER['SCRIPT_NAME'] ?? ''));
-        $rootPath  = rtrim($scriptDir, '/');
-        $imageUrl  = $scheme . '://' . $host . $rootPath . '/uploads/' . $filename;
-    }
+    // Build a root-relative URL so the path works on any domain
+    $imageUrl = UPLOAD_URL_PATH . $filename;
 
     return ['url' => $imageUrl, 'filename' => $filename];
 }

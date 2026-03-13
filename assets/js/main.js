@@ -144,6 +144,79 @@ const DEMO = [
   {id:6,name_ar:'سيدار وود',name_en:'Cedar Wood',brand:'TORO',origin:'UAE',category:'men',price:320,price_before:380,stock:12,image:'https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=400&q=80',images_arr:['https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=400&q=80'],description_ar:'عطر خشب الأرز بلمسة شرقية',description_en:'Cedar fragrance with oriental touch'},
 ];
 
+// ══════════════════════════════════════════
+// BANNER CAROUSEL
+// ══════════════════════════════════════════
+let _bannerTimer = null;
+let _bannerIdx   = 0;
+
+async function loadBanners() {
+  const r = await api('GET', `${BASE}/banners.php`);
+  if (r.ok && Array.isArray(r.data) && r.data.length) {
+    renderBanners(r.data);
+  }
+}
+
+function renderBanners(banners) {
+  const carousel = document.getElementById('banner-carousel');
+  const staticHero = document.getElementById('static-hero');
+  if (!carousel) return;
+
+  // Stop any previous timer
+  if (_bannerTimer) { clearInterval(_bannerTimer); _bannerTimer = null; }
+
+  if (!banners || !banners.length) {
+    carousel.setAttribute('data-empty', '1');
+    if (staticHero) staticHero.style.display = '';
+    return;
+  }
+
+  // Hide static hero when we have banners
+  if (staticHero) staticHero.style.display = 'none';
+  carousel.removeAttribute('data-empty');
+
+  // Build slides
+  carousel.innerHTML = banners.map((b, i) => {
+    const title = lang === 'en' ? (b.title_en || b.title_ar || '') : (b.title_ar || b.title_en || '');
+    const sub   = lang === 'en' ? (b.subtitle_en || b.subtitle_ar || '') : (b.subtitle_ar || b.subtitle_en || '');
+    const inner = `
+      <img src="${escHtml(b.image_url)}" alt="${escHtml(title)}" loading="${i === 0 ? 'eager' : 'lazy'}" onerror="this.style.visibility='hidden'">
+      ${title || sub ? `<div class="banner-overlay">${title ? `<div class="banner-title">${escHtml(title)}</div>` : ''}${sub ? `<div class="banner-sub">${escHtml(sub)}</div>` : ''}</div>` : ''}`;
+    const slide = b.link
+      ? `<a href="${escHtml(b.link)}" class="banner-slide${i === 0 ? ' active' : ''}" target="_blank" rel="noopener noreferrer">${inner}</a>`
+      : `<div class="banner-slide${i === 0 ? ' active' : ''}">${inner}</div>`;
+    return slide;
+  }).join('');
+
+  // Dots
+  if (banners.length > 1) {
+    const dots = document.createElement('div');
+    dots.className = 'banner-dots';
+    dots.innerHTML = banners.map((_, i) =>
+      `<button class="banner-dot${i === 0 ? ' active' : ''}" onclick="bannerGoTo(${i})" aria-label="Banner ${i+1}"></button>`
+    ).join('');
+    carousel.appendChild(dots);
+  }
+
+  _bannerIdx = 0;
+  if (banners.length > 1) {
+    _bannerTimer = setInterval(() => bannerNext(banners.length), 4500);
+  }
+}
+
+function bannerGoTo(idx) {
+  const slides = document.querySelectorAll('#banner-carousel .banner-slide');
+  const dots   = document.querySelectorAll('#banner-carousel .banner-dot');
+  if (!slides.length) return;
+  slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+  dots.forEach((d, i)   => d.classList.toggle('active', i === idx));
+  _bannerIdx = idx;
+}
+
+function bannerNext(total) {
+  bannerGoTo((_bannerIdx + 1) % total);
+}
+
 async function loadProds() {
   const r = await api('GET', `${BASE}/products.php`);
   prods = (r.ok && Array.isArray(r.data) && r.data.length) ? r.data : DEMO;
@@ -1259,4 +1332,5 @@ function confirmMapLocation() {
 updBdg();
 renderMarquee();  // show DEMO cards immediately while API loads
 loadProds();      // update marquee + grid with real data
+loadBanners();    // load banner carousel from API
 loadFavIds();

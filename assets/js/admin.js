@@ -85,6 +85,12 @@ let i18n = {
     reportsSub: 'إحصائيات ومخططات بيانية لمبيعات المتجر',
     refresh: '🔄 تحديث', cancel: 'إلغاء', preview: 'معاينة',
     urlTab: '🔗 رابط URL', storeLink: 'المتجر',
+    banners: 'البانرات', bannersSub: 'إدارة صور البانر المتحركة في الصفحة الرئيسية',
+    bannersList: 'قائمة البانرات', addBanner: 'إضافة بانر', editBanner: 'تعديل البانر',
+    newBanner: 'بانر جديد', bannerImage: 'صورة البانر', bannerTitleAr: 'العنوان (عربي)',
+    bannerTitleEn: 'العنوان (إنجليزي)', bannerSubAr: 'النص الفرعي (عربي)',
+    bannerSubEn: 'النص الفرعي (إنجليزي)', bannerLink: 'رابط (اختياري)',
+    bannerOrder: 'الترتيب', bannerActive: 'نشط', navBanners: 'المحتوى',
   },
   en: {
     dashboard: 'Dashboard', products: 'Products', orders: 'Orders',
@@ -150,6 +156,12 @@ let i18n = {
     reportsSub: 'Store sales statistics and charts',
     refresh: '🔄 Refresh', cancel: 'Cancel', preview: 'Preview',
     urlTab: '🔗 URL Link', storeLink: 'Store',
+    banners: 'Banners', bannersSub: 'Manage animated banner images on the homepage',
+    bannersList: 'Banners List', addBanner: 'Add Banner', editBanner: 'Edit Banner',
+    newBanner: 'New Banner', bannerImage: 'Banner Image', bannerTitleAr: 'Title (Arabic)',
+    bannerTitleEn: 'Title (English)', bannerSubAr: 'Subtitle (Arabic)',
+    bannerSubEn: 'Subtitle (English)', bannerLink: 'Link (optional)',
+    bannerOrder: 'Sort Order', bannerActive: 'Active', navBanners: 'Content',
   }
 };
 
@@ -322,6 +334,7 @@ function switchSection(section) {
   else if (section === 'payments')  loadPayments();
   else if (section === 'stock')     loadStockMovements();
   else if (section === 'reports')   loadReports();
+  else if (section === 'banners')   loadBanners();
 }
 
 // ── CONSTANTS ────────────────────────────────────────────
@@ -1157,6 +1170,132 @@ function renderStatusChart(data) {
   <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07);font-size:11px;color:var(--mu);text-align:center">
     ${lang==='ar'?'الإجمالي':'Total'}: <strong style="color:var(--tx)">${fmtNum(total)}</strong> ${lang==='ar'?'طلب':'orders'}
   </div></div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// BANNERS
+// ══════════════════════════════════════════════════════════════
+let allBanners = [];
+let editingBannerId = null;
+
+async function loadBanners() {
+  const list = document.getElementById('banners-list');
+  if (!list) return;
+  list.innerHTML = '<div class="ldw"><div class="ld"></div></div>';
+
+  const r = await api('GET', `${BASE}/banners.php?admin=1`);
+  if (!r.ok) {
+    list.innerHTML = `<div class="empty-state"><div class="ei">🖼</div><p>${r.msg || t('error')}</p></div>`;
+    return;
+  }
+  allBanners = r.data || [];
+  renderBannersList();
+}
+
+function renderBannersList() {
+  const list = document.getElementById('banners-list');
+  if (!list) return;
+  if (!allBanners.length) {
+    list.innerHTML = `<div class="empty-state"><div class="ei">🖼</div><p>${lang==='ar'?'لا توجد بانرات':'No banners yet'}</p></div>`;
+    return;
+  }
+  list.innerHTML = allBanners.map(b => `
+    <div class="prod-row" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bdr)">
+      <div style="width:80px;height:50px;border-radius:6px;overflow:hidden;flex-shrink:0;background:var(--bg2)">
+        ${b.image_url ? `<img src="${escHtml(b.image_url)}" style="width:100%;height:100%;object-fit:cover" loading="lazy" onerror="this.style.display='none'">` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:20px">🖼</div>'}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:13px">${escHtml(b.title_ar || b.title_en || '—')}</div>
+        <div style="font-size:11px;color:var(--mu);margin-top:2px">${escHtml(b.subtitle_ar || '')}</div>
+        <div style="font-size:11px;color:var(--mu);margin-top:2px">${t('bannerOrder')}: ${b.sort_order} &nbsp;|&nbsp; <span style="color:${b.is_active?'var(--gr)':'#e55'}">${b.is_active?t('active'):t('hidden')}</span></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        <button class="btn-secondary" onclick="openBannerForm(${b.id})">${t('editProduct').replace(t('products'),'')}</button>
+        <button class="btn-danger" onclick="deleteBanner(${b.id})">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function openBannerForm(id) {
+  editingBannerId = id || null;
+  const modal = document.getElementById('bannerModal');
+  if (!modal) return;
+
+  const b = id ? allBanners.find(x => x.id === id) : null;
+  document.getElementById('bfm-title-ar').value    = b ? (b.title_ar    || '') : '';
+  document.getElementById('bfm-title-en').value    = b ? (b.title_en    || '') : '';
+  document.getElementById('bfm-sub-ar').value      = b ? (b.subtitle_ar || '') : '';
+  document.getElementById('bfm-sub-en').value      = b ? (b.subtitle_en || '') : '';
+  document.getElementById('bfm-link').value        = b ? (b.link        || '') : '';
+  document.getElementById('bfm-order').value       = b ? (b.sort_order  || 0)  : 0;
+  document.getElementById('bfm-active').checked    = b ? !!b.is_active          : true;
+  document.getElementById('bfm-image-url').value   = b ? (b.image_url   || '') : '';
+  const preview = document.getElementById('bfm-img-preview');
+  if (preview) { preview.src = b?.image_url || ''; preview.style.display = b?.image_url ? '' : 'none'; }
+
+  const title = document.getElementById('bfm-modal-title');
+  if (title) title.textContent = id ? t('editBanner') : t('newBanner');
+  modal.classList.add('open');
+}
+
+function closeBannerModal() {
+  document.getElementById('bannerModal')?.classList.remove('open');
+  document.getElementById('bfm-img-file').value = '';
+}
+
+function previewBannerImage(url) {
+  const preview = document.getElementById('bfm-img-preview');
+  if (!preview) return;
+  preview.src = url || '';
+  preview.style.display = url ? '' : 'none';
+}
+
+async function uploadBannerImage() {
+  const file = document.getElementById('bfm-img-file')?.files?.[0];
+  if (!file) return;
+  const uploadBtn = document.getElementById('bfm-upload-btn');
+  if (uploadBtn) { uploadBtn.disabled = true; uploadBtn.textContent = t('uploading'); }
+  const fd = new FormData();
+  fd.append('image', file);
+  const r = await api('POST', `${BASE}/upload.php`, fd, true);
+  if (uploadBtn) { uploadBtn.disabled = false; uploadBtn.textContent = t('uploadImage'); }
+  if (!r.ok) { toast(t('uploadFailed'), 'er'); return; }
+  const url = r.data.url;
+  document.getElementById('bfm-image-url').value = url;
+  const preview = document.getElementById('bfm-img-preview');
+  if (preview) { preview.src = url; preview.style.display = ''; }
+}
+
+async function saveBanner() {
+  const imageUrl = document.getElementById('bfm-image-url').value.trim();
+  if (!imageUrl) { toast(t('bannerImage') + ' ' + (lang==='ar'?'مطلوب':'required'), 'er'); return; }
+
+  const data = {
+    title_ar:    document.getElementById('bfm-title-ar').value.trim(),
+    title_en:    document.getElementById('bfm-title-en').value.trim(),
+    subtitle_ar: document.getElementById('bfm-sub-ar').value.trim(),
+    subtitle_en: document.getElementById('bfm-sub-en').value.trim(),
+    image_url:   imageUrl,
+    link:        document.getElementById('bfm-link').value.trim(),
+    sort_order:  parseInt(document.getElementById('bfm-order').value) || 0,
+    is_active:   document.getElementById('bfm-active').checked ? 1 : 0
+  };
+
+  const method = editingBannerId ? 'PUT' : 'POST';
+  const url    = editingBannerId ? `${BASE}/banners.php?id=${editingBannerId}` : `${BASE}/banners.php`;
+  const r      = await api(method, url, data);
+  if (!r.ok) { toast(r.msg || t('error'), 'er'); return; }
+  toast(t('saved'));
+  closeBannerModal();
+  loadBanners();
+}
+
+async function deleteBanner(id) {
+  if (!confirm(lang==='ar'?'حذف هذا البانر نهائياً؟':'Delete this banner permanently?')) return;
+  const r = await api('DELETE', `${BASE}/banners.php?id=${id}`);
+  if (!r.ok) { toast(r.msg || t('error'), 'er'); return; }
+  toast(t('deleted'));
+  loadBanners();
 }
 
 // ── INIT ─────────────────────────────────────────────────

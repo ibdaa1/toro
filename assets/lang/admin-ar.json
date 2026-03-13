@@ -151,5 +151,20 @@
   "preview": "معاينة",
   "urlTab": "🔗 رابط URL",
   "storeLink": "المتجر",
-  "deleteImage": "🗑 حذف الصورة"
+  "deleteImage": "🗑 حذف الصورة",
+  "banners": "البانرات",
+  "bannersSub": "إدارة صور البانر المتحركة في الصفحة الرئيسية",
+  "bannersList": "قائمة البانرات",
+  "addBanner": "إضافة بانر",
+  "editBanner": "تعديل البانر",
+  "newBanner": "بانر جديد",
+  "bannerImage": "صورة البانر",
+  "bannerTitleAr": "العنوان (عربي)",
+  "bannerTitleEn": "العنوان (إنجليزي)",
+  "bannerSubAr": "النص الفرعي (عربي)",
+  "bannerSubEn": "النص الفرعي (إنجليزي)",
+  "bannerLink": "رابط (اختياري)",
+  "bannerOrder": "الترتيب",
+  "bannerActive": "نشط",
+  "navBanners": "المحتوى"
 }

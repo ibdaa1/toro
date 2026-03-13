@@ -61,6 +61,11 @@
       <button class="adm-nav-item" data-section="users">
         <span class="nav-icon">👥</span> <span data-i18n="users"></span>
       </button>
+
+      <div class="adm-nav-section" data-i18n="navBanners"></div>
+      <button class="adm-nav-item" data-section="banners">
+        <span class="nav-icon">🖼</span> <span data-i18n="banners"></span>
+      </button>
     </nav>
     <div class="adm-sidebar-footer">
       TORO Admin v2.0<br>
@@ -334,6 +339,28 @@
       <div id="rpt-body"></div>
     </section>
 
+    <!-- ═══ BANNERS ═══ -->
+    <section class="adm-section" id="sec-banners" style="display:none">
+      <div class="adm-page-hdr">
+        <div>
+          <div class="adm-page-title">🖼 <span data-i18n="banners"></span></div>
+          <div class="adm-page-sub" data-i18n="bannersSub"></div>
+        </div>
+        <button class="btn-primary" onclick="openBannerForm(null)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span data-i18n="addBanner"></span>
+        </button>
+      </div>
+      <div class="sec-card">
+        <div class="sec-hdr">
+          <span class="sec-title" data-i18n="bannersList"></span>
+        </div>
+        <div class="sec-body" id="banners-list">
+          <div class="ldw"><div class="ld"></div></div>
+        </div>
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -517,6 +544,41 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Banner Modal -->
+<div class="ov" id="bannerModal">
+  <div class="modal" style="max-width:480px">
+    <div class="mt" id="bfm-modal-title" data-i18n="newBanner"></div>
+    <div class="fg">
+      <label class="fl" data-i18n="bannerImage"></label>
+      <input class="fi" type="text" id="bfm-image-url" placeholder="/uploads/banner.jpg" oninput="previewBannerImage(this.value)">
+      <div style="margin-top:8px">
+        <input type="file" id="bfm-img-file" accept="image/*" style="display:none" onchange="uploadBannerImage()">
+        <button type="button" id="bfm-upload-btn" class="btn-secondary" onclick="document.getElementById('bfm-img-file').click()" data-i18n="uploadImage"></button>
+      </div>
+      <img id="bfm-img-preview" src="" style="display:none;width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-top:8px" onerror="this.style.display='none'">
+    </div>
+    <div class="fg"><label class="fl" data-i18n="bannerTitleAr"></label><input class="fi" id="bfm-title-ar" maxlength="200"></div>
+    <div class="fg"><label class="fl" data-i18n="bannerTitleEn"></label><input class="fi" id="bfm-title-en" maxlength="200"></div>
+    <div class="fg"><label class="fl" data-i18n="bannerSubAr"></label><input class="fi" id="bfm-sub-ar" maxlength="400"></div>
+    <div class="fg"><label class="fl" data-i18n="bannerSubEn"></label><input class="fi" id="bfm-sub-en" maxlength="400"></div>
+    <div class="fg"><label class="fl" data-i18n="bannerLink"></label><input class="fi" id="bfm-link" maxlength="512" placeholder="https://..."></div>
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+      <div style="flex:1">
+        <label class="fl" data-i18n="bannerOrder"></label>
+        <input class="fi" type="number" id="bfm-order" min="0" max="99" value="0" style="width:80px">
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="bfm-active" checked>
+        <span data-i18n="bannerActive"></span>
+      </label>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn-primary" style="flex:1" onclick="saveBanner()" data-i18n="saveProduct"></button>
+      <button class="bcl" onclick="closeBannerModal()" data-i18n="cancel"></button>
+    </div>
+  </div>
+</div>
 
 <script src="../assets/js/admin.js"></script>
 </body>
