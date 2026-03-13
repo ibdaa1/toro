@@ -409,12 +409,14 @@ function waFromModal()  { waProduct(modalProdId, modalQty); cm('pdMod'); }
 // ══════════════════════════════════════════
 const TW = {
   product(lg, p, qty, currency) {
-    const name = lg === 'ar' ? p.name_ar : p.name_en;
+    const name  = lg === 'ar' ? p.name_ar : p.name_en;
+    const cur   = lg === 'ar' ? 'ريال' : currency;
     return lg === 'ar'
-      ? `✨ *متجر TORO للعطور*\n━━━━━━━━━━━━━━━━━━\n🫙 *${name}* × ${qty}\n💰 *${(p.price * qty).toFixed(2)} ${currency}*\n━━━━━━━━━━━━━━━━━━\n💳 الدفع عند الاستلام`
-      : `✨ *TORO Perfume Store*\n━━━━━━━━━━━━━━━━━━\n🫙 *${name}* × ${qty}\n💰 *${(p.price * qty).toFixed(2)} ${currency}*\n━━━━━━━━━━━━━━━━━━\n💳 Cash on Delivery`;
+      ? `✨ *متجر TORO للعطور*\n━━━━━━━━━━━━━━━━━━\n🫙 *${name}* × ${qty}\n💰 *${(p.price * qty).toFixed(2)} ${cur}*\n━━━━━━━━━━━━━━━━━━`
+      : `✨ *TORO Perfume Store*\n━━━━━━━━━━━━━━━━━━\n🫙 *${name}* × ${qty}\n💰 *${(p.price * qty).toFixed(2)} ${cur}*\n━━━━━━━━━━━━━━━━━━`;
   },
   cart(lg, lines, total, currency, addr, notes, phone, locLink) {
+    const cur      = lg === 'ar' ? 'ريال' : currency;
     const itemsStr = lines.join('\n');
     const parts = [
       addr   ? `📍 ${addr}`   : '',
@@ -424,17 +426,18 @@ const TW = {
     ].filter(Boolean);
     const extra = parts.join('\n');
     return lg === 'ar'
-      ? `✨ *متجر TORO للعطور*\n━━━━━━━━━━━━━━━━━━\n${itemsStr}\n━━━━━━━━━━━━━━━━━━\n💰 *الإجمالي: ${total.toFixed(2)} ${currency}*\n${extra}\n💳 الدفع عند الاستلام`.trim()
-      : `✨ *TORO Perfume Store*\n━━━━━━━━━━━━━━━━━━\n${itemsStr}\n━━━━━━━━━━━━━━━━━━\n💰 *Total: ${total.toFixed(2)} ${currency}*\n${extra}\n💳 Cash on Delivery`.trim();
+      ? `✨ *متجر TORO للعطور*\n━━━━━━━━━━━━━━━━━━\n${itemsStr}\n━━━━━━━━━━━━━━━━━━\n💰 *الإجمالي: ${total.toFixed(2)} ${cur}*\n${extra}`.trim()
+      : `✨ *TORO Perfume Store*\n━━━━━━━━━━━━━━━━━━\n${itemsStr}\n━━━━━━━━━━━━━━━━━━\n💰 *Total: ${total.toFixed(2)} ${cur}*\n${extra}`.trim();
   },
   adminOrder(lg, o, currency) {
+    const cur   = lg === 'ar' ? 'ريال' : currency;
     const items = (o.items || []).map(i =>
-      `🫙 *${lg === 'ar' ? i.name_ar : i.name_en}* × ${i.qty} — ${(i.price * i.qty).toFixed(0)} ${currency}`
+      `🫙 *${lg === 'ar' ? i.name_ar : i.name_en}* × ${i.qty} — ${(i.price * i.qty).toFixed(0)} ${cur}`
     ).join('\n');
     const locLink = (o.latitude && o.longitude) ? `https://maps.google.com/?q=${o.latitude},${o.longitude}` : '';
     return lg === 'ar'
-      ? `✨ *متجر TORO للعطور*\n━━━━━━━━━━━━━━━━━━\n📋 *طلب رقم #${o.id}*\n\n${items}\n\n━━━━━━━━━━━━━━━━━━\n💰 *الإجمالي: ${Number(o.total).toFixed(2)} ${currency}*\n👤 ${o.user_name || '—'}\n📍 ${o.address || '—'}${o.phone ? `\n📞 ${o.phone}` : ''}${locLink ? `\n🗺 ${locLink}` : ''}\n💳 الدفع عند الاستلام`
-      : `✨ *TORO Perfume Store*\n━━━━━━━━━━━━━━━━━━\n📋 *Order #${o.id}*\n\n${items}\n\n━━━━━━━━━━━━━━━━━━\n💰 *Total: ${Number(o.total).toFixed(2)} ${currency}*\n👤 ${o.user_name || '—'}\n📍 ${o.address || '—'}${o.phone ? `\n📞 ${o.phone}` : ''}${locLink ? `\n🗺 ${locLink}` : ''}\n💳 Cash on Delivery`;
+      ? `✨ *متجر TORO للعطور*\n━━━━━━━━━━━━━━━━━━\n📋 *طلب رقم #${o.id}*\n\n${items}\n\n━━━━━━━━━━━━━━━━━━\n💰 *الإجمالي: ${Number(o.total).toFixed(2)} ${cur}*\n👤 ${o.user_name || '—'}\n📍 ${o.address || '—'}${o.phone ? `\n📞 ${o.phone}` : ''}${locLink ? `\n🗺 ${locLink}` : ''}`
+      : `✨ *TORO Perfume Store*\n━━━━━━━━━━━━━━━━━━\n📋 *Order #${o.id}*\n\n${items}\n\n━━━━━━━━━━━━━━━━━━\n💰 *Total: ${Number(o.total).toFixed(2)} ${cur}*\n👤 ${o.user_name || '—'}\n📍 ${o.address || '—'}${o.phone ? `\n📞 ${o.phone}` : ''}${locLink ? `\n🗺 ${locLink}` : ''}`;
   }
 };
 

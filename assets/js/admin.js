@@ -247,9 +247,9 @@ function fmtNum(n) { return Number(n || 0).toLocaleString('ar-AE'); }
 async function api(method, url, body = null, isFormData = false) {
   const tk = currentToken || localStorage.getItem(LS.TOKEN);
 
-  // InfinityFree sometimes strips custom request headers on GET/DELETE.
-  // db.php has a $_GET['_token'] fallback — use it so auth always works.
-  if (tk && (method === 'GET' || method === 'DELETE') && !url.match(/[?&]_token=/)) {
+  // InfinityFree sometimes strips custom request headers (GET/DELETE/POST/PUT).
+  // Always append _token to the query string as the most reliable auth fallback.
+  if (tk && !url.match(/[?&]_token=/)) {
     url += (url.includes('?') ? '&' : '?') + '_token=' + encodeURIComponent(tk);
   }
 
@@ -717,8 +717,9 @@ function showOrderDetail(o) {
 }
 
 function waOrder(o) {
+  const cur   = lang === 'ar' ? 'ريال' : t('aed');
   const items = (o.items || []).map(i =>
-    `🫙 *${lang === 'ar' ? i.name_ar : i.name_en}* × ${i.qty} — ${(i.price * i.qty).toFixed(0)} ${t('aed')}`
+    `🫙 *${lang === 'ar' ? i.name_ar : i.name_en}* × ${i.qty} — ${(i.price * i.qty).toFixed(0)} ${cur}`
   ).join('\n');
   const msg = lang === 'ar'
     ? `✨ *متجر TORO للعطور*\n` +
@@ -726,19 +727,17 @@ function waOrder(o) {
       `📋 *طلب رقم #${o.id}*\n\n` +
       `${items}\n\n` +
       `━━━━━━━━━━━━━━━━━━\n` +
-      `💰 *الإجمالي: ${Number(o.total).toFixed(2)} ${t('aed')}*\n` +
+      `💰 *الإجمالي: ${Number(o.total).toFixed(2)} ${cur}*\n` +
       `👤 العميل: ${o.user_name || '—'}\n` +
-      `📍 العنوان: ${o.address || '—'}\n` +
-      `💳 الدفع عند الاستلام`
+      `📍 العنوان: ${o.address || '—'}`
     : `✨ *TORO Perfume Store*\n` +
       `━━━━━━━━━━━━━━━━━━\n` +
       `📋 *Order #${o.id}*\n\n` +
       `${items}\n\n` +
       `━━━━━━━━━━━━━━━━━━\n` +
-      `💰 *Total: ${Number(o.total).toFixed(2)} ${t('aed')}*\n` +
+      `💰 *Total: ${Number(o.total).toFixed(2)} ${cur}*\n` +
       `👤 Customer: ${o.user_name || '—'}\n` +
-      `📍 Address: ${o.address || '—'}\n` +
-      `💳 Cash on Delivery`;
+      `📍 Address: ${o.address || '—'}`;
   window.open(`https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
@@ -1221,7 +1220,7 @@ function openBannerForm(id) {
   const modal = document.getElementById('bannerModal');
   if (!modal) return;
 
-  const b = id ? allBanners.find(x => x.id === id) : null;
+  const b = id ? allBanners.find(x => x.id == id) : null;
   document.getElementById('bfm-title-ar').value    = b ? (b.title_ar    || '') : '';
   document.getElementById('bfm-title-en').value    = b ? (b.title_en    || '') : '';
   document.getElementById('bfm-sub-ar').value      = b ? (b.subtitle_ar || '') : '';
