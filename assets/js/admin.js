@@ -657,6 +657,7 @@ function renderOrdersTable(list) {
       </td>
       <td><div class="act-row">
         <button class="btn-sm btn-view" onclick='showOrderDetail(${JSON.stringify(o).replace(/'/g,"&#39;")})'>${t('viewDetails')}</button>
+        <button class="btn-sm btn-del" onclick="deleteOrder(${o.id})">🗑</button>
       </div></td>
     </tr>`).join('')}</tbody>
   </table></div>`;
@@ -676,6 +677,18 @@ async function updateOrderStatus(id, status) {
   const r = await api('PUT', `${BASE}/orders.php?id=${id}`, { status });
   if (r.ok) toast(t('statusUpdated'), 'ok');
   else toast(r.msg || t('error'), 'er');
+}
+
+async function deleteOrder(id) {
+  const msg = lang === 'ar' ? `حذف الطلب رقم #${id} نهائياً؟` : `Permanently delete order #${id}?`;
+  if (!confirm(msg)) return;
+  const r = await api('DELETE', `${BASE}/orders.php?id=${id}`);
+  if (r.ok) {
+    toast(lang === 'ar' ? '✓ تم حذف الطلب' : '✓ Order deleted', 'ok');
+    loadOrders();
+  } else {
+    toast(r.msg || t('error'), 'er');
+  }
 }
 
 function showOrderDetail(o) {

@@ -18,10 +18,11 @@ class OrderController {
         $id     = qInt('id') ? qInt('id') : null;
 
         switch ($method) {
-            case 'GET':  $this->get();       break;
-            case 'POST': $this->post();      break;
-            case 'PUT':  $this->put($id);    break;
-            default:     err('Method not allowed', 405);
+            case 'GET':    $this->get();       break;
+            case 'POST':   $this->post();      break;
+            case 'PUT':    $this->put($id);    break;
+            case 'DELETE': $this->delete($id); break;
+            default:       err('Method not allowed', 405);
         }
     }
 
@@ -95,5 +96,15 @@ class OrderController {
         Order::updateStatus($db, $id, $rawStatus);
         $db->close();
         ok(['msg' => 'Status updated']);
+    }
+
+    private function delete($id) {
+        if (!$id) err('ID required', 400);
+        authUser(true);
+        $db = getDB();
+        $ok = Order::delete($db, $id);
+        $db->close();
+        if ($ok) ok(['msg' => 'Order deleted']);
+        else err('Delete failed', 500);
     }
 }

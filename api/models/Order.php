@@ -113,4 +113,32 @@ class Order {
         $order['items'] = self::getItems($db, $id);
         return $order;
     }
+
+    /**
+     * Delete an order and its items by ID. Returns bool.
+     */
+    public static function delete($db, $id) {
+        // Delete order items first (foreign key constraint)
+        $stmt = $db->prepare("DELETE FROM order_items WHERE order_id = ?");
+        if (!$stmt) return false;
+        $stmt->bind_param('i', $id);
+        if (!$stmt->execute()) { $stmt->close(); return false; }
+        $stmt->close();
+
+        // Delete payments (ignore error if table doesn't exist)
+        $stmt2 = $db->prepare("DELETE FROM payments WHERE order_id = ?");
+        if ($stmt2) {
+            $stmt2->bind_param('i', $id);
+            $stmt2->execute();
+            $stmt2->close();
+        }
+
+        // Delete the order record
+        $stmt = $db->prepare("DELETE FROM orders WHERE id = ?");
+        if (!$stmt) return false;
+        $stmt->bind_param('i', $id);
+        $ok = $stmt->execute();
+        $stmt->close();
+        return $ok;
+    }
 }

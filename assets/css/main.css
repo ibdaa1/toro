@@ -67,6 +67,14 @@ img{display:block;max-width:100%}
 .trust-ar{font-size:12px;color:var(--mu);white-space:nowrap;letter-spacing:.3px}
 .trust-sep{width:1px;height:20px;background:rgba(44,62,80,.25);flex-shrink:0}
 
+/* ═══ WHATSAPP CONTACT STRIP ═══ */
+.wa-contact-strip{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;margin:10px 14px 4px;background:linear-gradient(135deg,#075e54,#128c7e);border-radius:14px;box-shadow:0 3px 12px rgba(37,211,102,.2)}
+.wa-contact-info{display:flex;align-items:center;gap:8px;color:#fff;font-size:15px;font-weight:600;letter-spacing:.3px}
+.wa-contact-info svg{flex-shrink:0;opacity:.9}
+.wa-contact-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#25d366;color:#fff;border-radius:22px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;transition:.2s;box-shadow:0 2px 8px rgba(37,211,102,.35)}
+.wa-contact-btn:hover{background:#1ebe5d;transform:scale(1.04);box-shadow:0 4px 14px rgba(37,211,102,.5)}
+.wa-contact-btn:active{transform:scale(.97)}
+
 /* ═══ SEARCH ═══ */
 .sw{padding:14px 14px 10px;position:relative}
 .sw input{width:100%;background:var(--d2);border:1px solid rgba(44,62,80,.25);border-radius:28px;padding:11px 44px;color:var(--tx);font-size:16px;outline:none;transition:.25s}
