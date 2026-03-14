@@ -353,7 +353,7 @@ function showProd(id) {
   // Build image area
   let imgArea = '';
   if (imgs.length > 1) {
-    const slides = imgs.map((u,i) => `<img src="${escHtml(u)}" class="pd-slide${i===0?' pd-slide-active':''}" onerror="this.style.display='none'">`).join('');
+    const slides = imgs.map((u,i) => `<img src="${escHtml(u)}" class="pd-slide${i===0?' pd-slide-active':''}" alt="${escHtml(nm)} - ${escHtml(p.brand||'TORO')} ${i+1}" loading="lazy" onerror="this.style.display='none'">`).join('');
     const dots   = imgs.map((_,i) => `<span class="pd-dot${i===0?' pd-dot-active':''}" onclick="pdGoSlide(${i})"></span>`).join('');
     imgArea = `<div class="pdim pd-slider" id="pdSlider">
       ${slides}
@@ -362,7 +362,7 @@ function showProd(id) {
       <div class="pd-dots">${dots}</div>
     </div>`;
   } else {
-    imgArea = `<div class="pdim">${imgs[0] ? `<img src="${escHtml(imgs[0])}" onerror="this.style.display='none'">` : '🫙'}</div>`;
+    imgArea = `<div class="pdim">${imgs[0] ? `<img src="${escHtml(imgs[0])}" alt="${escHtml(nm)} - ${escHtml(p.brand||'TORO')} perfume" loading="lazy" onerror="this.style.display='none'">` : '🫙'}</div>`;
   }
 
   document.getElementById('pdBody').innerHTML = `
@@ -388,6 +388,33 @@ function showProd(id) {
   document.getElementById('mQty').textContent = 1;
   document.getElementById('pdAddBtn').textContent = t('add_cart');
   document.getElementById('pdMod').classList.add('open');
+
+  // Inject Product structured data for SEO
+  const seoImg = imgs.length ? imgs[0] : '';
+  const seoSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": nm,
+    "description": desc || nm + ' - TORO Boutique fragrance',
+    "brand": { "@type": "Brand", "name": p.brand || 'TORO' },
+    "image": seoImg ? [seoImg] : [],
+    "offers": {
+      "@type": "Offer",
+      "url": "https://toroboutique.top/?product=" + encodeURIComponent(p.id),
+      "priceCurrency": "AED",
+      "price": p.price,
+      "availability": p.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "seller": { "@type": "Organization", "name": "TORO Boutique" }
+    }
+  };
+  let ldEl = document.getElementById('__product_ld');
+  if (!ldEl) {
+    ldEl = document.createElement('script');
+    ldEl.id = '__product_ld';
+    ldEl.type = 'application/ld+json';
+    document.head.appendChild(ldEl);
+  }
+  ldEl.textContent = JSON.stringify(seoSchema);
 }
 
 let pdSlideIdx = 0, pdSlideCount = 1;
