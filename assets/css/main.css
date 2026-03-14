@@ -425,3 +425,8 @@ tr:hover td{background:rgba(44,62,80,.025)}
 .banner-dots{position:absolute;bottom:10px;inset-inline-end:14px;display:flex;gap:6px;z-index:2}
 .banner-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.45);transition:.25s;cursor:pointer;border:none;padding:0;outline:none}
 .banner-dot.active{background:#fff;width:18px;border-radius:4px}
+
+/* ═══ FLOATING WHATSAPP BUTTON ═══ */
+.wa-float{position:fixed;bottom:22px;inset-inline-end:18px;z-index:9999;width:58px;height:58px;border-radius:50%;background:var(--wa);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(37,211,102,.5);transition:.2s;text-decoration:none;-webkit-tap-highlight-color:transparent}
+.wa-float:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(37,211,102,.65)}
+.wa-float:active{transform:scale(.95)}

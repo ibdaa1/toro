@@ -413,13 +413,13 @@ function waFromModal()  { waProduct(modalProdId, modalQty); cm('pdMod'); }
 const TW = {
   product(lg, p, qty, currency) {
     const name  = lg === 'ar' ? p.name_ar : p.name_en;
-    const cur   = lg === 'ar' ? 'ريال' : currency;
+    const cur   = currency;
     return lg === 'ar'
       ? `✨ *متجر TORO للعطور*\n━━━━━━━━━━━━━━━━━━\n🫙 *${name}* × ${qty}\n💰 *${(p.price * qty).toFixed(2)} ${cur}*\n━━━━━━━━━━━━━━━━━━`
       : `✨ *TORO Perfume Store*\n━━━━━━━━━━━━━━━━━━\n🫙 *${name}* × ${qty}\n💰 *${(p.price * qty).toFixed(2)} ${cur}*\n━━━━━━━━━━━━━━━━━━`;
   },
   cart(lg, lines, total, currency, addr, notes, phone, locLink) {
-    const cur      = lg === 'ar' ? 'ريال' : currency;
+    const cur      = currency;
     const itemsStr = lines.join('\n');
     const parts = [
       addr   ? `📍 ${addr}`   : '',
@@ -433,7 +433,7 @@ const TW = {
       : `✨ *TORO Perfume Store*\n━━━━━━━━━━━━━━━━━━\n${itemsStr}\n━━━━━━━━━━━━━━━━━━\n💰 *Total: ${total.toFixed(2)} ${cur}*\n${extra}`.trim();
   },
   adminOrder(lg, o, currency) {
-    const cur   = lg === 'ar' ? 'ريال' : currency;
+    const cur   = currency;
     const items = (o.items || []).map(i =>
       `🫙 *${lg === 'ar' ? i.name_ar : i.name_en}* × ${i.qty} — ${(i.price * i.qty).toFixed(0)} ${cur}`
     ).join('\n');
