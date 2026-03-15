@@ -1,8 +1,17 @@
 // ══════════════════════════════════════════
 // CONFIG
 // ══════════════════════════════════════════
-const BASE   = '/api';
-const WA_NUM = '971505931141';
+const BASE      = '/api';
+const WA_NUM    = '971505931141';
+const SITE_URL  = 'https://toroboutique.top';
+const IS_MOBILE = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+
+// Convert a product/page name to a URL-safe slug
+function makeSlug(name) {
+  return name.toLowerCase().trim()
+    .replace(/[^a-z0-9\u0600-\u06ff]+/g, '-')
+    .replace(/^-|-$/g, '') || 'product';
+}
 
 // ══════════════════════════════════════════
 // SVG ICON CONSTANTS  (inline SVG avoids emoji rendering issues on Android)
@@ -400,7 +409,7 @@ function showProd(id) {
     "image": seoImg ? [seoImg] : [],
     "offers": {
       "@type": "Offer",
-      "url": "https://toroboutique.top/?product=" + encodeURIComponent(p.id),
+      "url": SITE_URL + '/?product=' + encodeURIComponent(p.id),
       "priceCurrency": "AED",
       "price": p.price,
       "availability": p.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
@@ -415,6 +424,38 @@ function showProd(id) {
     document.head.appendChild(ldEl);
   }
   ldEl.textContent = JSON.stringify(seoSchema);
+
+  // ── Dynamic title + meta description for SEO ─────────────
+  document.title = nm + ' | TORO Boutique';
+  const metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) metaDesc.setAttribute('content', (desc ? desc.slice(0,155) : nm) + ' — TORO Boutique');
+  const ogTitle = document.querySelector('meta[property="og:title"]');
+  if (ogTitle) ogTitle.setAttribute('content', nm + ' | TORO Boutique');
+  const twtTitle = document.querySelector('meta[name="twitter:title"]');
+  if (twtTitle) twtTitle.setAttribute('content', nm + ' | TORO Boutique');
+
+  // ── URL state: push ?product=ID so direct link is sharable ─
+  const slug = makeSlug(nm);
+  const newUrl = '/?product=' + encodeURIComponent(p.id) + '&name=' + encodeURIComponent(slug);
+  if (history.state?.productId !== p.id) {
+    history.pushState({ productId: p.id }, '', newUrl);
+  }
+  const canonEl = document.querySelector('link[rel="canonical"]');
+  if (canonEl) canonEl.setAttribute('href', SITE_URL + newUrl);
+}
+
+// Restore page title/URL/canonical when product modal is closed
+function _restoreSEO() {
+  document.title = 'TORO — عطور فاخرة أصيلة | متجر العطور الإماراتي';
+  const metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) metaDesc.setAttribute('content', 'متجر TORO للعطور الفاخرة في الإمارات. اكتشف أرقى العطور الرجالية والنسائية من أشهر الماركات العالمية. توصيل سريع لجميع الإمارات.');
+  const ogTitle = document.querySelector('meta[property="og:title"]');
+  if (ogTitle) ogTitle.setAttribute('content', 'TORO — عطور فاخرة أصيلة | TORO Boutique');
+  const twtTitle = document.querySelector('meta[name="twitter:title"]');
+  if (twtTitle) twtTitle.setAttribute('content', 'TORO Boutique — Luxury Perfumes UAE');
+  const canonEl = document.querySelector('link[rel="canonical"]');
+  if (canonEl) canonEl.setAttribute('href', SITE_URL + '/');
+  if (history.state?.productId) history.pushState({}, '', '/');
 }
 
 let pdSlideIdx = 0, pdSlideCount = 1;
@@ -474,10 +515,21 @@ const TW = {
 // ══════════════════════════════════════════
 // WHATSAPP
 // ══════════════════════════════════════════
+// Opens WhatsApp app directly on mobile; falls back to web on desktop.
+function openWA(phone, msg) {
+  const encoded = encodeURIComponent(msg);
+  if (IS_MOBILE) {
+    // Use deep link to open the WhatsApp app directly
+    location.href = `whatsapp://send?phone=${phone}&text=${encoded}`;
+  } else {
+    window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+  }
+}
+
 function waProduct(id, qty=1) {
   const p = prods.find(x=>x.id==id); if(!p) return;
   const msg = TW.product(lang, p, qty, t('currency'));
-  window.open(`https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
+  openWA(WA_NUM, msg);
 }
 
 function buildWaCartUrl() {
@@ -496,13 +548,13 @@ function buildWaCartUrl() {
   const lng   = document.getElementById('chkLng')?.value  || '';
   const locLink = (lat && lng) ? `https://maps.google.com/?q=${lat},${lng}` : '';
   const msg = TW.cart(lang, lines, total, t('currency'), addr, notes, phone, locLink);
-  return `https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`;
+  return msg;
 }
 
 function sendWhatsApp() {
-  const url = buildWaCartUrl();
-  if (!url) { toast(t('cart_empty'),'er'); return; }
-  window.open(url, '_blank');
+  const msg = buildWaCartUrl();
+  if (!msg) { toast(t('cart_empty'),'er'); return; }
+  openWA(WA_NUM, msg);
 }
 
 // ══════════════════════════════════════════
@@ -597,10 +649,10 @@ async function placeOrder() {
   const phone = document.getElementById('chkPhone')?.value?.trim();
   if (!phone) { toast(t('enter_phone'),'er'); document.getElementById('chkPhone')?.focus(); return; }
 
-  // Open a blank window synchronously so mobile popup blockers allow it.
-  // We'll navigate it to WhatsApp after the order is confirmed.
-  const waUrl = buildWaCartUrl();
-  const waWin = waUrl ? window.open('', '_blank') : null;
+  // Build WA message & decide how to send it (app on mobile, web on desktop).
+  const waMsg = buildWaCartUrl();
+  // Open blank window synchronously on desktop so popup blockers allow it.
+  const waWin = (!IS_MOBILE && waMsg) ? window.open('', '_blank') : null;
 
   const btn = document.getElementById('placeBtn');
   btn.disabled=true;
@@ -619,8 +671,12 @@ async function placeOrder() {
     setCart([]);
     updBdg();
     toast(t('order_ok'),'ok');
-    if (waWin && waUrl) {
-      waWin.location.href = waUrl;
+    if (waMsg) {
+      if (IS_MOBILE) {
+        openWA(WA_NUM, waMsg);
+      } else if (waWin) {
+        waWin.location.href = `https://wa.me/${WA_NUM}?text=${encodeURIComponent(waMsg)}`;
+      }
     }
     document.getElementById('chkAddr').value='';
     document.getElementById('chkNotes').value='';
@@ -1110,7 +1166,7 @@ async function updOrdSt(id, status) {
 
 function waOrderAdmin(o) {
   const msg = TW.adminOrder(lang, o, t('currency'));
-  window.open(`https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
+  openWA(WA_NUM, msg);
 }
 
 // Product Form
@@ -1308,9 +1364,21 @@ function escHtml(str) {
 // ══════════════════════════════════════════
 // MODAL
 // ══════════════════════════════════════════
-function cm(id) { document.getElementById(id)?.classList.remove('open'); }
+function cm(id) {
+  document.getElementById(id)?.classList.remove('open');
+  if (id === 'pdMod') _restoreSEO();
+}
 document.querySelectorAll('.ov').forEach(m => {
-  m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
+  m.addEventListener('click', e => { if(e.target===m) { m.classList.remove('open'); if(m.id==='pdMod') _restoreSEO(); } });
+});
+
+// Handle browser back/forward — close product modal when navigating back
+window.addEventListener('popstate', () => {
+  const params = new URLSearchParams(location.search);
+  if (!params.has('product')) {
+    document.getElementById('pdMod')?.classList.remove('open');
+    _restoreSEO();
+  }
 });
 
 // ══════════════════════════════════════════
@@ -1384,6 +1452,11 @@ function confirmMapLocation() {
 // INIT
 // ══════════════════════════════════════════
 updBdg();
-loadProds();      // update marquee + grid with real data
+loadProds().then(() => {
+  // Auto-open product if URL contains ?product=ID (e.g., from sitemap or shared link)
+  const params = new URLSearchParams(location.search);
+  const pid = params.get('product');
+  if (pid) showProd(pid);
+});
 loadBanners();    // load banner carousel from API
 loadFavIds();
