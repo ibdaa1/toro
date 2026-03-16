@@ -361,6 +361,9 @@ async function loadDashboard() {
     const pct = Math.min(100, (d.revenue / REVENUE_TARGET) * 100);
     const bar = document.getElementById('rev-bar-fill');
     if (bar) setTimeout(() => bar.style.width = pct + '%', 100);
+
+    // Show pending orders notification banner when there are pending orders
+    showPendingNotification(Number(d.pending_orders) || 0);
   }
 
   // Recent orders
@@ -388,6 +391,16 @@ async function loadDashboard() {
       }
     }
   }
+}
+
+function showPendingNotification(count) {
+  const banner = document.getElementById('pending-notif');
+  if (!banner) return;
+  if (count <= 0) { banner.style.display = 'none'; return; }
+  document.getElementById('pending-notif-count').textContent = fmtNum(count);
+  document.getElementById('pending-notif-text').textContent  = t('pendingWaiting');
+  document.getElementById('pending-notif-action').textContent = t('viewOrders');
+  banner.style.display = 'flex';
 }
 
 // ── PRODUCTS ─────────────────────────────────────────────

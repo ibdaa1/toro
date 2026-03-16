@@ -593,7 +593,7 @@ function renderCart() {
     const p=prods.find(x=>x.id==c.product_id); if(!p) return '';
     const nm=lang==='ar'?p.name_ar:p.name_en;
     return `<div class="citem">
-      <div class="cimg">${p.image?`<img src="${p.image}" onerror="this.style.display='none'">`:'🫙'}</div>
+      <div class="cimg">${p.image?`<img src="${p.image}" loading="lazy" onerror="this.style.display='none'">`:'🫙'}</div>
       <div class="cinf">
         <div class="cnm">${escHtml(nm)}</div>
         <div class="cpr">${p.price} ${t('currency')}</div>
@@ -972,7 +972,7 @@ function renderProdTable(list) {
       const active = p.is_active==1||p.is_active===undefined;
       return `<tr>
         <td><div class="prod-thumb">
-          ${p.image?`<img src="${p.image}" onerror="this.style.display='none'">` : '🫙'}
+          ${p.image?`<img src="${p.image}" loading="lazy" onerror="this.style.display='none'">` : '🫙'}
         </div></td>
         <td data-label="${escHtml(t('th_product'))}" style="color:var(--tx);max-width:140px">
           <div style="font-weight:500">${escHtml(nm)}</div>
