@@ -4,7 +4,10 @@
 const BASE      = '/api';
 const WA_NUM    = '971505931141';
 const SITE_URL  = 'https://toroboutique.top';
-const IS_MOBILE = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+// Detect mobile/tablet, including iPads in "Request Desktop Site" mode (iOS 13+)
+// where the UA reports "Macintosh" but maxTouchPoints reveals touch hardware.
+const IS_MOBILE = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent)
+  || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
 // Convert a product/page name to a URL-safe slug
 function makeSlug(name) {
