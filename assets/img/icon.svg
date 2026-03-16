@@ -1,6 +1,65 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" rx="96" fill="#080808"/>
-  <rect x="6" y="6" width="500" height="500" rx="90" fill="none" stroke="#c9a84c" stroke-width="8" opacity="0.35"/>
-  <text x="256" y="295" font-family="Georgia,'Times New Roman',serif" font-size="290" font-style="italic" font-weight="700" fill="#c9a84c" text-anchor="middle" letter-spacing="4">T</text>
-  <text x="256" y="385" font-family="Georgia,'Times New Roman',serif" font-size="88" font-style="italic" font-weight="700" fill="#c9a84c" text-anchor="middle" letter-spacing="28" opacity="0.82">ORO</text>
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#e8c96a"/>
+      <stop offset="50%"  stop-color="#c9a84c"/>
+      <stop offset="100%" stop-color="#a07830"/>
+    </linearGradient>
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#e8c96a" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#a07830" stop-opacity="0.4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="88" fill="#080808"/>
+
+  <!-- Outer border -->
+  <rect x="9" y="9" width="494" height="494" rx="82" fill="none" stroke="url(#borderGrad)" stroke-width="2"/>
+
+  <!-- Inner frame accent -->
+  <rect x="22" y="22" width="468" height="468" rx="70" fill="none" stroke="#c9a84c" stroke-width="0.75" opacity="0.18"/>
+
+  <!-- Top ornamental rule -->
+  <line x1="88"  y1="148" x2="208" y2="148" stroke="url(#goldGrad)" stroke-width="1.5"/>
+  <line x1="304" y1="148" x2="424" y2="148" stroke="url(#goldGrad)" stroke-width="1.5"/>
+
+  <!-- Diamond ornament centred on rule -->
+  <polygon points="256,140 263,148 256,156 249,148" fill="url(#goldGrad)"/>
+
+  <!-- ─── Geometric T mark ─── -->
+  <!-- Top cross bar -->
+  <rect x="108" y="170" width="296" height="32" rx="4" fill="url(#goldGrad)"/>
+  <!-- Left serif tab -->
+  <rect x="108" y="170" width="48" height="16" rx="3" fill="url(#goldGrad)"/>
+  <!-- Right serif tab -->
+  <rect x="356" y="170" width="48" height="16" rx="3" fill="url(#goldGrad)"/>
+  <!-- Vertical stem -->
+  <rect x="232" y="202" width="48" height="136" rx="4" fill="url(#goldGrad)"/>
+  <!-- Foot serifs -->
+  <rect x="210" y="322" width="92" height="14" rx="3" fill="url(#goldGrad)"/>
+
+  <!-- Bottom ornamental rule -->
+  <line x1="88"  y1="372" x2="424" y2="372" stroke="#c9a84c" stroke-width="0.75" opacity="0.4"/>
+
+  <!-- Brand wordmark -->
+  <text
+    x="256" y="430"
+    font-family="Georgia,'Times New Roman',serif"
+    font-size="64"
+    font-weight="700"
+    fill="url(#goldGrad)"
+    text-anchor="middle"
+    letter-spacing="22"
+  >TORO</text>
+
+  <!-- Tiny dot accents flanking wordmark -->
+  <circle cx="120" cy="418" r="3" fill="#c9a84c" opacity="0.45"/>
+  <circle cx="392" cy="418" r="3" fill="#c9a84c" opacity="0.45"/>
+
+  <!-- Corner micro-accents -->
+  <path d="M42,42 L70,42 M42,42 L42,70"   stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+  <path d="M470,42 L442,42 M470,42 L470,70" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+  <path d="M42,470 L70,470 M42,470 L42,442" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+  <path d="M470,470 L442,470 M470,470 L470,442" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
 </svg>
