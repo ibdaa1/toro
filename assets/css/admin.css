@@ -489,7 +489,7 @@ table tbody tr:hover { background: rgba(201,168,76,.04); }
 .img-drop-zone .drop-icon { font-size: 32px; opacity: .6; }
 .img-drop-zone .drop-text { font-size: 13px; color: var(--mu); }
 .img-drop-zone .drop-sub  { font-size: 11px; color: var(--mu); opacity: .7; }
-.img-drop-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.img-drop-zone input[type="file"] { position: absolute; top: 0; right: 0; bottom: 0; left: 0; opacity: 0; cursor: pointer; }
 .img-del-btn {
   background: rgba(201,72,72,.15);
   color: #e07070;
@@ -534,7 +534,7 @@ table tbody tr:hover { background: rgba(201,168,76,.04); }
 .ov {
   display: none;
   position: fixed;
-  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
   z-index: 600;
   background: rgba(0,0,0,.88);
   align-items: center;
@@ -647,7 +647,7 @@ table tbody tr:hover { background: rgba(201,168,76,.04); }
   .adm-overlay {
     display: none;
     position: fixed;
-    inset: 0;
+    top: 0; right: 0; bottom: 0; left: 0;
     background: rgba(0,0,0,.6);
     z-index: 340;
   }

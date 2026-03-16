@@ -9,7 +9,7 @@ const WA_NUM = '971505931141';
 // ── STATE ───────────────────────────────────────────────
 const LS = { USER: 'toro_user', TOKEN: 'toro_token', LANG: 'toro_lang' };
 
-let lang          = localStorage.getItem(LS.LANG) || 'ar';
+let lang; try { lang = localStorage.getItem(LS.LANG) || 'ar'; } catch (e) { lang = 'ar'; }
 let currentUser   = null;
 let currentToken  = null;
 let currentSection = 'dashboard';

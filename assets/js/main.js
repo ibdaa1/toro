@@ -30,7 +30,7 @@ const SVG = {
 // ══════════════════════════════════════════
 const LS = { USER:'toro_user', TOKEN:'toro_token', CART:'toro_cart', LANG:'toro_lang' };
 
-let lang   = localStorage.getItem(LS.LANG) || 'ar';
+let lang; try { lang = localStorage.getItem(LS.LANG) || 'ar'; } catch (e) { lang = 'ar'; }
 let prods  = [];
 let favIds = new Set(); // favorites product IDs for current user
 let curFlt = 'all';
