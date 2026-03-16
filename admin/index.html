@@ -581,5 +581,23 @@
 </div>
 
 <script src="../assets/js/admin.js"></script>
-</body>
-</html>
+<script>
+// Register the shared service worker so this page also reloads automatically
+// when a new SW version activates — fixes stale admin panel on iOS/Safari.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('../sw.js', { updateViaCache: 'none' }).catch(function () {});
+  });
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') {
+      navigator.serviceWorker.getRegistration().then(function (reg) {
+        if (reg) reg.update();
+      });
+    }
+  });
+  var _swRefreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (!_swRefreshing) { _swRefreshing = true; location.reload(); }
+  });
+}
+</script>

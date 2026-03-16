@@ -1,6 +1,6 @@
-// TORO Service Worker — cache-first for static, network-first for API
+// TORO Service Worker — network-first for HTML, cache-first for static assets
 // Bump CACHE version whenever static files change to force a fresh install.
-const CACHE = 'toro-v42';
+const CACHE = 'toro-v43';
 const STATIC = [
   './',
   './index.html',
@@ -63,7 +63,32 @@ self.addEventListener('fetch', e => {
   // 3. Always network-first for API calls — never serve stale data
   if (url.pathname.includes('/api/')) return;
 
-  // 4. Cache-first strategy for same-origin static assets
+  // 4. Network-first for HTML navigation requests.
+  //    HTML pages (index.html, admin/index.html, …) must always come from the
+  //    network so users never see a stale admin panel or store page.  Only fall
+  //    back to the matching cached page when completely offline.
+  if (req.destination === 'document') {
+    e.respondWith(
+      fetch(req)
+        .then(res => {
+          if (res && res.status === 200) {
+            const clone = res.clone();
+            caches.open(CACHE).then(c => c.put(req, clone));
+          }
+          return res;
+        })
+        .catch(() =>
+          caches.match(req).then(cached =>
+            cached || new Response('<h1>TORO — You are offline</h1>', {
+              headers: { 'Content-Type': 'text/html; charset=utf-8' }
+            })
+          )
+        )
+    );
+    return;
+  }
+
+  // 5. Cache-first strategy for same-origin static assets (CSS, JS, images)
   e.respondWith(
     caches.match(req).then(cached => {
       if (cached) return cached;
@@ -76,18 +101,7 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE).then(c => c.put(req, clone));
           return res;
         })
-        .catch(() => {
-          // Offline fallback: serve cached index.html for navigation requests
-          if (req.destination === 'document') {
-            return caches.match('./index.html').then(cached =>
-              cached || new Response('<h1>TORO — You are offline</h1>', {
-                headers: { 'Content-Type': 'text/html; charset=utf-8' }
-              })
-            );
-          }
-          // For other assets return an empty 503
-          return new Response('', { status: 503 });
-        });
+        .catch(() => new Response('', { status: 503 }));
     })
   );
 });
