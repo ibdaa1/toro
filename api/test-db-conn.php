@@ -1,50 +1,36 @@
 <?php
-// api/health/db.php
-declare(strict_types=1);
+// api/test-db-conn.php — JSON health-check for the database connection
 
 header('Content-Type: application/json; charset=utf-8');
 
-$response = [
+$response = array(
     "success" => false,
     "service" => "database"
-];
+);
 
 try {
+    require_once __DIR__ . '/config/config.php';
+    require_once __DIR__ . '/config/db.php';
 
-    require_once __DIR__ . '/../config/db.php';
-
-    if (!function_exists('connectDB')) {
+    if (!function_exists('getDB')) {
         throw new Exception("Database function not available");
     }
 
-    $db = connectDB();
+    $db = getDB();
 
     if ($db instanceof mysqli) {
-
-        if ($db->connect_errno) {
-            throw new Exception("Database connection failed");
+        $result = $db->query("SELECT 1");
+        if ($result === false) {
+            throw new Exception("Test query failed: " . $db->error);
         }
-
-        $db->query("SELECT 1");
-
         $response["success"] = true;
-        $response["driver"] = "mysqli";
+        $response["driver"]  = "mysqli";
+        $db->close();
     }
 
-    elseif ($db instanceof PDO) {
-
-        $db->query("SELECT 1");
-
-        $response["success"] = true;
-        $response["driver"] = "pdo";
-    }
-
-} catch (Throwable $e) {
-
+} catch (Exception $e) {
     http_response_code(500);
-
-    $response["error"] = "Database unavailable";
-
+    $response["error"] = "Database unavailable: " . $e->getMessage();
 }
 
 echo json_encode($response, JSON_UNESCAPED_UNICODE);

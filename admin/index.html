@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>TORO — لوحة التحكم</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Tajawal:wght@300;400;500;700&display=swap" rel="preload" as="style" onload="this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body data-lang="ar">
+
+<!-- TOP HEADER -->
+<header class="adm-hdr">
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="adm-menu-btn" id="menuBtn">☰</button>
+    <div class="adm-logo">TORO <small data-i18n="dashboard"></small></div>
+  </div>
+  <div class="adm-hdr-r">
+    <div class="adm-user-info">
+      <strong id="adm-user-name">—</strong>
+      <span id="adm-user-email"></span>
+    </div>
+    <a href="/" class="adm-store-link">🛍 <span data-i18n="storeLink"></span></a>
+    <button class="adm-lang-btn" id="lang-btn" onclick="toggleLang()">EN</button>
+    <button class="adm-logout" onclick="logout()" data-i18n="logout"></button>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="adm-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="adm-sidebar" id="adm-sidebar">
+    <nav class="adm-nav">
+      <div class="adm-nav-section" data-i18n="navHome"></div>
+      <button class="adm-nav-item active" data-section="dashboard">
+        <span class="nav-icon">📊</span> <span data-i18n="dashboard"></span>
+      </button>
+
+      <div class="adm-nav-section" data-i18n="navStore"></div>
+      <button class="adm-nav-item" data-section="products">
+        <span class="nav-icon">📦</span> <span data-i18n="products"></span>
+      </button>
+      <button class="adm-nav-item" data-section="orders">
+        <span class="nav-icon">🧾</span> <span data-i18n="orders"></span>
+      </button>
+      <button class="adm-nav-item" data-section="payments">
+        <span class="nav-icon">💳</span> <span data-i18n="payments"></span>
+      </button>
+      <button class="adm-nav-item" data-section="stock">
+        <span class="nav-icon">📦</span> <span data-i18n="stockMovements"></span>
+      </button>
+
+      <div class="adm-nav-section" data-i18n="navReports"></div>
+      <button class="adm-nav-item" data-section="reports">
+        <span class="nav-icon">📈</span> <span data-i18n="salesReports"></span>
+      </button>
+
+      <div class="adm-nav-section" data-i18n="navUsers"></div>
+      <button class="adm-nav-item" data-section="users">
+        <span class="nav-icon">👥</span> <span data-i18n="users"></span>
+      </button>
+
+      <div class="adm-nav-section" data-i18n="navBanners"></div>
+      <button class="adm-nav-item" data-section="banners">
+        <span class="nav-icon">🖼</span> <span data-i18n="banners"></span>
+      </button>
+    </nav>
+    <div class="adm-sidebar-footer">
+      TORO Admin v2.0<br>
+      <span style="font-size:9px;opacity:.5">© 2025</span>
+    </div>
+  </aside>
+
+  <!-- OVERLAY (mobile) -->
+  <div class="adm-overlay" id="adm-overlay"></div>
+
+  <!-- MAIN CONTENT -->
+  <main class="adm-main" id="adm-content">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <section class="adm-section" id="sec-dashboard">
+
+      <!-- Pending Orders Notification Banner -->
+      <div class="pending-notif" id="pending-notif" style="display:none">
+        <div class="pending-notif-icon">⚠️</div>
+        <div class="pending-notif-body">
+          <strong id="pending-notif-count"></strong>
+          <span id="pending-notif-text"></span>
+        </div>
+        <button class="btn-secondary pending-notif-btn" onclick="switchSection('orders')" id="pending-notif-action"></button>
+        <button class="pending-notif-close" onclick="document.getElementById('pending-notif').style.display='none'" aria-label="dismiss">✕</button>
+      </div>
+
+      <div class="adm-page-hdr">
+        <div>
+          <div class="adm-page-title">📊 <span data-i18n="dashboard"></span></div>
+          <div class="adm-page-sub" data-i18n="dashboardSub"></div>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📦</div>
+          <div class="stat-val" id="stat-products">—</div>
+          <div class="stat-lbl" data-i18n="totalProducts"></div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon">🧾</div>
+          <div class="stat-val" id="stat-orders">—</div>
+          <div class="stat-lbl" data-i18n="totalOrders"></div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon">👥</div>
+          <div class="stat-val" id="stat-users">—</div>
+          <div class="stat-lbl" data-i18n="totalCustomers"></div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-icon">💰</div>
+          <div class="stat-val" id="stat-revenue">—</div>
+          <div class="stat-lbl" data-i18n="revenueStat"></div>
+        </div>
+      </div>
+
+      <!-- Revenue bar + pending -->
+      <div class="dash-mini-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+        <div class="sec-card">
+          <div class="sec-hdr"><span class="sec-title">💰 <span data-i18n="totalRevenue"></span></span></div>
+          <div class="sec-body">
+            <div style="font-size:28px;font-weight:800;color:var(--g)" id="stat-revenue-big">—</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px" data-i18n="aedFull"></div>
+            <div class="rev-bar" style="margin-top:12px">
+              <div class="rev-fill" id="rev-bar-fill" style="width:0%"></div>
+            </div>
+            <div style="font-size:10px;color:var(--mu);margin-top:4px" data-i18n="revenueTarget"></div>
+          </div>
+        </div>
+        <div class="sec-card">
+          <div class="sec-hdr"><span class="sec-title">⏳ <span data-i18n="pendingOrders"></span></span></div>
+          <div class="sec-body">
+            <div style="font-size:42px;font-weight:800;color:var(--or)" id="stat-pending">—</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px" data-i18n="pendingWaiting"></div>
+            <div style="margin-top:12px">
+              <button class="btn-secondary" onclick="switchSection('orders')" data-i18n="viewOrders"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent orders -->
+      <div class="sec-card">
+        <div class="sec-hdr">
+          <span class="sec-title">🕒 <span data-i18n="recentOrders"></span></span>
+          <button class="btn-secondary" onclick="switchSection('orders')" data-i18n="viewAll"></button>
+        </div>
+        <div class="sec-body" id="recent-orders-list">
+          <div class="ldw"><div class="ld"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ PRODUCTS ═══ -->
+    <section class="adm-section" id="sec-products" style="display:none">
+      <div class="adm-page-hdr">
+        <div>
+          <div class="adm-page-title">📦 <span data-i18n="products"></span></div>
+          <div class="adm-page-sub" data-i18n="productsSub"></div>
+        </div>
+        <button class="btn-primary" onclick="openProductForm()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span data-i18n="addProduct"></span>
+        </button>
+      </div>
+      <div class="sec-card">
+        <div class="sec-hdr">
+          <span class="sec-title" data-i18n="productsList"></span>
+          <div class="adm-search" style="width:240px;margin:0">
+            <span class="srch-ic">🔍</span>
+            <input data-i18n-placeholder="searchProducts" placeholder="بحث..." oninput="filterProducts(this.value)">
+          </div>
+        </div>
+        <div style="padding:0" id="prod-table-wrap">
+          <div class="ldw"><div class="ld"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ ORDERS ═══ -->
+    <section class="adm-section" id="sec-orders" style="display:none">
+      <div class="adm-page-hdr">
+        <div>
+          <div class="adm-page-title">🧾 <span data-i18n="orders"></span></div>
+          <div class="adm-page-sub" data-i18n="ordersSub"></div>
+        </div>
+      </div>
+      <div class="sec-card">
+        <div class="sec-hdr">
+          <span class="sec-title" data-i18n="ordersList"></span>
+          <div class="adm-search" style="width:240px;margin:0">
+            <span class="srch-ic">🔍</span>
+            <input data-i18n-placeholder="searchOrders" placeholder="بحث بالرقم أو العميل..." oninput="filterOrders(this.value)">
+          </div>
+        </div>
+        <div style="padding:0" id="orders-table-wrap">
+          <div class="ldw"><div class="ld"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ PAYMENTS ═══ -->
+    <section class="adm-section" id="sec-payments" style="display:none">
+      <div class="adm-page-hdr">
+        <div>
+          <div class="adm-page-title">💳 <span data-i18n="payments"></span></div>
+          <div class="adm-page-sub" data-i18n="paymentsSub"></div>
+        </div>
+      </div>
+      <div class="sec-card">
+        <div class="sec-hdr"><span class="sec-title" data-i18n="paymentsHistory"></span></div>
+        <div class="sec-body" id="payments-body">
+          <div class="ldw"><div class="ld"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ USERS ═══ -->
+    <section class="adm-section" id="sec-users" style="display:none">
+      <div class="adm-page-hdr">
+        <div>
+          <div class="adm-page-title">👥 <span data-i18n="users"></span></div>
+          <div class="adm-page-sub" data-i18n="usersSub"></div>
+        </div>
+      </div>
+      <div class="sec-card">
+        <div class="sec-hdr">
+          <span class="sec-title" data-i18n="customersList"></span>
+          <div class="adm-search" style="width:240px;margin:0">
+            <span class="srch-ic">🔍</span>
+            <input data-i18n-placeholder="searchUsers" placeholder="بحث بالاسم أو البريد..." oninput="filterUsers(this.value)">
+          </div>
+        </div>
+        <div style="padding:0" id="users-table-wrap">
+          <div class="ldw"><div class="ld"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ STOCK MOVEMENTS ═══ -->
+    <section class="adm-section" id="sec-stock" style="display:none">
+      <div class="adm-page-hdr">
+        <div>
+          <div class="adm-page-title">📦 <span data-i18n="stockMovements"></span></div>
+          <div class="adm-page-sub" data-i18n="stockSub"></div>
+        </div>
+      </div>
+
+      <!-- Add movement form -->
+      <div class="sec-card" style="margin-bottom:16px">
+        <div class="sec-hdr"><span class="sec-title">➕ <span data-i18n="addStock"></span></span></div>
+        <div class="sec-body">
+          <div class="fr2">
+            <div class="fg">
+              <label class="fl"><span data-i18n="product"></span> *</label>
+              <select class="fsel" id="sm-product">
+                <option value="" data-i18n="selectProduct"></option>
+              </select>
+            </div>
+            <div class="fg">
+              <label class="fl"><span data-i18n="movementType"></span> *</label>
+              <select class="fsel" id="sm-type">
+                <option value="in" data-i18n="stockIn"></option>
+                <option value="out" data-i18n="stockOut"></option>
+                <option value="adjustment" data-i18n="adjustment"></option>
+              </select>
+            </div>
+          </div>
+          <div class="fr2">
+            <div class="fg">
+              <label class="fl"><span data-i18n="quantity"></span> *</label>
+              <input class="fi" id="sm-qty" type="number" min="1" max="99999" placeholder="10">
+            </div>
+            <div class="fg">
+              <label class="fl" data-i18n="reason"></label>
+              <input class="fi" id="sm-reason" data-i18n-placeholder="stockReasonPh" placeholder="مثال: شحنة جديدة، طلب رقم 25..." maxlength="255">
+            </div>
+          </div>
+          <button class="btn-primary" onclick="addStockMovement()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span data-i18n="recordMovement"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Movement history -->
+      <div class="sec-card">
+        <div class="sec-hdr">
+          <span class="sec-title">📋 <span data-i18n="stockHistory"></span></span>
+        </div>
+        <div id="stock-body" style="padding:0">
+          <div class="ldw"><div class="ld"></div></div>
+        </div>
+        <div style="padding:0" id="stock-table-wrap"></div>
+      </div>
+    </section>
+
+    <!-- ═══ SALES REPORTS ═══ -->
+    <section class="adm-section" id="sec-reports" style="display:none">
+      <div class="adm-page-hdr">
+        <div>
+          <div class="adm-page-title">📈 <span data-i18n="salesReports"></span></div>
+          <div class="adm-page-sub" data-i18n="reportsSub"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <select class="fsel" id="rpt-period" style="width:160px" onchange="loadReports()">
+            <option value="7days" data-i18n="last7days"></option>
+            <option value="30days" selected data-i18n="last30days"></option>
+            <option value="3months" data-i18n="last3months"></option>
+            <option value="year" data-i18n="lastYear"></option>
+          </select>
+          <button class="btn-secondary" onclick="loadReports()" data-i18n="refresh"></button>
+        </div>
+      </div>
+
+      <!-- Summary cards -->
+      <div class="stat-grid" id="rpt-summary" style="margin-bottom:16px">
+        <div class="ldw"><div class="ld"></div></div>
+      </div>
+
+      <!-- Revenue chart — SVG rendered by renderRevenueChart() -->
+      <div class="sec-card" style="margin-bottom:16px">
+        <div class="sec-hdr"><span class="sec-title">💰 <span data-i18n="revenueChart"></span></span></div>
+        <div class="sec-body" style="padding:8px 0">
+          <div id="revenue-chart-wrap"></div>
+        </div>
+      </div>
+
+      <!-- Two column: top products + status breakdown -->
+      <div class="dash-mini-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div class="sec-card">
+          <div class="sec-hdr"><span class="sec-title">🏆 <span data-i18n="topProducts"></span></span></div>
+          <div style="padding:0" id="rpt-top-products"></div>
+        </div>
+        <div class="sec-card">
+          <div class="sec-hdr"><span class="sec-title">📊 <span data-i18n="ordersByStatus"></span></span></div>
+          <div id="status-chart-wrap"></div>
+        </div>
+      </div>
+
+      <div id="rpt-body"></div>
+    </section>
+
+    <!-- ═══ BANNERS ═══ -->
+    <section class="adm-section" id="sec-banners" style="display:none">
+      <div class="adm-page-hdr">
+        <div>
+          <div class="adm-page-title">🖼 <span data-i18n="banners"></span></div>
+          <div class="adm-page-sub" data-i18n="bannersSub"></div>
+        </div>
+        <button class="btn-primary" onclick="openBannerForm(null)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span data-i18n="addBanner"></span>
+        </button>
+      </div>
+      <div class="sec-card">
+        <div class="sec-hdr">
+          <span class="sec-title" data-i18n="bannersList"></span>
+        </div>
+        <div class="sec-body" id="banners-list">
+          <div class="ldw"><div class="ld"></div></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Product Form Modal -->
+<div class="ov" id="pf-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="mt" id="pf-title" data-i18n="addProduct"></div>
+    <input type="hidden" id="f_id">
+
+    <div class="fr2">
+      <div class="fg">
+        <label class="fl"><span data-i18n="nameAr"></span> *</label>
+        <input class="fi" id="f_nar" placeholder="عود الملكي" maxlength="200">
+      </div>
+      <div class="fg">
+        <label class="fl"><span data-i18n="nameEn"></span> *</label>
+        <input class="fi" id="f_nen" placeholder="Royal Oud" maxlength="200">
+      </div>
+    </div>
+
+    <div class="fr2">
+      <div class="fg">
+        <label class="fl"><span data-i18n="brand"></span> *</label>
+        <input class="fi" id="f_br" placeholder="TORO, Chanel..." maxlength="100">
+      </div>
+      <div class="fg">
+        <label class="fl" data-i18n="origin"></label>
+        <input class="fi" id="f_or" placeholder="UAE, France..." maxlength="100">
+      </div>
+    </div>
+
+    <div class="fg">
+      <label class="fl" data-i18n="category"></label>
+      <select class="fsel" id="f_cat">
+        <option value="men" data-i18n="men"></option>
+        <option value="women" data-i18n="women"></option>
+        <option value="unisex" data-i18n="unisex"></option>
+      </select>
+    </div>
+
+    <div class="fr2">
+      <div class="fg">
+        <label class="fl"><span data-i18n="priceNow"></span> *</label>
+        <input class="fi" id="f_pr" type="number" placeholder="299" min="0" max="99999" step="0.01">
+      </div>
+      <div class="fg">
+        <label class="fl" data-i18n="priceBefore"></label>
+        <input class="fi" id="f_pb" type="number" placeholder="399" min="0" max="99999" step="0.01">
+      </div>
+    </div>
+
+    <div class="fr2">
+      <div class="fg">
+        <label class="fl" data-i18n="stock"></label>
+        <input class="fi" id="f_st" type="number" placeholder="10" min="0" max="9999">
+      </div>
+      <div class="fg">
+        <label class="fl" data-i18n="statusLabel"></label>
+        <select class="fsel" id="f_ac">
+          <option value="1" data-i18n="active"></option>
+          <option value="0" data-i18n="hidden"></option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Multi-image section: up to 3 images -->
+    <div class="fg">
+      <label class="fl" data-i18n="image"></label>
+      <div class="img-slots">
+        <!-- Slot 1 -->
+        <div class="img-slot">
+          <div class="img-slot-num">1</div>
+          <div class="img-slot-body">
+            <div class="img-tabs">
+              <button class="img-tab active" data-tab="url"    onclick="setImgTab('url',1)"    data-i18n="urlTab"></button>
+              <button class="img-tab"        data-tab="upload" onclick="setImgTab('upload',1)" data-i18n="uploadImage"></button>
+            </div>
+            <div id="img-url-section-1">
+              <input class="fi" id="f_im_1" placeholder="https://..." oninput="updateImgPreview(1)" maxlength="500">
+              <div class="ipr" id="imgPrev1"><span data-i18n="preview"></span></div>
+            </div>
+            <div style="text-align:center;margin-top:6px">
+              <button type="button" class="img-del-btn" onclick="clearImg(1)" data-i18n="deleteImage"></button>
+            </div>
+            <div id="img-file-section-1" style="display:none">
+              <div class="img-drop-zone" id="img-drop-zone-1">
+                <div class="drop-icon">🖼️</div>
+                <div class="drop-text" data-i18n="clickOrDrop"></div>
+                <div class="drop-sub" data-i18n="imageFormats"></div>
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handleFileUpload(this,1)">
+              </div>
+              <div id="upload-status-1" style="font-size:12px;color:var(--mu);margin-top:6px;text-align:center"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Slot 2 -->
+        <div class="img-slot">
+          <div class="img-slot-num">2</div>
+          <div class="img-slot-body">
+            <div class="img-tabs">
+              <button class="img-tab active" data-tab="url"    onclick="setImgTab('url',2)"    data-i18n="urlTab"></button>
+              <button class="img-tab"        data-tab="upload" onclick="setImgTab('upload',2)" data-i18n="uploadImage"></button>
+            </div>
+            <div id="img-url-section-2">
+              <input class="fi" id="f_im_2" placeholder="https://..." oninput="updateImgPreview(2)" maxlength="500">
+              <div class="ipr" id="imgPrev2"><span data-i18n="preview"></span></div>
+            </div>
+            <div style="text-align:center;margin-top:6px">
+              <button type="button" class="img-del-btn" onclick="clearImg(2)" data-i18n="deleteImage"></button>
+            </div>
+            <div id="img-file-section-2" style="display:none">
+              <div class="img-drop-zone" id="img-drop-zone-2">
+                <div class="drop-icon">🖼️</div>
+                <div class="drop-text" data-i18n="clickOrDrop"></div>
+                <div class="drop-sub" data-i18n="imageFormats"></div>
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handleFileUpload(this,2)">
+              </div>
+              <div id="upload-status-2" style="font-size:12px;color:var(--mu);margin-top:6px;text-align:center"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Slot 3 -->
+        <div class="img-slot">
+          <div class="img-slot-num">3</div>
+          <div class="img-slot-body">
+            <div class="img-tabs">
+              <button class="img-tab active" data-tab="url"    onclick="setImgTab('url',3)"    data-i18n="urlTab"></button>
+              <button class="img-tab"        data-tab="upload" onclick="setImgTab('upload',3)" data-i18n="uploadImage"></button>
+            </div>
+            <div id="img-url-section-3">
+              <input class="fi" id="f_im_3" placeholder="https://..." oninput="updateImgPreview(3)" maxlength="500">
+              <div class="ipr" id="imgPrev3"><span data-i18n="preview"></span></div>
+            </div>
+            <div style="text-align:center;margin-top:6px">
+              <button type="button" class="img-del-btn" onclick="clearImg(3)" data-i18n="deleteImage"></button>
+            </div>
+            <div id="img-file-section-3" style="display:none">
+              <div class="img-drop-zone" id="img-drop-zone-3">
+                <div class="drop-icon">🖼️</div>
+                <div class="drop-text" data-i18n="clickOrDrop"></div>
+                <div class="drop-sub" data-i18n="imageFormats"></div>
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handleFileUpload(this,3)">
+              </div>
+              <div id="upload-status-3" style="font-size:12px;color:var(--mu);margin-top:6px;text-align:center"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fg">
+      <label class="fl" data-i18n="descAr"></label>
+      <textarea class="fta" id="f_dar" placeholder="وصف العطر..." maxlength="1000"></textarea>
+    </div>
+    <div class="fg">
+      <label class="fl" data-i18n="descEn"></label>
+      <textarea class="fta" id="f_den" placeholder="Description..." maxlength="1000"></textarea>
+    </div>
+
+    <div class="mac">
+      <button class="btn-primary" onclick="saveProduct()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="t-save" data-i18n="saveProduct"></span>
+      </button>
+      <button class="bcl" onclick="cm('pf-modal')" data-i18n="cancel"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Order Detail Modal -->
+<div class="ov" id="ord-detail-modal">
+  <div class="modal">
+    <div class="mt" id="ord-detail-title" data-i18n="orderDetail"></div>
+    <div id="ord-detail-body"></div>
+    <div style="margin-top:14px">
+      <button class="bcl" style="width:100%" onclick="cm('ord-detail-modal')" data-i18n="close"></button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Banner Modal -->
+<div class="ov" id="bannerModal">
+  <div class="modal" style="max-width:480px">
+    <div class="mt" id="bfm-modal-title" data-i18n="newBanner"></div>
+    <div class="fg">
+      <label class="fl" data-i18n="bannerImage"></label>
+      <input class="fi" type="text" id="bfm-image-url" placeholder="/uploads/banner.jpg" oninput="previewBannerImage(this.value)">
+      <div style="margin-top:8px">
+        <input type="file" id="bfm-img-file" accept="image/*" style="display:none" onchange="uploadBannerImage()">
+        <button type="button" id="bfm-upload-btn" class="btn-secondary" onclick="document.getElementById('bfm-img-file').click()" data-i18n="uploadImage"></button>
+      </div>
+      <img id="bfm-img-preview" src="" style="display:none;width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-top:8px" onerror="this.style.display='none'">
+    </div>
+    <div class="fg"><label class="fl" data-i18n="bannerTitleAr"></label><input class="fi" id="bfm-title-ar" maxlength="200"></div>
+    <div class="fg"><label class="fl" data-i18n="bannerTitleEn"></label><input class="fi" id="bfm-title-en" maxlength="200"></div>
+    <div class="fg"><label class="fl" data-i18n="bannerSubAr"></label><input class="fi" id="bfm-sub-ar" maxlength="400"></div>
+    <div class="fg"><label class="fl" data-i18n="bannerSubEn"></label><input class="fi" id="bfm-sub-en" maxlength="400"></div>
+    <div class="fg"><label class="fl" data-i18n="bannerLink"></label><input class="fi" id="bfm-link" maxlength="512" placeholder="https://..."></div>
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+      <div style="flex:1">
+        <label class="fl" data-i18n="bannerOrder"></label>
+        <input class="fi" type="number" id="bfm-order" min="0" max="99" value="0" style="width:80px">
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="bfm-active" checked>
+        <span data-i18n="bannerActive"></span>
+      </label>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn-primary" style="flex:1" onclick="saveBanner()" data-i18n="saveProduct"></button>
+      <button class="bcl" onclick="closeBannerModal()" data-i18n="cancel"></button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/admin.js" defer></script>
+<script>
+// Register the shared service worker so this page also reloads automatically
+// when a new SW version activates — fixes stale admin panel on iOS/Safari.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('../sw.js', { updateViaCache: 'none' }).catch(function () {});
+  });
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') {
+      navigator.serviceWorker.getRegistration().then(function (reg) {
+        if (reg) reg.update();
+      });
+    }
+  });
+  var _swRefreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (!_swRefreshing) { _swRefreshing = true; location.reload(); }
+  });
+}
+</script>

@@ -1,0 +1,56 @@
+# ─────────────────────────────────────────────────────────────
+# Root .htaccess — toroboutique.top (LiteSpeed / Apache)
+# ─────────────────────────────────────────────────────────────
+
+# Prevent directory listing
+Options -Indexes
+
+# Serve index.php before index.html so security headers are always set
+DirectoryIndex index.php index.html
+
+# ── Block sensitive version-control / config dirs ────────────
+# These are matched as URL paths and returned as 404 so attackers
+# get no information about whether the directory exists.
+# RedirectMatch uses mod_alias which is always available on LiteSpeed.
+RedirectMatch 404 /\.git(/.*)?$
+RedirectMatch 404 /\.env(/.*)?$
+RedirectMatch 404 /\.svn(/.*)?$
+RedirectMatch 404 /\.hg(/.*)?$
+
+# ── MIME type for PWA manifest ───────────────────────────────
+# Serve manifest.json with the correct PWA manifest MIME type.
+# Scoped to manifest.json only so other .json files are unaffected.
+# ForceType/AddType use mod_mime which is available on LiteSpeed,
+# unlike mod_headers which is not.
+<Files "manifest.json">
+    ForceType application/manifest+json
+</Files>
+
+RewriteEngine On
+
+# ── Redirect old InfinityFree domain → production domain ─────
+# Any request arriving on qooqz.infinityfreeapp.com is permanently
+# redirected to the canonical production domain toroboutique.top.
+# This must come BEFORE the HTTP→HTTPS rule so the host change and
+# the scheme upgrade both happen in a single redirect.
+RewriteCond %{HTTP_HOST} ^qooqz\.infinityfreeapp\.com$ [NC]
+RewriteRule ^ https://toroboutique.top%{REQUEST_URI} [L,R=301]
+
+# ── HTTP → HTTPS redirect ─────────────────────────────────────
+# On shared hosting the reverse proxy terminates SSL and forwards
+# requests to PHP as plain HTTP, setting X-Forwarded-Proto to signal
+# the original protocol.  Redirect only when BOTH indicators confirm
+# a plain-HTTP connection to avoid infinite redirect loops.
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# ── Route direct index.html requests through index.php ────────
+# Ensures security headers are set even when the file is requested
+# by its exact name (e.g., by the Sucuri / Observatory scanner).
+RewriteCond %{THE_REQUEST} \s/+index\.html[\s?/]
+RewriteRule ^index\.html$ /index.php [L,R=301]
+
+# ── SEO: Route sitemap.xml → sitemap.php ─────────────────────
+RewriteRule ^sitemap\.xml$ /sitemap.php [L]
+
